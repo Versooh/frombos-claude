@@ -1,0 +1,8 @@
+/* FROMBOS V8 — tactical fit, readable markers, real wards */
+.portrait-fallback[hidden]{display:none!important}.ci-art .portrait-fallback,.ci-hero .portrait-fallback{display:none!important}
+.tb-viewport{height:calc(100vh - 215px);min-height:520px;max-height:none!important;overflow:auto!important;padding:8px!important;align-items:center!important;justify-items:center!important;background:#02070b!important}
+.tb-stage{min-width:0!important;max-width:none!important;margin:auto!important;aspect-ratio:1!important;transition:width .12s ease!important}
+.tb-stage svg{border-radius:10px!important;box-shadow:0 12px 36px rgba(0,0,0,.34)!important}
+.tb-board-card{background:#02070b!important}.tb-board-meta{min-height:40px}.tb-board-footer{min-height:30px}
+@media(max-width:1180px){.tb-viewport{height:min(72vh,760px);min-height:460px}}
+@media(max-width:700px){.tb-viewport{height:66vh;min-height:420px;padding:4px!important}.tb-stage{min-width:420px!important}}

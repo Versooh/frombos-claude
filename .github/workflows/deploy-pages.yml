@@ -27,6 +27,10 @@ jobs:
         run: node scripts/build-open-series-scouting.mjs
       - name: Build Open Series match results registry
         run: node scripts/build-open-series-results.mjs
+      - name: Localize exact Wild Rift tactical map
+        run: |
+          mkdir -p assets/img
+          curl -L --fail --retry 3 --connect-timeout 10 "https://puu.sh/j5JOG/0f458a62b3.jpg" -o assets/img/wild-rift-map.jpg || rm -f assets/img/wild-rift-map.jpg
       - name: Validate JavaScript syntax
         run: |
           node --check assets/js/app.js
@@ -34,12 +38,15 @@ jobs:
           node --check assets/js/store.js
           node --check assets/js/draft-room.js
           node --check assets/js/tactical.js
+          node --check assets/js/tactical-ux-v8.js
           node --check assets/js/tactical-share-restore.js
           node --check assets/js/vod-review.js
           node --check assets/js/champion-intelligence.js
           node --check assets/js/champion-registry.generated.js
           node --check assets/js/champion-visual-upgrade.js
           node --check assets/js/curated-champion-data.js
+          node --check assets/js/item-assets.js
+          node --check assets/js/build-item-upgrade.js
           node --check assets/js/open-series-champions.generated.js
           node --check assets/js/open-series-observed-ui.js
           node --check assets/js/open-series-scouting.generated.js
