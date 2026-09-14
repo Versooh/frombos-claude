@@ -37,6 +37,7 @@ jobs:
           node --check assets/js/competitive-router.js
           node --check assets/js/meta-intelligence.js
           node --check assets/js/meta-router.js
+          node --check assets/js/visual-polish.js
       - name: Prepare public artifact
         run: |
           rm -rf _site
