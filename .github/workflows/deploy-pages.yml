@@ -37,6 +37,9 @@ jobs:
           node --check assets/js/data.js
           node --check assets/js/store.js
           node --check assets/js/draft-room.js
+          node --check assets/js/structural-intelligence.js
+          node --check assets/js/draft-intelligence-ui.js
+          node --check assets/js/composition-intelligence-ui.js
           node --check assets/js/tactical.js
           node --check assets/js/tactical-ux-v8.js
           node --check assets/js/tactical-share-restore.js
