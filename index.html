@@ -8,13 +8,14 @@
   <title>FROMBOS — Competitive Intelligence</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/features.css">
 </head>
 <body>
   <div id="app"></div>
   <noscript>O FROMBOS precisa de JavaScript habilitado.</noscript>
   <script type="module" src="assets/js/app.js"></script>
   <script>
-    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn));
   </script>
 </body>
 </html>
