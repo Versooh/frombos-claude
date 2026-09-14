@@ -7,6 +7,7 @@ export const MODULES = [
   { id: 'tactical', label: 'Tactical Board', group: 'ANÁLISE', icon: '◎' },
   { id: 'vod', label: 'VOD Review', group: 'ANÁLISE', icon: '▶' },
   { id: 'champions', label: 'Champions', group: 'INTELIGÊNCIA', icon: '◇' },
+  { id: 'meta', label: 'Meta Intelligence', group: 'INTELIGÊNCIA', icon: '◌' },
   { id: 'matchups', label: 'Matchup Lab', group: 'INTELIGÊNCIA', icon: '⇄' },
   { id: 'builds', label: 'Build Intelligence', group: 'INTELIGÊNCIA', icon: '▦' },
   { id: 'scouting', label: 'Scouting', group: 'PREPARAÇÃO', icon: '⌖' },
@@ -27,10 +28,10 @@ export const RECOVERED_COMPOSITIONS=[
 {id:'anti-engage',name:'Vem que tem resposta',archetype:'Proteção e escala',origin:'RECOVERED_TRAINING_PROPOSAL',patch:'7.2e editorial baseline',lineup:{BARON:'Gwen',JUNGLE:'Poppy',MID:'Orianna',DUO:'Xayah',SUPPORT:'Janna'},plan:'Anti-engage e dano contra frontline, com ameaça de Gwen na lateral.',winCondition:'Negar a primeira entrada, preservar cooldowns defensivos e ganhar espaço depois do engage inimigo.'}
 ];
 export const DATA_SOURCES=[
-{id:'riot',name:'Riot Official',type:'OFFICIAL',status:'active',domains:['roster','champion assets','patch','skills','system changes']},
+{id:'riot',name:'Riot Official',type:'OFFICIAL',status:'active · patch 7.2e / roster assets',domains:['roster','champion assets','patch','skills','system changes']},
 {id:'openseries',name:'Open Series',type:'OBSERVED_COMPETITIVE',status:'active snapshot · 2026-09-14',domains:['tournament summary','teams','groups','rankings']},
 {id:'riftgg',name:'RiftGG',type:'OBSERVED',status:'recovery',domains:['matchups','observed competitive/ranked data']},
-{id:'wildriftfire',name:'WildRiftFire',type:'CURATED',status:'planned',domains:['tiers','builds','runes','guides']},
+{id:'wildriftfire',name:'WildRiftFire',type:'OBSERVED_CN + CURATED',status:'active snapshot · patch 7.2e',domains:['CN ranked stats','tiers','builds','guides']},
 {id:'wildlegends',name:'Wild Legends',type:'CURATED',status:'planned',domains:['tiers','patch tracker','guides']},
 {id:'frombos',name:'FROMBOS Structural',type:'FROMBOS_STRUCTURAL',status:'foundation',domains:['draft structure','composition structure','contextual reasoning']}
 ];
