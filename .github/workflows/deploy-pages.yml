@@ -19,6 +19,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Build official champion registry
+        run: node scripts/build-champion-registry.mjs
+      - name: Validate JavaScript syntax
+        run: |
+          node --check assets/js/app.js
+          node --check assets/js/data.js
+          node --check assets/js/store.js
+          node --check assets/js/draft-room.js
+          node --check assets/js/tactical.js
+          node --check assets/js/vod-review.js
+          node --check assets/js/champion-intelligence.js
+          node --check assets/js/champion-registry.generated.js
       - name: Prepare public artifact
         run: |
           rm -rf _site
