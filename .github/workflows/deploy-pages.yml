@@ -64,6 +64,7 @@ jobs:
           node --check assets/js/reports.js
           node --check assets/js/reports-router.js
           node --check assets/js/visual-polish.js
+          node --check assets/js/i18n-ptbr.js
       - name: Prepare public artifact
         run: |
           rm -rf _site
