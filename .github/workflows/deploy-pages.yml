@@ -25,6 +25,8 @@ jobs:
         run: node scripts/build-open-series-champions.mjs
       - name: Build Open Series scouting registry
         run: node scripts/build-open-series-scouting.mjs
+      - name: Build Open Series match results registry
+        run: node scripts/build-open-series-results.mjs
       - name: Validate JavaScript syntax
         run: |
           node --check assets/js/app.js
@@ -41,6 +43,8 @@ jobs:
           node --check assets/js/open-series-observed-ui.js
           node --check assets/js/open-series-scouting.generated.js
           node --check assets/js/scouting-registry-ui.js
+          node --check assets/js/open-series-results.generated.js
+          node --check assets/js/scouting-results-ui.js
           node --check assets/js/performance-center.js
           node --check assets/js/competitive-intelligence.js
           node --check assets/js/competitive-router.js
