@@ -1,6 +1,8 @@
-name: Deploy FROMBOS
+name: FROMBOS — Validate & Deploy
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 permissions:
@@ -8,13 +10,10 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: frombos-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -65,6 +64,35 @@ jobs:
           node --check assets/js/reports-router.js
           node --check assets/js/visual-polish.js
           node --check assets/js/i18n-ptbr.js
+      - name: Validate V10 integration assets
+        run: |
+          test -f assets/css/visual-v10.css
+          test -f assets/js/i18n-ptbr.js
+          grep -q 'visual-v10.css' index.html
+          grep -q 'i18n-ptbr.js' index.html
+          grep -q 'visual-v10.css' sw.js
+          grep -q 'i18n-ptbr.js' sw.js
+          grep -q 'lang="pt-BR"' index.html
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build production registries
+        run: |
+          node scripts/build-champion-registry.mjs
+          node scripts/build-open-series-champions.mjs
+          node scripts/build-open-series-scouting.mjs
+          node scripts/build-open-series-results.mjs
+      - name: Localize exact Wild Rift tactical map
+        run: |
+          mkdir -p assets/img
+          curl -L --fail --retry 3 --connect-timeout 10 "https://puu.sh/j5JOG/0f458a62b3.jpg" -o assets/img/wild-rift-map.jpg || rm -f assets/img/wild-rift-map.jpg
       - name: Prepare public artifact
         run: |
           rm -rf _site
