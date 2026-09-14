@@ -1,17 +1,14 @@
-export const OPEN_SERIES_RESULTS_META={source:'Open Series',type:'OBSERVED_COMPETITIVE',retrievedAt:'2026-09-14',url:'https://www.openseries.com.br/tabelas/',coverage:12,notes:'Fallback snapshot. Deploy refreshes all publicly listed group match results. Source page does not expose match dates or draft sequence.'};
-export const OPEN_SERIES_MATCHES=[
-{id:'gE-1',group:'GRUPO E',teamA:'Avengers',scoreA:0,scoreB:1,teamB:'MyBad eSports'},
-{id:'gE-2',group:'GRUPO E',teamA:'Aquarianos Natos',scoreA:0,scoreB:1,teamB:'MyBad eSports'},
-{id:'gE-3',group:'GRUPO E',teamA:'MyBad eSports',scoreA:1,scoreB:0,teamB:'RRE BAGRES'},
-{id:'gE-4',group:'GRUPO E',teamA:'MyBad eSports',scoreA:1,scoreB:0,teamB:'Avengers'},
-{id:'gE-5',group:'GRUPO E',teamA:'MyBad eSports',scoreA:1,scoreB:0,teamB:'Aquarianos Natos'},
-{id:'gE-6',group:'GRUPO E',teamA:'RRE BAGRES',scoreA:0,scoreB:1,teamB:'MyBad eSports'},
-{id:'gG-1',group:'GRUPO G',teamA:'Full House Gaming',scoreA:2,scoreB:0,teamB:'Project Phoenix'},
-{id:'gG-2',group:'GRUPO G',teamA:'Full House Gaming',scoreA:1,scoreB:0,teamB:'Manolos'},
-{id:'gG-3',group:'GRUPO G',teamA:'Full House Gaming',scoreA:1,scoreB:0,teamB:'Lápis Lazuli'},
-{id:'gG-4',group:'GRUPO G',teamA:'Project Phoenix',scoreA:1,scoreB:0,teamB:'Full House Gaming'},
-{id:'gG-5',group:'GRUPO G',teamA:'Manolos',scoreA:0,scoreB:1,teamB:'Full House Gaming'},
-{id:'gG-6',group:'GRUPO G',teamA:'Lápis Lazuli',scoreA:0,scoreB:1,teamB:'Full House Gaming'}
-];
+export const OPEN_SERIES_RESULTS_META={source:'Open Series',type:'OBSERVED_COMPETITIVE',retrievedAt:'2026-09-14',url:'https://www.openseries.com.br/tabelas/',coverage:96,notes:'Materialized fallback from the public group confrontation table. Source page does not expose match dates or per-game draft sequence. Deploy refresh remains best-effort and never replaces this snapshot with lower coverage.'};
+const RAW={
+A:[['Minerva UFRJ',1,0,'Surrender'],['Aliança Unlucky',1,0,'Nebulosa Egt E-sports'],['Minerva UFRJ',0,1,'Nebulosa Egt E-sports'],['Aliança Unlucky',1,0,'Surrender'],['Minerva UFRJ',0,1,'Aliança Unlucky'],['Nebulosa Egt E-sports',1,0,'Surrender'],['Surrender',0,1,'Minerva UFRJ'],['Nebulosa Egt E-sports',0,1,'Aliança Unlucky'],['Nebulosa Egt E-sports',0,1,'Minerva UFRJ'],['Surrender',0,1,'Aliança Unlucky'],['Aliança Unlucky',1,0,'Minerva UFRJ'],['Surrender',0,1,'Nebulosa Egt E-sports']],
+B:[['Bravos',0,1,'VØID Rise'],['NEXT Gaming',1,0,'OS SEM MAPA'],['Bravos',0,1,'OS SEM MAPA'],['NEXT Gaming',0,1,'VØID Rise'],['Bravos',0,1,'NEXT Gaming'],['OS SEM MAPA',0,1,'VØID Rise'],['VØID Rise',1,0,'Bravos'],['OS SEM MAPA',0,1,'NEXT Gaming'],['OS SEM MAPA',0,1,'Bravos'],['VØID Rise',1,0,'NEXT Gaming'],['NEXT Gaming',1,0,'Bravos'],['VØID Rise',1,0,'OS SEM MAPA']],
+C:[['GOATZ VICTORY',0,1,'RMD Gaming'],['Aposentados e perigosos',1,0,'Doryoku'],['GOATZ VICTORY',1,0,'Doryoku'],['Aposentados e perigosos',0,1,'RMD Gaming'],['GOATZ VICTORY',1,0,'Aposentados e perigosos'],['Doryoku',0,1,'RMD Gaming'],['RMD Gaming',0,1,'GOATZ VICTORY'],['Doryoku',0,1,'Aposentados e perigosos'],['Doryoku',0,1,'GOATZ VICTORY'],['RMD Gaming',1,0,'Aposentados e perigosos'],['Aposentados e perigosos',0,1,'GOATZ VICTORY'],['RMD Gaming',1,0,'Doryoku']],
+D:[['MONORQUIA',0,1,'Pegasus'],['Ei Nerd Esports',1,0,'Manshine GG team'],['MONORQUIA',1,0,'Manshine GG team'],['Ei Nerd Esports',1,0,'Pegasus'],['MONORQUIA',0,1,'Ei Nerd Esports'],['Manshine GG team',0,1,'Pegasus'],['Pegasus',0,1,'MONORQUIA'],['Manshine GG team',0,1,'Ei Nerd Esports'],['Manshine GG team',0,1,'MONORQUIA'],['Pegasus',0,1,'Ei Nerd Esports'],['Ei Nerd Esports',1,0,'MONORQUIA'],['Pegasus',1,0,'Manshine GG team']],
+E:[['Aquarianos Natos',0,1,'RRE BAGRES'],['Avengers',0,1,'MyBad eSports'],['Aquarianos Natos',0,1,'MyBad eSports'],['Avengers',1,0,'RRE BAGRES'],['Aquarianos Natos',0,1,'Avengers'],['MyBad eSports',1,0,'RRE BAGRES'],['RRE BAGRES',1,0,'Aquarianos Natos'],['MyBad eSports',1,0,'Avengers'],['MyBad eSports',1,0,'Aquarianos Natos'],['RRE BAGRES',0,1,'Avengers'],['Avengers',1,0,'Aquarianos Natos'],['RRE BAGRES',0,1,'MyBad eSports']],
+F:[['Ta Triste?',1,0,'Turtles'],['Team Hard Counter',1,0,'THC SOBRA NADA'],['Ta Triste?',1,0,'THC SOBRA NADA'],['Team Hard Counter',1,0,'Turtles'],['Ta Triste?',2,1,'Team Hard Counter'],['THC SOBRA NADA',1,0,'Turtles'],['Turtles',0,1,'Ta Triste?'],['THC SOBRA NADA',0,1,'Team Hard Counter'],['THC SOBRA NADA',0,1,'Ta Triste?'],['Turtles',0,1,'Team Hard Counter'],['Team Hard Counter',0,1,'Ta Triste?'],['Turtles',0,1,'THC SOBRA NADA']],
+G:[['Full House Gaming',2,0,'Project Phoenix'],['Lápis Lazuli',0,1,'Manolos'],['Full House Gaming',1,0,'Manolos'],['Lápis Lazuli',0,1,'Project Phoenix'],['Full House Gaming',1,0,'Lápis Lazuli'],['Manolos',0,1,'Project Phoenix'],['Project Phoenix',1,0,'Full House Gaming'],['Manolos',1,0,'Lápis Lazuli'],['Manolos',0,1,'Full House Gaming'],['Project Phoenix',1,0,'Lápis Lazuli'],['Lápis Lazuli',0,1,'Full House Gaming'],['Project Phoenix',1,0,'Manolos']],
+H:[['Aliança Parazinhos',0,1,'TITANUS GAMING'],['SGC TEAM',1,0,'Super Camarões'],['Aliança Parazinhos',1,0,'Super Camarões'],['SGC TEAM',1,0,'TITANUS GAMING'],['Aliança Parazinhos',0,1,'SGC TEAM'],['Super Camarões',0,1,'TITANUS GAMING'],['TITANUS GAMING',1,0,'Aliança Parazinhos'],['Super Camarões',0,1,'SGC TEAM'],['Super Camarões',0,1,'Aliança Parazinhos'],['TITANUS GAMING',0,1,'SGC TEAM'],['SGC TEAM',1,0,'Aliança Parazinhos'],['TITANUS GAMING',1,0,'Super Camarões']]
+};
+export const OPEN_SERIES_MATCHES=Object.entries(RAW).flatMap(([group,rows])=>rows.map(([teamA,scoreA,scoreB,teamB],i)=>({id:`g${group}-${i+1}`,group:`GRUPO ${group}`,teamA,scoreA,scoreB,teamB})));
 export const matchesForTeam=team=>OPEN_SERIES_MATCHES.filter(x=>x.teamA===team||x.teamB===team);
 export const resultForTeam=(m,team)=>{const own=m.teamA===team?m.scoreA:m.scoreB,opp=m.teamA===team?m.scoreB:m.scoreA;return own>opp?'W':own<opp?'L':'D';};
