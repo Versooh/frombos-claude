@@ -4,7 +4,7 @@ const initialState={
   team:{name:'UOL E-SPORTS',opponent:'ADVERSÁRIO',format:'MD5',players:{BARON:{name:'',pool:[]},JUNGLE:{name:'',pool:[]},MID:{name:'',pool:[]},DUO:{name:'',pool:[]},SUPPORT:{name:'',pool:[]}}},
   favorites:[],customComps:[],
   training:{goals:[],sessions:[],focus:['Macro','Mecânica','Visão','Comunicação','Objetivos']},
-  draft:{game:1,fearless:false,tournament:'Scrim / Treino',format:'MD5',ruleset:'ALTERNATING_5BAN_5PICK',actions:[],games:{1:{actions:[]}},branches:[],referenceComp:null},
+  draft:{game:1,fearless:false,fearlessMode:'off',tournament:'Scrim / Treino',format:'MD5',ruleset:'ALTERNATING_5BAN_5PICK',actions:[],games:{1:{actions:[]}},branches:[],activeBranchId:null,branchOrigin:null,referenceComp:null},
   tactical:{activeScenario:null,scenarios:[],strokes:[]},
   vod:{reviews:[]},
   settings:{theme:'dark',reducedMotion:false}

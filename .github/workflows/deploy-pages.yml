@@ -38,6 +38,7 @@ jobs:
           node --check assets/js/draft-room.js
           node --check assets/js/structural-intelligence.js
           node --check assets/js/draft-intelligence-ui.js
+          node --check assets/js/draft-v13.js
           node --check assets/js/composition-intelligence-ui.js
           node --check assets/js/tactical.js
           node --check assets/js/tactical-ux-v8.js
@@ -74,16 +75,19 @@ jobs:
           test -f assets/js/tactical-v11.js
           test -f assets/css/tactical-v12.css
           test -f assets/js/tactical-v12.js
+          test -f assets/css/draft-v13.css
+          test -f assets/js/draft-v13.js
           grep -q 'visual-v10.css' index.html
           grep -q 'i18n-ptbr.js' index.html
           grep -q 'tactical-v11.css' index.html
           grep -q 'tactical-v11.js' index.html
           grep -q 'tactical-v12.css' index.html
           grep -q 'tactical-v12.js' index.html
-          grep -q 'tactical-v11.css' sw.js
-          grep -q 'tactical-v11.js' sw.js
-          grep -q 'tactical-v12.css' sw.js
-          grep -q 'tactical-v12.js' sw.js
+          grep -q 'draft-v13.css' index.html
+          grep -q 'draft-v13.js' index.html
+          grep -q 'draft-v13.css' sw.js
+          grep -q 'draft-v13.js' sw.js
+          grep -q 'fearlessMode' assets/js/draft-room.js
           grep -q 'lang="pt-BR"' index.html
   deploy:
     if: github.event_name != 'pull_request'
