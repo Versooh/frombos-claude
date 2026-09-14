@@ -32,4 +32,5 @@ let initialized=false,canvas=document.querySelector('#riftmap'),ctx,draw=false,c
 function initMap(){if(initialized)return;setTimeout(()=>{const r=canvas.getBoundingClientRect(),d=devicePixelRatio||1;canvas.width=r.width*d;canvas.height=r.height*d;ctx=canvas.getContext('2d');ctx.scale(d,d);ctx.lineCap='round';ctx.lineJoin='round';paintBase(r.width,r.height);mapLoading.classList.add('hidden');initialized=true},180)}
 function paintBase(w,h){ctx.clearRect(0,0,w,h)}
 canvas.addEventListener('pointerdown',e=>{draw=true;canvas.setPointerCapture(e.pointerId);ctx.beginPath();const r=canvas.getBoundingClientRect();ctx.moveTo(e.clientX-r.left,e.clientY-r.top)});canvas.addEventListener('pointermove',e=>{if(!draw)return;const r=canvas.getBoundingClientRect();ctx.strokeStyle=color;ctx.lineWidth=4;ctx.lineTo(e.clientX-r.left,e.clientY-r.top);ctx.stroke()});canvas.addEventListener('pointerup',()=>draw=false);resetMap.onclick=()=>{if(initialized){const r=canvas.getBoundingClientRect();paintBase(r.width,r.height)}};document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{color=b.dataset.color;document.querySelectorAll('[data-color]').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
-</script></body></html>
+</script><!-- FROMBOS publish trigger -->
+</body></html>
