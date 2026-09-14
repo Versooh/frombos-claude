@@ -73,6 +73,14 @@ const REPLACEMENTS = [
   ['planned','planejado'],
   ['recovery','recuperação'],
   ['foundation','fundação'],
+  ['OFFICIAL','OFICIAL'],
+  ['OBSERVED','OBSERVADO'],
+  ['CURATED','CURADO'],
+  ['FROMBOS_STRUCTURAL','ESTRUTURAL FROMBOS'],
+  ['USER_PRIVATE','PRIVADO DA EQUIPE'],
+  ['UNKNOWN','DESCONHECIDO'],
+  ['RECOVERED_TRAINING_PROPOSAL','PROPOSTA DE TREINO RECUPERADA'],
+  ['WILD RIFT','WILD RIFT'],
   ['Game ','Jogo '],
   [' actions registered',' ações registradas'],
   ['Win condition:','Condição de vitória:'],
@@ -108,8 +116,13 @@ function translateElement(el){
     }
   }
   if(el.tagName==='OPTION'){
+    const rawValue=el.value;
+    const hadExplicitValue=el.hasAttribute('value');
     const next=translateString(el.textContent);
-    if(next!==el.textContent) el.textContent=next;
+    if(next!==el.textContent){
+      el.textContent=next;
+      if(!hadExplicitValue) el.value=rawValue;
+    }
   }
 }
 
