@@ -41,6 +41,7 @@ jobs:
           node --check assets/js/composition-intelligence-ui.js
           node --check assets/js/tactical.js
           node --check assets/js/tactical-ux-v8.js
+          node --check assets/js/tactical-v11.js
           node --check assets/js/tactical-share-restore.js
           node --check assets/js/vod-review.js
           node --check assets/js/champion-intelligence.js
@@ -64,14 +65,18 @@ jobs:
           node --check assets/js/reports-router.js
           node --check assets/js/visual-polish.js
           node --check assets/js/i18n-ptbr.js
-      - name: Validate V10 integration assets
+      - name: Validate integration assets
         run: |
           test -f assets/css/visual-v10.css
           test -f assets/js/i18n-ptbr.js
+          test -f assets/css/tactical-v11.css
+          test -f assets/js/tactical-v11.js
           grep -q 'visual-v10.css' index.html
           grep -q 'i18n-ptbr.js' index.html
-          grep -q 'visual-v10.css' sw.js
-          grep -q 'i18n-ptbr.js' sw.js
+          grep -q 'tactical-v11.css' index.html
+          grep -q 'tactical-v11.js' index.html
+          grep -q 'tactical-v11.css' sw.js
+          grep -q 'tactical-v11.js' sw.js
           grep -q 'lang="pt-BR"' index.html
   deploy:
     if: github.event_name != 'pull_request'
