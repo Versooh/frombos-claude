@@ -2,7 +2,7 @@ import { CHAMPIONS, DRAFT_ORDER } from './data.js';
 import { portraitHTML } from './champion-intelligence.js';
 import { store } from './store.js';
 
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tournamentOptions=['Scrim / Treino','FROMBOS Cup','Open Series','WRL','Custom'];
 const maxGames=format=>format==='MD3'?3:5;
 
@@ -17,6 +17,7 @@ function ensureDraft(){
     d.games=d.games&&typeof d.games==='object'?d.games:{};
     d.branches=Array.isArray(d.branches)?d.branches:[];
     d.fearlessMode=['off','global','team'].includes(d.fearlessMode)?d.fearlessMode:(d.fearless?'global':'off');
+    if(d.fearless===true&&d.fearlessMode==='off')d.fearlessMode='global';
     d.fearless=d.fearlessMode!=='off';
     d.activeBranchId=d.activeBranchId||null;
     d.branchOrigin=d.branchOrigin||null;
@@ -28,10 +29,6 @@ function ensureDraft(){
 }
 function d(){return store.state.draft;}
 function actions(){return [...(d().actions||[])].sort((a,b)=>a.step-b.step);}
-function saveCurrent(){
-  if(d().activeBranchId)return;
-  store.update(s=>{s.draft.games[s.draft.game]={...(s.draft.games[s.draft.game]||{}),actions:s.draft.actions.map(x=>({...x})),updatedAt:new Date().toISOString()};});
-}
 function previousFearless(side=null){
   const blocked=new Set(),state=d();
   if(state.fearlessMode==='off')return blocked;
@@ -66,6 +63,7 @@ export function draftRoomHTML(){
   ensureDraft();const state=d();const next=nextStep();const step=next==null?null:DRAFT_ORDER[next];
   const blocked=step?.[1]==='pick'?previousFearless(step[0]):new Set();
   const games=Array.from({length:maxGames(state.format)},(_,i)=>i+1);
+  const gameBranches=state.branches.filter(b=>b.game===state.game);
   const fearlessLabel=state.fearlessMode==='global'?'Global':state.fearlessMode==='team'?'Por equipe':'Desligado';
   const fearlessText=state.fearlessMode==='off'?'Fearless desligado para esta série.':step?.[1]==='ban'?`Fearless ${fearlessLabel}: bans continuam disponíveis; a restrição é aplicada aos picks.`:`Fearless ${fearlessLabel}: ${blocked.size} campeão(ões) indisponíveis para este pick por jogos anteriores.`;
   return `<div class="draft-pro ${state.activeBranchId?'draft-branch-mode':''}">
@@ -84,7 +82,7 @@ export function draftRoomHTML(){
       <section class="draft-center-panel card">
         <div class="draft-stage-head"><div class="eyebrow">G${state.game} · ${esc(state.tournament)} · ${esc(state.format)}</div><h2>${step?`${step[0]==='blue'?'AZUL':'VERMELHO'} · ${step[1]==='ban'?'BANIMENTO':'ESCOLHA'}`:'DRAFT CONCLUÍDO'}</h2><p>${fearlessText}</p></div>
         <div class="draft-sequence-pro">${DRAFT_ORDER.map((s,i)=>{const a=actions().find(x=>x.step===i);return `<div class="draft-seq-row ${i===next?'current':''} ${a?'done':''}"><span>${String(i+1).padStart(2,'0')}</span><b>${s[0]==='blue'?'AZUL':'VERMELHO'}</b><em>${s[1]==='ban'?'BAN':'PICK'}</em><strong>${a?esc(a.champ):'—'}</strong></div>`}).join('')}</div>
-        <div class="draft-branches"><div><span class="eyebrow">PLANOS ALTERNATIVOS</span><p class="muted">Explore respostas sem destruir a linha principal.</p></div><div class="branch-list">${state.branches.length?state.branches.filter(b=>b.game===state.game).slice(-6).map((b,i)=>`<button class="btn ${b.id===state.activeBranchId?'info':''}" data-branch="${b.id}">${esc(b.name||`Plano ${String.fromCharCode(65+i)}`)}</button>`).join(''):'<span class="muted">Nenhum plano alternativo salvo nesta partida.</span>'}</div></div>
+        <div class="draft-branches"><div><span class="eyebrow">PLANOS ALTERNATIVOS</span><p class="muted">Explore respostas sem destruir a linha principal.</p></div><div class="branch-list">${gameBranches.length?gameBranches.slice(-6).map((b,i)=>`<button class="btn ${b.id===state.activeBranchId?'info':''}" data-branch="${b.id}">${esc(b.name||`Plano ${String.fromCharCode(65+i)}`)}</button>`).join(''):'<span class="muted">Nenhum plano alternativo salvo nesta partida.</span>'}</div></div>
       </section>
       <section class="draft-team-panel red"><div class="draft-team-head"><div><span class="eyebrow">LADO VERMELHO</span><h2>${esc(store.state.team.opponent)}</h2></div><span class="side-dot"></span></div><div class="draft-section-label">BANIMENTOS</div><div class="ban-grid">${slotHTML('red','ban',5)}</div><div class="draft-section-label">ESCOLHAS</div><div class="pick-stack">${slotHTML('red','pick',5)}</div></section>
     </div>
@@ -110,7 +108,6 @@ export function bindDraftRoom(rerender){
   $('#drSearch')?.addEventListener('input',renderChampions);
   document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{const g=+b.dataset.game;store.update(s=>{leaveBranch(s.draft);s.draft.game=g;if(!s.draft.games[g])s.draft.games[g]={actions:[]};s.draft.actions=(s.draft.games[g].actions||[]).map(x=>({...x}));});rerender();});
   $('#drTournament').onchange=e=>store.update(s=>s.draft.tournament=e.target.value);
-  $('#drFormat').onchange=e=>store.update(s=>{leaveBranch(s.draft);s.draft.format=e.target.value;s.team.format=e.target.value;const limit=maxGames(e.target.value);if(s.draft.game>limit)s.draft.game=limit;if(!s.draft.games[s.draft.game])s.draft.games[s.draft.game]={actions:[]};s.draft.actions=(s.draft.games[s.draft.game].actions||[]).map(x=>({...x}));});
   $('#drFormat').onchange=e=>{store.update(s=>{leaveBranch(s.draft);s.draft.format=e.target.value;s.team.format=e.target.value;const limit=maxGames(e.target.value);if(s.draft.game>limit)s.draft.game=limit;if(!s.draft.games[s.draft.game])s.draft.games[s.draft.game]={actions:[]};s.draft.actions=(s.draft.games[s.draft.game].actions||[]).map(x=>({...x}));});rerender();};
   $('#drFearless').onchange=e=>{store.update(s=>{s.draft.fearlessMode=e.target.value;s.draft.fearless=e.target.value!=='off';});rerender();};
   $('#drUndo').onclick=()=>{store.update(s=>{s.draft.actions.pop();persistActionState(s.draft);});rerender();};
