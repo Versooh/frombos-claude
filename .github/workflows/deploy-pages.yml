@@ -32,6 +32,7 @@ jobs:
           node --check assets/js/store.js
           node --check assets/js/draft-room.js
           node --check assets/js/tactical.js
+          node --check assets/js/tactical-share-restore.js
           node --check assets/js/vod-review.js
           node --check assets/js/champion-intelligence.js
           node --check assets/js/champion-registry.generated.js
