@@ -1,0 +1,22 @@
+/* FROMBOS V7 — composition cards + item imagery */
+.build-item-pill{display:grid!important;grid-template-columns:48px 1fr!important;gap:10px!important;align-items:center!important;padding:8px!important;min-height:64px}.item-glyph{width:46px!important;height:46px!important;border-radius:9px!important;overflow:hidden!important;background:#0b1424!important;border:1px solid #2b3f60!important;padding:0!important}.item-glyph.has-item-icon{display:block!important}.build-item-icon{width:100%;height:100%;object-fit:cover;display:block}.build-item-pill b{font-size:10px!important}.build-item-pill small{font-size:7px!important}.build-item-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}.build-situational .build-item-pill{max-width:360px}
+
+/* composition lab inspired by the original FROMBOS information density */
+#app .content>.grid.cols-2:has([data-comp-draft]){grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px!important;align-items:start}
+#app article.card:has([data-comp-draft]){position:relative;overflow:hidden;border-color:#314563;background:linear-gradient(180deg,#0d1730 0%,#091224 100%);padding:20px;min-height:430px;display:flex;flex-direction:column;box-shadow:inset 0 1px 0 rgba(240,201,122,.12)}
+#app article.card:has([data-comp-draft])::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,#d7aa55,transparent 72%);opacity:.75}
+#app article.card:has([data-comp-draft]) h3{font-size:24px;line-height:1.05;margin:5px 0 0;text-transform:uppercase;letter-spacing:-.015em}
+#app article.card:has([data-comp-draft])>.comp-lineup{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:18px 0 14px}
+#app article.card:has([data-comp-draft]) .champ-slot{position:relative!important;display:flex!important;flex-direction:column!important;min-width:0!important;min-height:150px!important;padding:0!important;border:1px solid #2a3d5c!important;border-radius:8px!important;overflow:hidden!important;background:#07101e!important;gap:0!important}
+#app article.card:has([data-comp-draft]) .comp-portrait-wrap{width:100%!important;height:104px!important;border:0!important;border-radius:0!important;display:block!important;grid-row:auto!important;background:#0b1322!important}
+#app article.card:has([data-comp-draft]) .comp-portrait{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 30%!important;display:block!important}
+#app article.card:has([data-comp-draft]) .champ-slot small{order:2!important;margin:0!important;padding:6px 7px 1px!important;font-size:7px!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#8190a8!important;grid-column:auto!important}
+#app article.card:has([data-comp-draft]) .champ-slot b{order:3!important;margin:0!important;padding:0 7px 7px!important;font-size:10px!important;color:#fff!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;grid-column:auto!important}
+#app article.card:has([data-comp-draft])>p:not(.muted){font-size:13px;line-height:1.5;color:#e7edf8;margin:4px 0 10px}
+#app article.card:has([data-comp-draft])>p.muted{font-size:11px;line-height:1.55;color:#9eacc2;border-top:1px solid #23344e;padding-top:12px;margin-top:auto}
+#app article.card:has([data-comp-draft])>p.muted b{color:#f0c97a}
+#app article.card:has([data-comp-draft])>[data-comp-draft]{align-self:flex-end;margin-top:8px}
+
+@media(max-width:1450px){#app .content>.grid.cols-2:has([data-comp-draft]){grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:900px){#app .content>.grid.cols-2:has([data-comp-draft]){grid-template-columns:1fr!important}#app article.card:has([data-comp-draft]) .comp-portrait-wrap{height:118px!important}}
+@media(max-width:600px){#app article.card:has([data-comp-draft])>.comp-lineup{grid-template-columns:repeat(5,minmax(74px,1fr));overflow-x:auto;padding-bottom:4px}#app article.card:has([data-comp-draft]) .champ-slot{min-height:138px!important}#app article.card:has([data-comp-draft]) .comp-portrait-wrap{height:92px!important}.build-item-grid{grid-template-columns:1fr!important}}
