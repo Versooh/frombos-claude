@@ -32,6 +32,8 @@ jobs:
           node --check assets/js/champion-intelligence.js
           node --check assets/js/champion-registry.generated.js
           node --check assets/js/performance-center.js
+          node --check assets/js/competitive-intelligence.js
+          node --check assets/js/competitive-router.js
       - name: Prepare public artifact
         run: |
           rm -rf _site
