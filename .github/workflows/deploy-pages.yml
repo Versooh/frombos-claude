@@ -38,6 +38,7 @@ jobs:
           node --check assets/js/vod-review.js
           node --check assets/js/champion-intelligence.js
           node --check assets/js/champion-registry.generated.js
+          node --check assets/js/champion-visual-upgrade.js
           node --check assets/js/curated-champion-data.js
           node --check assets/js/open-series-champions.generated.js
           node --check assets/js/open-series-observed-ui.js
