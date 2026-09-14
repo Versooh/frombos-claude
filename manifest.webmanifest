@@ -1,0 +1,10 @@
+{
+  "name": "FROMBOS — Competitive Intelligence",
+  "short_name": "FROMBOS",
+  "start_url": "./#/home",
+  "display": "standalone",
+  "background_color": "#06081f",
+  "theme_color": "#06081f",
+  "description": "Competitive intelligence platform for Wild Rift teams, coaches and analysts.",
+  "icons": []
+}
