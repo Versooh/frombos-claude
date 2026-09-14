@@ -12,7 +12,7 @@ const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slic
 function decodePlan(value){
   if(!value||value.length>700000)throw new Error('payload ausente ou grande demais');
   let raw=value.replace(/ /g,'+').replace(/-/g,'+').replace(/_/g,'/');
-  raw+= '='.repeat((4-raw.length%4)%4);
+  raw+='='.repeat((4-raw.length%4)%4);
   const bytes=Uint8Array.from(atob(raw),c=>c.charCodeAt(0));
   return JSON.parse(new TextDecoder().decode(bytes));
 }
@@ -46,7 +46,7 @@ function safeScenario(s,index){
 function sanitize(raw){
   if(!raw||typeof raw!=='object'||!Array.isArray(raw.scenarios)||!raw.scenarios.length)throw new Error('estrutura tática inválida');
   const scenarios=raw.scenarios.slice(0,LIMITS.scenarios).map(safeScenario);
-  const active=scenarios.some(x=>x.id===raw.activeScenario)?raw.activeScenario:scenarios[0].id;
+  const active=scenarios.some(x=>x.id===String(raw.activeScenario))?String(raw.activeScenario):scenarios[0].id;
   return {activeScenario:active,scenarios,strokes:[]};
 }
 function banner(message,type='ok'){
@@ -63,7 +63,7 @@ function maybeImport(){
 function bindShare(){
   if((location.hash.replace('#/','').split('?')[0]||'home')!=='tactical')return;
   const button=document.querySelector('#tbShare');if(!button||button.dataset.safeShare==='1')return;button.dataset.safeShare='1';
-  button.onclick=()=>{try{const payload=encodePlan(sanitize(store.state.tactical));const url=new URL(location.href);url.hash=`#/tactical?plan=${payload}`;const copy=()=>navigator.clipboard?.writeText(url.toString());if(copy())copy().then(()=>banner('Link seguro do plano copiado.')).catch(()=>prompt('Copie o link:',url.toString()));else prompt('Copie o link:',url.toString());}catch(error){banner(`Não foi possível compartilhar: ${error.message||error}`,'error');}};
+  button.onclick=()=>{try{const payload=encodePlan(sanitize(store.state.tactical));const url=new URL(location.href);url.hash=`#/tactical?plan=${payload}`;const result=navigator.clipboard?.writeText(url.toString());if(result)result.then(()=>banner('Link seguro do plano copiado.')).catch(()=>prompt('Copie o link:',url.toString()));else prompt('Copie o link:',url.toString());}catch(error){banner(`Não foi possível compartilhar: ${error.message||error}`,'error');}};
 }
 function apply(){maybeImport();bindShare();}
 const observer=new MutationObserver(()=>apply());observer.observe(document.documentElement,{subtree:true,childList:true});
