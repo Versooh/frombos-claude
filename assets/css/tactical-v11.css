@@ -1,0 +1,16 @@
+/* FROMBOS Tactical Board V11 */
+.tb-map-lock{margin-left:auto;margin-right:10px;padding:5px 9px;border:1px solid rgba(82,217,152,.32);border-radius:999px;color:#8df0bb;background:rgba(82,217,152,.06);font-size:8px;font-weight:900;letter-spacing:.12em}
+.tb-inspector{margin-top:16px;padding-top:15px;border-top:1px solid rgba(125,154,214,.15)}
+.tb-inspector label{display:block;margin:10px 0;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#8190ad;font-weight:800}.tb-inspector label .input{display:block;width:100%;margin-top:6px;text-transform:none;letter-spacing:normal;font-weight:500}
+.tb-inspector-block{margin:12px 0;padding:11px;border:1px solid rgba(125,154,214,.18);border-radius:9px;background:rgba(5,14,34,.55)}
+.tb-inspector-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:10px;color:#98a9c9}.tb-inspector-row strong{color:#f0c97a}
+.tb-inspector-block input[type=range]{width:100%;accent-color:#00d4ff}.tb-inspector-block small{display:block;margin-top:7px;line-height:1.5;color:#637493;font-size:9px}
+.tb-inspector-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tb-inspector-actions .btn.danger{grid-column:1/-1;border-color:rgba(255,83,100,.25);color:#ff8490;background:rgba(255,83,100,.05)}
+.tb-inspector-hint{margin-top:9px;color:#61718f;font-size:9px;line-height:1.7}.tb-inspector-hint kbd{border:1px solid rgba(125,154,214,.24);border-bottom-width:2px;border-radius:5px;background:#071329;padding:2px 5px;color:#afbdd8}
+.tb-v11-selected{filter:drop-shadow(0 0 8px rgba(240,201,122,.48))}.tb-v11-selected>circle:first-child{stroke:#f0c97a!important;stroke-width:3!important}
+.tb-player-tag{pointer-events:none}.tb-vision-label{pointer-events:none;letter-spacing:.06em}
+.tb-panning{cursor:grabbing!important;user-select:none}.tb-panning #tbBoard{pointer-events:none}
+#tbViewport{overscroll-behavior:contain;scroll-behavior:smooth}
+#tbBoard [data-marker-id]{transition:filter .12s ease}
+@media(max-width:1180px){.tb-map-lock{display:none}.tb-inspector-actions{grid-template-columns:1fr}}
+@media(max-width:760px){.tb-inspector{padding-bottom:8px}.tb-inspector-actions{grid-template-columns:1fr}.tb-inspector-hint{display:none}}
