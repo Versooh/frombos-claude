@@ -72,14 +72,13 @@ jobs:
           node --check assets/js/reports.js
           node --check assets/js/reports-router.js
           node --check assets/js/visual-polish.js
+          node --check assets/js/i18n-ptbr.js
           node --check assets/js/i18n-v19.js
           node --check assets/js/ui-stabilization-v19.js
       - name: Validate integration assets
         run: |
           test -f assets/css/visual-v10.css
-          test -f assets/css/ui-stabilization-v19.css
-          test -f assets/js/i18n-v19.js
-          test -f assets/js/ui-stabilization-v19.js
+          test -f assets/js/i18n-ptbr.js
           test -f assets/css/tactical-v11.css
           test -f assets/js/tactical-v11.js
           test -f assets/css/tactical-v12.css
@@ -98,13 +97,17 @@ jobs:
           test -f assets/css/match-center-v18.css
           test -f assets/js/match-center-v18.js
           test -f assets/js/match-center-router.js
+          test -f assets/css/ui-stabilization-v19.css
+          test -f assets/js/ui-stabilization-v19.js
+          test -f assets/js/i18n-v19.js
+          grep -q 'visual-v10.css' index.html
+          grep -q 'i18n-v19.js' index.html
+          ! grep -q 'i18n-ptbr.js' index.html
           grep -q 'ui-stabilization-v19.css' index.html
           grep -q 'ui-stabilization-v19.js' index.html
-          grep -q 'i18n-v19.js' index.html
           grep -q 'ui-stabilization-v19.css' sw.js
           grep -q 'ui-stabilization-v19.js' sw.js
           grep -q 'i18n-v19.js' sw.js
-          ! grep -q 'i18n-ptbr.js' index.html
           grep -q 'replaceSafe' assets/js/i18n-v19.js
           grep -q "\['BAN','BANIMENTO'\]" assets/js/i18n-v19.js
           ! grep -q "\['Pick','Captura'\]" assets/js/i18n-v19.js
@@ -114,6 +117,40 @@ jobs:
           grep -q 'teamSaveV19' assets/js/ui-stabilization-v19.js
           grep -q 'scRegSearchV19' assets/js/ui-stabilization-v19.js
           grep -q 'ci-evidence-icon-v19' assets/js/ui-stabilization-v19.js
+          grep -q 'tactical-v11.css' index.html
+          grep -q 'tactical-v11.js' index.html
+          grep -q 'tactical-v12.css' index.html
+          grep -q 'tactical-v12.js' index.html
+          grep -q 'draft-v13.css' index.html
+          grep -q 'draft-v13.js' index.html
+          grep -q 'draft-v13.css' sw.js
+          grep -q 'draft-v13.js' sw.js
+          grep -q 'fearlessMode' assets/js/draft-room.js
+          grep -q 'VOD REVIEW V14' assets/js/vod-review.js
+          grep -q 'vod-v14.js' index.html
+          grep -q 'vod-v14.js' sw.js
+          grep -q 'vod-review.css?v=14' index.html
+          grep -q 'activeSessionId' assets/js/store.js
+          grep -q 'captureSnapshot' assets/js/vod-review.js
+          grep -q 'vod-session-strip' assets/css/vod-review.css
+          grep -q 'performance-v15.css' index.html
+          grep -q 'performance-v15.css' sw.js
+          grep -q 'vod-performance-v15.js' index.html
+          grep -q 'vod-performance-v15.js' sw.js
+          grep -q 'VOD_CORRECTION_DRILL' assets/js/performance-center.js
+          grep -q 'data-vod-to-training' assets/js/vod-performance-v15.js
+          grep -q 'training-planner-v16.css' index.html
+          grep -q 'training-planner-v16.css' sw.js
+          grep -q 'training-planner-v16.js' index.html
+          grep -q 'training-planner-v16.js' sw.js
+          grep -q 'TRAINING PLANNER V16' assets/js/training-planner-v16.js
+          grep -q 'data-tp-day' assets/js/training-planner-v16.js
+          grep -q 'team-operations-v17.css' index.html
+          grep -q 'team-operations-v17.css' sw.js
+          grep -q 'team-operations-v17.js' index.html
+          grep -q 'team-operations-v17.js' sw.js
+          grep -q 'TEAM OPERATIONS V17' assets/js/team-operations-v17.js
+          grep -q 'data-ops-week' assets/js/team-operations-v17.js
           grep -q 'match-center-v18.css' index.html
           grep -q 'match-center-v18.css' sw.js
           grep -q 'match-center-router.js' index.html
@@ -122,13 +159,6 @@ jobs:
           grep -q 'known>=10' assets/js/match-center-v18.js
           grep -q 'matches:{games' assets/js/store.js
           grep -q 'data-route=.matches.' assets/js/match-center-router.js
-          grep -q 'fearlessMode' assets/js/draft-room.js
-          grep -q 'VOD REVIEW V14' assets/js/vod-review.js
-          grep -q 'activeSessionId' assets/js/store.js
-          grep -q 'captureSnapshot' assets/js/vod-review.js
-          grep -q 'VOD_CORRECTION_DRILL' assets/js/performance-center.js
-          grep -q 'TRAINING PLANNER V16' assets/js/training-planner-v16.js
-          grep -q 'TEAM OPERATIONS V17' assets/js/team-operations-v17.js
           grep -q 'lang="pt-BR"' index.html
   deploy:
     if: github.event_name != 'pull_request'
