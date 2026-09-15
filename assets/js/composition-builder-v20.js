@@ -56,7 +56,9 @@ function builderPayload(){
 function validatePayload(payload){
   if(!payload.name)return'Informe o nome da composição.';
   if(!payload.archetype)return'Informe o arquétipo da composição.';
-  for(const role of ROLES){const champion=payload.lineup[role.id];if(!champion)return`Selecione o campeão de ${role.label}.`;if(!CHAMPIONS.includes(champion))return`${champion} não pertence ao roster Wild Rift deste build.`;}
+  const selected=[];
+  for(const role of ROLES){const champion=payload.lineup[role.id];if(!champion)return`Selecione o campeão de ${role.label}.`;if(!CHAMPIONS.includes(champion))return`${champion} não pertence ao roster Wild Rift deste build.`;selected.push(champion);}
+  if(new Set(selected).size!==selected.length)return'Cada função precisa usar um campeão diferente.';
   if(!payload.plan)return'Descreva o plano de jogo.';
   if(!payload.winCondition)return'Descreva a condição de vitória.';
   return'';
