@@ -21,20 +21,17 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Validate V21.1 assets and syntax
+      - name: Validate V21.2 assets and syntax
         shell: bash
         run: |
           set -euo pipefail
-          for file in assets/css/visual-v21-runeterra.css assets/css/motion-v21.css assets/js/visual-v21-runeterra.js assets/js/champion-pool-v21.js; do test -f "$file"; done
+          for file in assets/css/visual-v21-runeterra.css assets/css/modules-v21-runeterra.css assets/css/motion-v21.css assets/js/visual-v21-runeterra.js assets/js/modules-v21-runeterra.js assets/js/champion-pool-v21.js; do test -f "$file"; done
           node --check assets/js/visual-v21-runeterra.js
+          node --check assets/js/modules-v21-runeterra.js
           node --check assets/js/champion-pool-v21.js
           node --check assets/js/store.js
-          grep -q 'visual-v21-runeterra.css?v=21.1' index.html
-          grep -q 'motion-v21.css?v=21.1' index.html
-          grep -q 'champion-pool-v21.js?v=21.1' index.html
-          grep -q 'visual-v21-runeterra.js?v=21.1' index.html
-          grep -q 'sw.js?v=21.1' index.html
-          grep -q 'v21-1-runeterra-competitive-system' sw.js
+          for token in 'visual-v21-runeterra.css?v=21.2' 'modules-v21-runeterra.css?v=21.2' 'motion-v21.css?v=21.2' 'champion-pool-v21.js?v=21.2' 'visual-v21-runeterra.js?v=21.2' 'modules-v21-runeterra.js?v=21.2' 'sw.js?v=21.2'; do grep -q "$token" index.html; done
+          grep -q 'v21-2-runeterra-modules' sw.js
 
       - name: Ensure V21 owns the final visual cascade
         shell: bash
@@ -44,12 +41,14 @@ jobs:
           import fs from 'node:fs';
           const html=fs.readFileSync('index.html','utf8');
           const oldCss=html.lastIndexOf('render-performance-v20.css?v=20.18');
-          const v21Css=html.indexOf('visual-v21-runeterra.css?v=21.1');
-          const motion=html.indexOf('motion-v21.css?v=21.1');
+          const visual=html.indexOf('visual-v21-runeterra.css?v=21.2');
+          const modules=html.indexOf('modules-v21-runeterra.css?v=21.2');
+          const motion=html.indexOf('motion-v21.css?v=21.2');
           const runtime=html.indexOf('runtime-v20.js?v=20.17');
-          const visual=html.indexOf('visual-v21-runeterra.js?v=21.1');
-          if(oldCss<0||v21Css<oldCss||motion<v21Css) throw new Error('Runeterra + motion must own final CSS cascade');
-          if(runtime<0||visual<runtime) throw new Error('V21 visual controller must load after shared runtime');
+          const controller=html.indexOf('visual-v21-runeterra.js?v=21.2');
+          const moduleController=html.indexOf('modules-v21-runeterra.js?v=21.2');
+          if(oldCss<0||visual<oldCss||modules<visual||motion<modules) throw new Error('V21.2 CSS cascade order invalid');
+          if(runtime<0||controller<runtime||moduleController<controller) throw new Error('V21.2 controllers must load after shared runtime in order');
           if(html.includes('visual-v21-rebuild.css?v=21.0')||html.includes('visual-v21-shell.js?v=21.0')) throw new Error('Legacy V21 shell must not remain active');
           NODE
 
@@ -60,10 +59,13 @@ jobs:
           for token in '--fb-bg:#f5f8fc' '--fb-surface:#ffffff' '--fb-navy:#07182b' '--fb-blue:#176bff' '--fb-cyan:#21b8ff' '--fb-gold:#d6a84b' '.fb-global-search' '.fb-pool-hero' '.fb-pool-grid' '.fb-champion-drawer' '.content[data-page="draft"]'; do
             grep -Fq -- "$token" assets/css/visual-v21-runeterra.css || { echo "Missing Runeterra selector/token: $token"; exit 1; }
           done
+          for token in '.comp-toolbar-v20' '.fb-draft-clock' '.scouting-war-room' '.fb-tactical-views' '.vod-layout' '.performance-center' '.reports-center'; do grep -Fq "$token" assets/css/modules-v21-runeterra.css || { echo "Missing module surface: $token"; exit 1; }; done
           grep -Fq 'CONHECIMENTO' assets/js/visual-v21-runeterra.js
           grep -Fq 'Champion Pool' assets/js/visual-v21-runeterra.js
           grep -Fq 'Meta Global' assets/js/champion-pool-v21.js
           grep -Fq 'UNKNOWN' assets/js/champion-pool-v21.js
+          grep -Fq 'CRONÔMETRO LOCAL' assets/js/modules-v21-runeterra.js
+          grep -Fq 'BOARD_VISUAL' assets/js/modules-v21-runeterra.js
 
       - name: Preserve evidence and Wild Rift-only rules
         shell: bash
@@ -71,16 +73,25 @@ jobs:
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const visual=fs.readFileSync('assets/js/visual-v21-runeterra.js','utf8');
-          const pool=fs.readFileSync('assets/js/champion-pool-v21.js','utf8');
-          const css=fs.readFileSync('assets/css/visual-v21-runeterra.css','utf8');
-          const combined=visual+'\n'+pool+'\n'+css;
-          if(/fetch\s*\(|XMLHttpRequest|WebSocket|axios|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i.test(combined)) throw new Error('Network or League PC fallback detected');
+          const files=['assets/js/visual-v21-runeterra.js','assets/js/modules-v21-runeterra.js','assets/js/champion-pool-v21.js','assets/css/visual-v21-runeterra.css','assets/css/modules-v21-runeterra.css'];
+          const combined=files.map(f=>fs.readFileSync(f,'utf8')).join('\n');
+          if(/fetch\s*\(|XMLHttpRequest|WebSocket|axios|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i.test(combined)) throw new Error('Network or League PC fallback detected in V21');
           if(/win\s*rate\s*[:=]|pick\s*rate\s*[:=]|ban\s*rate\s*[:=]|prediction|probability/i.test(combined)) throw new Error('Invented competitive metric language detected');
+          const pool=fs.readFileSync('assets/js/champion-pool-v21.js','utf8');
           for(const token of ['OFFICIAL','OBSERVED','CURATED','FROMBOS_STRUCTURAL','USER_PRIVATE','UNKNOWN']) if(!pool.includes(token)) throw new Error(`Missing evidence state: ${token}`);
           if(!pool.includes("import { CHAMPION_REGISTRY } from './champion-registry.generated.js'")) throw new Error('Champion Pool must use Wild Rift champion registry');
-          if(!pool.includes("s.championProfiles")) throw new Error('Champion profile edits must stay in USER_PRIVATE workspace state');
+          if(!pool.includes('s.championProfiles')) throw new Error('Champion profile edits must stay in USER_PRIVATE workspace state');
+          const moduleJs=fs.readFileSync('assets/js/modules-v21-runeterra.js','utf8');
+          if(/store\.update|store\.save|localStorage|sessionStorage/.test(moduleJs)) throw new Error('V21 module controller must not mutate competitive workspace state');
           NODE
+
+      - name: Validate Tactical map ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg'" assets/js/tactical.js
+          if grep -Eq 'tbMapImage.*setAttribute\(.href.|MAP_URL\s*=' assets/js/modules-v21-runeterra.js; then echo 'V21 module controller may not alter map source'; exit 1; fi
+          grep -Fq 'Mapa e geometria preservados' assets/js/modules-v21-runeterra.js
 
       - name: Validate mobile and motion system
         shell: bash
@@ -89,6 +100,8 @@ jobs:
           grep -q '@media(max-width:760px)' assets/css/visual-v21-runeterra.css
           grep -q '@media(max-width:430px)' assets/css/visual-v21-runeterra.css
           grep -q '@media(max-width:360px)' assets/css/visual-v21-runeterra.css
+          grep -q '@media(max-width:760px)' assets/css/modules-v21-runeterra.css
+          grep -q '@media(max-width:430px)' assets/css/modules-v21-runeterra.css
           grep -q '100dvh' assets/css/visual-v21-runeterra.css
           grep -q 'prefers-reduced-motion:reduce' assets/css/motion-v21.css
           grep -Fq 'cubic-bezier(.2,.8,.2,1)' assets/css/motion-v21.css
@@ -97,4 +110,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for token in "'./assets/css/visual-v21-runeterra.css'" "'./assets/css/motion-v21.css'" "'./assets/js/champion-pool-v21.js'" "'./assets/js/visual-v21-runeterra.js'"; do grep -Fq "$token" sw.js || { echo "Missing SW asset: $token"; exit 1; }; done
+          for token in "'./assets/css/visual-v21-runeterra.css'" "'./assets/css/modules-v21-runeterra.css'" "'./assets/css/motion-v21.css'" "'./assets/js/champion-pool-v21.js'" "'./assets/js/visual-v21-runeterra.js'" "'./assets/js/modules-v21-runeterra.js'"; do grep -Fq "$token" sw.js || { echo "Missing SW asset: $token"; exit 1; }; done
