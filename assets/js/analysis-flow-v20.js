@@ -77,11 +77,12 @@ function vodFocus(){
 }
 
 function apply(){tacticalFocus();vodFocus();}
-let scheduled=false;
-function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;apply();});}
-new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});
-window.addEventListener('hashchange',schedule);
-window.addEventListener('load',schedule);
-schedule();
+function bindRuntime(){
+  const runtime=window.FROMBOS_V20_RUNTIME;
+  if(runtime?.subscribe){runtime.subscribe(apply);return;}
+  let scheduled=false;const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;apply();});};
+  new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});window.addEventListener('hashchange',schedule);window.addEventListener('load',schedule);schedule();
+}
+bindRuntime();
 
 window.FROMBOS_ANALYSIS_FLOW_V20={apply};
