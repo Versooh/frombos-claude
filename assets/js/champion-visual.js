@@ -1,4 +1,4 @@
-const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
 const SPECIAL_SLUGS={
   "Cho'Gath":'chogath',
@@ -16,6 +16,14 @@ const SPECIAL_SLUGS={
   "Xin Zhao":'xin-zhao',
   "Vel'Koz":'velkoz'
 };
+
+/*
+ * Asset allow-lists are intentionally explicit. V20 never probes 141 nonexistent
+ * files and never substitutes League PC art. Add a slug here only after the
+ * corresponding Wild Rift file exists in assets/champions/{portrait|hero}/.
+ */
+const VERIFIED_PORTRAITS=new Set([]);
+const VERIFIED_HEROES=new Set([]);
 
 export function championSlug(name){
   if(SPECIAL_SLUGS[name]) return SPECIAL_SLUGS[name];
@@ -39,14 +47,21 @@ export function championAsset(name,variant='portrait'){
   return `assets/champions/${folder}/${slug}.webp`;
 }
 
+export function hasChampionAsset(name,variant='portrait'){
+  const slug=championSlug(name);
+  return (variant==='hero'?VERIFIED_HEROES:VERIFIED_PORTRAITS).has(slug);
+}
+
 export function championPortrait(name,options={}){
   const {size='md',label=false,role='',className='',variant='portrait',priority=false}=options;
   const safe=esc(name||'Campeão');
-  const src=championAsset(name,variant);
   const roleLabel=role?`<small class="champion-role">${esc(role)}</small>`:'';
-  return `<span class="champion-visual champion-${size} ${className}" data-champion="${safe}">
+  const image=hasChampionAsset(name,variant)
+    ? `<img class="champion-image" data-champion-img src="${championAsset(name,variant)}" alt="${safe}" ${priority?'fetchpriority="high"':'loading="lazy"'} decoding="async">`
+    : '';
+  return `<span class="champion-visual champion-${size} ${className} ${image?'':'image-missing'}" data-champion="${safe}">
     <span class="champion-fallback" aria-hidden="true">${championInitials(name)}</span>
-    <img class="champion-image" data-champion-img src="${src}" alt="${safe}" ${priority?'fetchpriority="high"':'loading="lazy"'} decoding="async">
+    ${image}
     ${label?`<span class="champion-copy"><b>${safe}</b>${roleLabel}</span>`:''}
   </span>`;
 }
@@ -67,5 +82,6 @@ export function hydrateChampionImages(root=document){
 export const CHAMPION_ASSET_POLICY={
   source:'FROMBOS_LOCAL_WILD_RIFT_ONLY',
   fallback:'INITIALS',
-  allowLeaguePCFallback:false
+  allowLeaguePCFallback:false,
+  probeMissingAssets:false
 };
