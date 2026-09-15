@@ -85,7 +85,7 @@
 
 /* Team pools */
 .pool-list{display:flex;flex-wrap:wrap;gap:7px}
-.pool-entry{
+.pool-list .pool-chip-v20{
   display:inline-flex;
   align-items:center;
   gap:6px;
@@ -94,9 +94,8 @@
   background:rgba(20,122,255,.045);
   border-radius:8px;
 }
-.pool-entry .champion-visual{grid-template-columns:var(--champ-size);gap:0}
-.pool-entry>span{font-size:10px;color:#c8d3e6}
-.pool-remove{all:unset;cursor:pointer;color:#778ba8;font-size:13px}.pool-remove:hover{color:#ff7d8b}
+.pool-list .pool-chip-v20>.champion-visual{grid-template-columns:var(--champ-size);gap:0}
+.pool-list .pool-chip-v20 button{color:#778ba8!important}.pool-list .pool-chip-v20 button:hover{color:#ff7d8b!important}
 
 /* Draft */
 .dr-slot.filled{display:flex;align-items:center;justify-content:flex-start;gap:7px;text-align:left;padding:7px 9px}
@@ -109,6 +108,11 @@
 .draft-champ-card .champion-image,.draft-champ-card .champion-fallback{border-radius:8px}
 .draft-champ-card b{font-size:9px;line-height:1.1;text-align:center}
 .draft-champ-card small{font-size:6px}
+
+/* Tactical champion picker */
+.tb-champ>.champion-visual{grid-template-columns:var(--champ-size);gap:0}
+.tb-champ>.champion-visual .champion-image,.tb-champ>.champion-visual .champion-fallback{border-radius:50%}
+.tb-champ>.champion-visual+.champion-visual{display:none}
 
 /* Series */
 .series-pick-list{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
