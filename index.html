@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="assets/css/features.css">
   <link rel="stylesheet" href="assets/css/champions.css">
   <link rel="stylesheet" href="assets/css/performance.css">
+  <link rel="stylesheet" href="assets/css/performance-v15.css?v=15">
   <link rel="stylesheet" href="assets/css/competitive.css">
   <link rel="stylesheet" href="assets/css/meta.css">
   <link rel="stylesheet" href="assets/css/visual-polish.css">
@@ -33,8 +34,9 @@
 <body>
   <div id="app"></div>
   <noscript>O FROMBOS precisa de JavaScript habilitado.</noscript>
-  <script type="module" src="assets/js/app.js?v=14"></script>
+  <script type="module" src="assets/js/app.js?v=15"></script>
   <script type="module" src="assets/js/vod-v14.js?v=14"></script>
+  <script type="module" src="assets/js/vod-performance-v15.js?v=15"></script>
   <script type="module" src="assets/js/competitive-router.js"></script>
   <script type="module" src="assets/js/meta-router.js"></script>
   <script type="module" src="assets/js/reports-router.js"></script>
@@ -53,7 +55,7 @@
   <script type="module" src="assets/js/composition-intelligence-ui.js?v=9.1"></script>
   <script src="assets/js/i18n-ptbr.js?v=10" defer></script>
   <script>
-    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=14').catch(console.warn));
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=15').catch(console.warn));
   </script>
 </body>
 </html>
