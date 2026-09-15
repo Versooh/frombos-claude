@@ -114,11 +114,12 @@ function ensureDraftFlow(){
 }
 
 function apply(){ensureCompositionFlow();ensureChampionFlow();ensureDraftFlow();}
-let scheduled=false;
-function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;apply();});}
-new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true});
-window.addEventListener('hashchange',schedule);
-window.addEventListener('load',schedule);
-schedule();
+function bindRuntime(){
+  const runtime=window.FROMBOS_V20_RUNTIME;
+  if(runtime?.subscribe){runtime.subscribe(apply);return;}
+  let scheduled=false;const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;apply();});};
+  new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true});window.addEventListener('hashchange',schedule);window.addEventListener('load',schedule);schedule();
+}
+bindRuntime();
 
 window.FROMBOS_COMPETITIVE_FLOW_V20={apply,updateCompositionCompare};
