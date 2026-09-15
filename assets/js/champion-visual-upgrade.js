@@ -54,10 +54,14 @@ function upgradeCompositions(){
     const src=portrait(name),sig=src||`fallback:${name}`;
     if(signatures.get(slot)===sig&&directChildren(slot,'.comp-v20-portrait').length===1)return;
     signatures.set(slot,sig);
-    /* V20 canonicalizes old V4/V10 injectors: exactly one direct portrait per slot. */
-    directChildren(slot,'.comp-portrait-wrap,.comp-portrait,.comp-v20-portrait,[data-champion-portrait]').forEach(x=>x.remove());
-    slot.prepend(imageNode(name,'comp-v20-portrait'));
-    slot.dataset.portraitReady='v20';
+    /*
+     * V19 also checks for .comp-v19-portrait-wrap. V20 keeps that compatibility
+     * class on the one canonical node, so the V19 observer does not inject a
+     * second portrait. Older V4/V10 nodes are removed.
+     */
+    directChildren(slot,'.comp-portrait-wrap,.comp-portrait,.comp-v20-portrait').forEach(x=>x.remove());
+    const canonical=imageNode(name,'comp-v20-portrait comp-v19-portrait-wrap');
+    slot.prepend(canonical);slot.dataset.portraitReady='v20';
   });
 }
 
@@ -66,7 +70,7 @@ function upgradeTeamPools(){
     const text=[...chip.childNodes].find(n=>n.nodeType===Node.TEXT_NODE)?.textContent?.trim();if(!text)return;
     const name=text.replace(/×\s*$/,'').trim(),src=portrait(name),sig=src||`fallback:${name}`;
     if(signatures.get(chip)===sig&&directChildren(chip,'.pool-v20-portrait').length===1)return;signatures.set(chip,sig);
-    directChildren(chip,'.pool-mini-portrait,.pool-v20-portrait,[data-champion-portrait]').forEach(x=>x.remove());
+    directChildren(chip,'.pool-mini-portrait,.pool-v20-portrait').forEach(x=>x.remove());
     chip.prepend(imageNode(name,'pool-v20-portrait'));chip.dataset.portraitReady='v20';
   });
 }
@@ -80,8 +84,6 @@ function upgradeSeries(){
   });
 }
 
-function apply(){
-  upgradeChampionBrowser();upgradeDraft();upgradeCompositions();upgradeTeamPools();upgradeSeries();upgradeTacticalPicker();upgradeMapMarkers();
-}
+function apply(){upgradeChampionBrowser();upgradeDraft();upgradeCompositions();upgradeTeamPools();upgradeSeries();upgradeTacticalPicker();upgradeMapMarkers();}
 let scheduled=false;const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;apply();});};
 const observer=new MutationObserver(schedule);observer.observe(document.documentElement,{subtree:true,childList:true});window.addEventListener('hashchange',schedule);schedule();
