@@ -122,6 +122,23 @@ jobs:
           grep -q 'report-metrics' assets/css/visual-v20-ops.css
           grep -q 'mc-filters' assets/css/visual-v20-ops.css
 
+      - name: V20 system and intelligence workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-system.css
+          grep -q 'visual-v20-system.css?v=20.6' index.html
+          grep -q "'./assets/css/visual-v20-system.css'" sw.js
+          grep -q 'data-page="team"' assets/css/visual-v20-system.css
+          grep -q 'data-page="competitive"' assets/css/visual-v20-system.css
+          grep -q 'data-page="meta"' assets/css/visual-v20-system.css
+          grep -q 'data-page="data"' assets/css/visual-v20-system.css
+          grep -q 'data-page="settings"' assets/css/visual-v20-system.css
+          grep -q 'team-ops-v17' assets/css/visual-v20-system.css
+          grep -q 'competitive-center' assets/css/visual-v20-system.css
+          grep -q 'meta-intelligence' assets/css/visual-v20-system.css
+          grep -q 'source-row' assets/css/visual-v20-system.css
+
       - name: Wild Rift only guard
         shell: bash
         run: |
