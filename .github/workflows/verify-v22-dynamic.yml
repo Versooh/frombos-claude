@@ -1,0 +1,63 @@
+name: Verify FROMBOS V22 Dynamic Intelligence
+
+on:
+  pull_request:
+    paths:
+      - 'assets/css/experience-v22.css'
+      - 'assets/js/experience-v22.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v22-dynamic.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-v22:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate V22 files and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/experience-v22.css
+          test -f assets/js/experience-v22.js
+          node --check assets/js/experience-v22.js
+          grep -Fq 'experience-v22.css?v=22.0' index.html
+          grep -Fq 'experience-v22.js?v=22.0' index.html
+          grep -Fq "'./assets/css/experience-v22.css'" sw.js
+          grep -Fq "'./assets/js/experience-v22.js'" sw.js
+      - name: Preserve evidence-first safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/experience-v22.js','utf8');
+          const css=fs.readFileSync('assets/css/experience-v22.css','utf8');
+          const combined=js+'\n'+css;
+          if(/store\.update|store\.save|localStorage|sessionStorage/.test(js)) throw new Error('V22 experience must not mutate competitive state');
+          if(/fetch\s*\(|XMLHttpRequest|WebSocket|axios/i.test(js)) throw new Error('V22 experience must not acquire network data');
+          if(/ddragon\.leagueoflegends|lol-game-data|CommunityDragon/i.test(combined)) throw new Error('League PC fallback detected');
+          if(/win\s*rate\s*[:=]|pick\s*rate\s*[:=]|ban\s*rate\s*[:=]|prediction|probability/i.test(combined)) throw new Error('Invented competitive metric language detected');
+          NODE
+      - name: Preserve Tactical map ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg'" assets/js/tactical.js
+          if grep -Eq 'MAP_URL\s*=|tbMapImage.*setAttribute' assets/js/experience-v22.js; then
+            echo 'V22 may not alter Tactical map source'
+            exit 1
+          fi
+      - name: Validate responsive and reduced motion
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq '@media(max-width:760px)' assets/css/experience-v22.css
+          grep -Fq '@media(max-width:430px)' assets/css/experience-v22.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/experience-v22.css
+          grep -Fq 'Decision Center' assets/js/experience-v22.js
+          grep -Fq 'WILD RIFT · EVIDENCE FIRST' assets/js/experience-v22.js
