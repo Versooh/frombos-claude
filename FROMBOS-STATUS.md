@@ -5,47 +5,39 @@ _Last updated: 2026-09-15_
 ## Current branch
 `rebuild/frombos-v2-next`
 
-## Current HEAD
-`90a3e2054b3b2dcaf4b0588523670462bef63fef`
-
 ## Product phase
-**Phase 1 — Product Foundation → SaaS foundation.** Core state migration is underway and the first multi-tenant account boundary is now connected to the existing Supabase backend.
+**Phase 1 — Product Foundation → SaaS foundation.** Authentication, organization context and the first real organization-scoped Team/Roster cloud path are connected to the existing Supabase backend.
 
 ## Completed in the latest sequence
-- Added `assets/js/core/store-adapter.js` as the new Core persistence boundary while preserving the legacy V2 store.
-- Wired the main app shell, Team, Composition and Series surfaces to Core state where migration is safe.
-- Added pinned Supabase JS `2.116.0` browser client integration in `assets/js/core/auth.js`.
-- Added authenticated sign-in/sign-up flow.
-- Added organization discovery and active-organization context.
-- Added organization creation through the existing `create_organization_with_owner` RPC.
-- Added auth/organization onboarding UI and responsive styling.
-- Updated the PWA service-worker cache for the new auth/Core assets.
-- Verified the connected Supabase project is `FROMBOS-RIFT` in `sa-east-1` and already contains organization, team, player, composition, series and draft persistence tables with organization-aware RLS policies.
-- Verified the organization creation RPC is executable by `authenticated` and not by `anon`.
+- Added `assets/js/core/cloud-store.js` as the organization-aware cloud persistence adapter.
+- Cloud reads now load the active organization team, active season, roster and champion pools before `app.js` boots.
+- Team Workspace now supports organization-scoped team selection.
+- Team name, roster and champion-pool changes are queued into Supabase automatically, with an explicit `Salvar na organização` action as well.
+- First save can create the organization's first team and its default current-year season through the existing RLS-protected tables.
+- Corrected the Core/database role boundary: `BARON/JUNGLE/MID/DUO/SUPPORT` maps to `baron/jungle/mid/dragon/support` in Supabase.
+- Updated the PWA service-worker cache to include `cloud-store.js` and invalidate the previous auth-only cache.
+- Verified the real database schema and RLS policies for `teams`, `team_seasons`, `players`, `player_champion_pool`, `team_compositions`, `team_composition_slots`, `series_plans`, `draft_sessions` and `organization_members`.
+- Verified `create_organization_with_owner(text,text)` returns a UUID and is exposed only to `authenticated`.
 
 ## Important product direction
-FROMBOS is now being treated as a **multi-tenant SaaS product**, not only a local PWA.
-
-Target model:
+FROMBOS is being built as a **multi-tenant SaaS product**:
 
 `Account → Organization → Teams → Seasons/Rosters → Competitive Workflow`
 
-A user can belong to one or more organizations. An organization owns its teams and private competitive workspace. Team staff roles will control roster, strategy, scouting and administrative actions through database RLS.
+Cloud is canonical for authenticated organization/team data. Local Core remains an offline/cache layer during migration.
 
 ## Current limitation
-Authentication and organization selection are now real, but the migrated Core workspace is still local-first. Team/composition/draft data is not yet fully synchronized with the organization database from the new Core adapter.
+Composition, Series/Draft, Tactical, VOD and Training are not yet fully cloud-persisted. Their Core state can still be local while the migration proceeds module by module.
 
-That is intentional: cloud synchronization must be implemented against the existing RLS model rather than creating a second parallel database model.
+The legacy `store.js` bridge remains intentionally active only before a cloud team has been hydrated, preventing stale local state from silently overwriting an existing organization team.
 
 ## Next engineering priorities
-1. Build the organization-aware Cloud Store adapter over the existing Supabase schema.
-2. Load/create/select organization teams and active team seasons from the cloud.
-3. Persist Team/Roster/Champion Pools to `teams`, `team_seasons`, `players` and `player_champion_pool`.
-4. Persist Composition Lab to `team_compositions` + `team_composition_slots`.
-5. Connect Draft/Series to `series_plans` + `draft_sessions` and existing draft event/branch structures.
-6. Add organization administration: members, roles, invitations and team management.
-7. Add cloud persistence for Tactical/VOD/Training and then retire local-only state paths progressively.
-8. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
+1. Persist Composition Lab to `team_compositions` + `team_composition_slots`.
+2. Connect Draft/Series to `series_plans` + `draft_sessions` and existing draft event/branch structures.
+3. Add organization administration: members, roles, invitations and multi-team management.
+4. Persist Tactical/VOD/Training and remove their remaining local-only paths progressively.
+5. Add cloud-aware backup/import and conflict/dirty-state handling.
+6. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
 
 ## Security rules
 - Never expose a Supabase service-role key in the browser.
