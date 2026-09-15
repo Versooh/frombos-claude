@@ -49,6 +49,7 @@ jobs:
           node --check assets/js/vod-v14.js
           node --check assets/js/vod-performance-v15.js
           node --check assets/js/training-planner-v16.js
+          node --check assets/js/team-operations-v17.js
           node --check assets/js/champion-intelligence.js
           node --check assets/js/champion-registry.generated.js
           node --check assets/js/champion-visual-upgrade.js
@@ -87,6 +88,8 @@ jobs:
           test -f assets/js/vod-performance-v15.js
           test -f assets/css/training-planner-v16.css
           test -f assets/js/training-planner-v16.js
+          test -f assets/css/team-operations-v17.css
+          test -f assets/js/team-operations-v17.js
           grep -q 'visual-v10.css' index.html
           grep -q 'i18n-ptbr.js' index.html
           grep -q 'tactical-v11.css' index.html
@@ -117,6 +120,12 @@ jobs:
           grep -q 'training-planner-v16.js' sw.js
           grep -q 'TRAINING PLANNER V16' assets/js/training-planner-v16.js
           grep -q 'data-tp-day' assets/js/training-planner-v16.js
+          grep -q 'team-operations-v17.css' index.html
+          grep -q 'team-operations-v17.css' sw.js
+          grep -q 'team-operations-v17.js' index.html
+          grep -q 'team-operations-v17.js' sw.js
+          grep -q 'TEAM OPERATIONS V17' assets/js/team-operations-v17.js
+          grep -q 'data-ops-week' assets/js/team-operations-v17.js
           grep -q 'lang="pt-BR"' index.html
   deploy:
     if: github.event_name != 'pull_request'
