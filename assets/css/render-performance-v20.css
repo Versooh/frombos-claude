@@ -1,0 +1,41 @@
+/* FROMBOS V20.18 — rendering performance hints.
+   Repeated cards remain in the DOM; content-visibility only skips offscreen paint/layout work. */
+
+@supports (content-visibility:auto){
+  .content[data-page="champions"] .ci-card,
+  .content[data-page="draft"] .draft-champ-card,
+  .content[data-page="tactical"] .tb-champ,
+  .content[data-page="vod"] .vod-note-card,
+  .content[data-page="scouting"] .sc-reg-player,
+  .match-center-v18 .mc-game{
+    content-visibility:auto;
+  }
+  .content[data-page="champions"] .ci-card{contain-intrinsic-size:auto 178px}
+  .content[data-page="draft"] .draft-champ-card{contain-intrinsic-size:auto 162px}
+  .content[data-page="tactical"] .tb-champ{contain-intrinsic-size:auto 70px}
+  .content[data-page="vod"] .vod-note-card{contain-intrinsic-size:auto 132px}
+  .content[data-page="scouting"] .sc-reg-player{contain-intrinsic-size:auto 58px}
+  .match-center-v18 .mc-game{contain-intrinsic-size:auto 128px}
+}
+
+/* Isolate image-heavy paint without changing geometry or interactivity. */
+.content[data-page="champions"] .ci-art,
+.content[data-page="draft"] .draft-champ-art,
+.content[data-page="tactical"] .tb-champ-v20-portrait,
+.content[data-page="comps"] .comp-v20-portrait,
+.sc-reg-fav,
+.vod-note-thumb{
+  contain:paint;
+}
+
+/* Stable intrinsic ratios reduce reflow while official portraits decode. */
+.ci-grid img,.draft-champ-grid img,#tbChampGrid img,.comp-lineup img,.sc-reg-player img,.series-v20-portraits img{height:auto;max-width:100%}
+.ci-art img,.draft-champ-art img,.tb-champ-v20-portrait img,.comp-v20-portrait img,.sc-reg-fav img{width:100%;height:100%;object-fit:cover}
+
+@media(max-width:760px){
+  @supports (content-visibility:auto){
+    .content[data-page="champions"] .ci-card{contain-intrinsic-size:auto 142px}
+    .content[data-page="draft"] .draft-champ-card{contain-intrinsic-size:auto 146px}
+    .match-center-v18 .mc-game{contain-intrinsic-size:auto 150px}
+  }
+}
