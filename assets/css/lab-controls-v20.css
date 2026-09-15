@@ -1,0 +1,75 @@
+/* FROMBOS V20 — decision controls for Composition Lab, Champion Intelligence and Draft Room */
+
+.comp-toolbar-v20{
+  display:grid;
+  grid-template-columns:minmax(280px,.95fr) minmax(0,1.45fr) max-content;
+  gap:10px;
+  align-items:center;
+  margin:0 0 14px;
+  padding:10px;
+  border:1px solid rgba(119,153,210,.16);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(11,25,53,.9),rgba(6,15,32,.94));
+  box-shadow:0 14px 34px rgba(0,0,0,.16);
+}
+.comp-search-v20{display:flex;align-items:center;gap:8px;min-width:0}
+.comp-search-v20>span{color:#6f86aa;font-size:18px;line-height:1}
+.comp-search-v20 .input{width:100%;min-width:0;min-height:38px}
+.comp-filter-tabs-v20{display:flex;gap:6px;align-items:center;min-width:0;overflow:auto;padding-bottom:2px;scrollbar-width:thin}
+.comp-filter-v20{
+  flex:0 0 auto;
+  min-height:32px;
+  padding:6px 9px;
+  border:1px solid rgba(112,151,212,.18);
+  border-radius:999px;
+  background:#07111f;
+  color:#8396b3;
+  font-size:9px;
+  font-weight:800;
+  cursor:pointer;
+  transition:border-color .15s ease,color .15s ease,background .15s ease;
+}
+.comp-filter-v20:hover{color:#e9f5ff;border-color:rgba(80,220,255,.34)}
+.comp-filter-v20[aria-pressed="true"]{color:#07101e;background:linear-gradient(180deg,#f0c97a,#cda75f);border-color:#e2bd77;box-shadow:0 8px 20px rgba(226,189,119,.12)}
+.comp-count-v20{font-size:9px;font-weight:800;color:#7c8da8;white-space:nowrap;text-align:right}
+.composition-card[hidden]{display:none!important}
+.comp-card-actions{display:flex;justify-content:flex-end;padding:0 18px 18px;margin-top:auto}
+.comp-card-actions .comp-primary-action{min-width:156px}
+
+.ci-browser-meta-v20{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:9px 0 2px;padding:7px 2px 6px;border-bottom:1px solid rgba(255,255,255,.055);font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:#667b9a}
+.ci-result-count-v20{color:#b8c9df;font-weight:900}
+.content[data-page="champions"] .ci-card.is-selected{border-color:rgba(226,189,119,.72)!important;box-shadow:0 0 0 1px rgba(226,189,119,.18),0 15px 35px rgba(0,0,0,.3)!important;transform:translateY(-2px)}
+.content[data-page="champions"] .ci-card.is-selected .ci-card-body{background:linear-gradient(180deg,rgba(226,189,119,.1),rgba(13,24,48,.96))}
+.content[data-page="champions"] .ci-card.is-selected .ci-card-body b{color:#f3d99f}
+
+.draft-filterbar-v20{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0 8px;border-bottom:1px solid rgba(255,255,255,.055)}
+.draft-filter-tabs-v20{display:flex;gap:5px;min-width:0;overflow:auto;padding-bottom:1px;scrollbar-width:thin}
+.draft-filter-tabs-v20 button{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:30px;
+  padding:5px 8px;
+  border:1px solid rgba(112,151,212,.18);
+  border-radius:7px;
+  background:#07111f;
+  color:#7f91ad;
+  font-size:8px;
+  font-weight:800;
+  cursor:pointer;
+}
+.draft-filter-tabs-v20 button:hover{border-color:rgba(80,220,255,.34);color:#ccefff}
+.draft-filter-tabs-v20 button[aria-pressed="true"]{border-color:rgba(80,220,255,.58);background:rgba(80,220,255,.08);color:#ccefff;box-shadow:inset 0 -2px #50dcff}
+.draft-filter-tabs-v20 button b{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:rgba(255,255,255,.055);font-size:7px;color:#a9bad0}
+.draft-visible-count-v20{flex:0 0 auto;color:#6f82a0;font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.draft-champ-card[hidden]{display:none!important}
+
+@media(max-width:1100px){
+  .comp-toolbar-v20{grid-template-columns:1fr auto}.comp-filter-tabs-v20{grid-column:1/-1;grid-row:2}.comp-count-v20{grid-column:2;grid-row:1}
+}
+@media(max-width:720px){
+  .comp-toolbar-v20{grid-template-columns:1fr;padding:9px}.comp-search-v20,.comp-filter-tabs-v20,.comp-count-v20{grid-column:1;grid-row:auto}.comp-count-v20{text-align:left}
+  .draft-filterbar-v20{align-items:flex-start;flex-direction:column}.draft-filter-tabs-v20{width:100%}.draft-visible-count-v20{padding-left:2px}
+}
+@media(prefers-reduced-motion:reduce){.comp-filter-v20,.draft-filter-tabs-v20 button{transition:none}}
