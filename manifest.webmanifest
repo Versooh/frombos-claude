@@ -3,8 +3,8 @@
   "short_name": "FROMBOS RIFT",
   "start_url": "./#/home",
   "display": "standalone",
-  "background_color": "#f5f8fc",
-  "theme_color": "#f5f8fc",
+  "background_color": "#EEF1F6",
+  "theme_color": "#EEF1F6",
   "description": "Plataforma de inteligência competitiva para equipes, treinadores e analistas de Wild Rift.",
   "lang": "pt-BR",
   "icons": []

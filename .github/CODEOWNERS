@@ -1,0 +1,6 @@
+# FROMBOS RIFT — repository ownership
+# All project changes require review by the repository owner when branch protection is enabled.
+* @Versooh
+/.github/ @Versooh
+/assets/ @Versooh
+/scripts/ @Versooh
