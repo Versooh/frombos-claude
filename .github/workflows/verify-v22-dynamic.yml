@@ -7,10 +7,12 @@ on:
       - 'assets/css/champion-flow-v22.css'
       - 'assets/css/meta-lab-v22.css'
       - 'assets/css/draft-decision-v22.css'
+      - 'assets/css/composition-lab-v22.css'
       - 'assets/js/experience-v22.js'
       - 'assets/js/champion-flow-v22.js'
       - 'assets/js/meta-lab-v22.js'
       - 'assets/js/draft-decision-v22.js'
+      - 'assets/js/composition-lab-v22.js'
       - 'index.html'
       - 'sw.js'
       - '.github/workflows/verify-v22-dynamic.yml'
@@ -28,31 +30,34 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in assets/css/experience-v22.css assets/css/champion-flow-v22.css assets/css/meta-lab-v22.css assets/css/draft-decision-v22.css assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js; do test -f "$file"; done
+          for file in assets/css/experience-v22.css assets/css/champion-flow-v22.css assets/css/meta-lab-v22.css assets/css/draft-decision-v22.css assets/css/composition-lab-v22.css assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js assets/js/composition-lab-v22.js; do test -f "$file"; done
           node --check assets/js/experience-v22.js
           node --check assets/js/champion-flow-v22.js
           node --check assets/js/meta-lab-v22.js
           node --check assets/js/draft-decision-v22.js
+          node --check assets/js/composition-lab-v22.js
           grep -Fq 'experience-v22.css?v=22.0' index.html
           grep -Fq 'champion-flow-v22.css?v=22.1' index.html
           grep -Fq 'meta-lab-v22.css?v=22.2' index.html
           grep -Fq 'draft-decision-v22.css?v=22.3' index.html
+          grep -Fq 'composition-lab-v22.css?v=22.4' index.html
           grep -Fq 'experience-v22.js?v=22.1' index.html
           grep -Fq 'champion-flow-v22.js?v=22.1' index.html
           grep -Fq 'meta-lab-v22.js?v=22.2' index.html
-          grep -Fq 'draft-decision-v22.js?v=22.3' index.html
-          grep -Fq 'sw.js?v=22.3' index.html
-          for asset in experience-v22.css champion-flow-v22.css meta-lab-v22.css draft-decision-v22.css; do grep -Fq "'./assets/css/$asset'" sw.js; done
-          for asset in experience-v22.js champion-flow-v22.js meta-lab-v22.js draft-decision-v22.js; do grep -Fq "'./assets/js/$asset'" sw.js; done
-          grep -Fq 'v22-3-draft-decision' sw.js
+          grep -Fq 'draft-decision-v22.js?v=22.4' index.html
+          grep -Fq 'composition-lab-v22.js?v=22.4' index.html
+          grep -Fq 'sw.js?v=22.4' index.html
+          for asset in experience-v22.css champion-flow-v22.css meta-lab-v22.css draft-decision-v22.css composition-lab-v22.css; do grep -Fq "'./assets/css/$asset'" sw.js; done
+          for asset in experience-v22.js champion-flow-v22.js meta-lab-v22.js draft-decision-v22.js composition-lab-v22.js; do grep -Fq "'./assets/js/$asset'" sw.js; done
+          grep -Fq 'v22-4-composition-intelligence' sw.js
       - name: Preserve evidence-first safety
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const jsFiles=['assets/js/experience-v22.js','assets/js/champion-flow-v22.js','assets/js/meta-lab-v22.js','assets/js/draft-decision-v22.js'];
-          const cssFiles=['assets/css/experience-v22.css','assets/css/champion-flow-v22.css','assets/css/meta-lab-v22.css','assets/css/draft-decision-v22.css'];
+          const jsFiles=['assets/js/experience-v22.js','assets/js/champion-flow-v22.js','assets/js/meta-lab-v22.js','assets/js/draft-decision-v22.js','assets/js/composition-lab-v22.js'];
+          const cssFiles=['assets/css/experience-v22.css','assets/css/champion-flow-v22.css','assets/css/meta-lab-v22.css','assets/css/draft-decision-v22.css','assets/css/composition-lab-v22.css'];
           const js=jsFiles.map(f=>fs.readFileSync(f,'utf8')).join('\n');
           const combined=js+'\n'+cssFiles.map(f=>fs.readFileSync(f,'utf8')).join('\n');
           const guarded=combined.replaceAll('NO WIN PROBABILITY','');
@@ -79,21 +84,32 @@ jobs:
             grep -Fiq "$token" assets/js/meta-lab-v22.js || { echo "Missing meta command token: $token"; exit 1; }
           done
           grep -Fq 'meta-lens[hidden]' assets/css/meta-lab-v22.css
+      - name: Validate Composition Decision Workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in 'COMPOSITION DECISION WORKSPACE' 'COBERTURA ESTRUTURAL' 'INTERAÇÕES DETECTADAS' 'COMPARISON LENS' 'Levar referência ao Draft' 'FROMBOS_STRUCTURAL' 'NO AUTO-PICK'; do
+            grep -Fiq "$token" assets/js/composition-lab-v22.js || { echo "Missing composition intelligence token: $token"; exit 1; }
+          done
+          grep -Fq "from './structural-intelligence.js'" assets/js/composition-lab-v22.js
+          grep -Fq 'store.state.customComps' assets/js/composition-lab-v22.js
+          if grep -Eq 'store\.update|store\.save|localStorage|sessionStorage' assets/js/composition-lab-v22.js; then echo 'Composition workspace may not mutate competitive state'; exit 1; fi
       - name: Validate Draft Decision Layer
         shell: bash
         run: |
           set -euo pipefail
-          for token in 'DRAFT DECISION LAYER' 'FROMBOS_STRUCTURAL' 'PRÓXIMA DECISÃO' 'NO WIN PROBABILITY' 'scoreCandidate' 'threatRead'; do
+          for token in 'DRAFT DECISION LAYER' 'FROMBOS_STRUCTURAL' 'PRÓXIMA DECISÃO' 'NO WIN PROBABILITY' 'scoreCandidate' 'threatRead' 'REFERENCE COMPOSITION' 'referenceStatus' 'data-v22-reference-champ'; do
             grep -Fq "$token" assets/js/draft-decision-v22.js || { echo "Missing draft decision token: $token"; exit 1; }
           done
           grep -Fq "from './structural-intelligence.js'" assets/js/draft-decision-v22.js
+          grep -Fq "from './store.js'" assets/js/draft-decision-v22.js
           if grep -Eq 'click\(\)|data-champ.*\.click|store\.update' assets/js/draft-decision-v22.js; then echo 'Draft Decision Layer may not auto-pick or mutate state'; exit 1; fi
       - name: Preserve Tactical map ownership
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg'" assets/js/tactical.js
-          if grep -Eq 'MAP_URL\s*=|tbMapImage.*setAttribute' assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js; then
+          if grep -Eq 'MAP_URL\s*=|tbMapImage.*setAttribute' assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js assets/js/composition-lab-v22.js; then
             echo 'V22 may not alter Tactical map source'
             exit 1
           fi
@@ -110,5 +126,8 @@ jobs:
           grep -Fq 'prefers-reduced-motion:reduce' assets/css/meta-lab-v22.css
           grep -Fq '@media(max-width:760px)' assets/css/draft-decision-v22.css
           grep -Fq 'prefers-reduced-motion:reduce' assets/css/draft-decision-v22.css
+          grep -Fq '@media(max-width:760px)' assets/css/composition-lab-v22.css
+          grep -Fq '@media(max-width:430px)' assets/css/composition-lab-v22.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/composition-lab-v22.css
           grep -Fq 'Decision Center' assets/js/experience-v22.js
           grep -Fq 'WILD RIFT · EVIDENCE FIRST' assets/js/experience-v22.js
