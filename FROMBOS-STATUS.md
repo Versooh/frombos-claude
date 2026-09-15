@@ -20,22 +20,23 @@ _Last updated: 2026-09-15_
 - Added `assets/js/core/cloud-tactical.js` for scenario/event persistence and authenticated boot hydration.
 - Added `assets/js/core/tactical-cloud-bridge.js` so UI modules can persist tactical state without coupling directly to Supabase.
 - Tactical events support both map timestamp and a separate VOD timestamp reference.
-- Plan × Execution playback controller exists as an integration layer.
+- Wired Tactical Board save/create, map interaction and coach-plan changes to the cloud bridge through `assets/js/tactical-cloud-ui.js` without rewriting the validated board.
+- VOD Review timestamp notes now create cloud tactical events when an active tactical scenario exists; native local video seeking remains intact.
+- Service-worker cache bumped to include the tactical cloud integration assets.
+- Plan × Execution playback controller remains the next UI integration surface.
 
 ## Tactical Board direction
-The Tactical Board remains the tactical analysis surface, with scenarios, champion markers, wards, control wards, objectives, routes, zones, notes and coach plan. Cloud persistence is now available at the Core boundary while the existing board UI remains protected from a large rewrite.
+The Tactical Board remains the tactical analysis surface, with scenarios, champion markers, wards, control wards, objectives, routes, zones, notes and coach plan. Cloud persistence is now connected around the existing board instead of replacing its validated Wild Rift map implementation.
 
 ## Current limitation
-The cloud model and hydration are implemented, but the existing `tactical.js` UI has not yet been fully rewired to persist every scenario/annotation automatically. The VOD seek bridge also requires integration with the actual VOD player lifecycle. No browser QA has been claimed yet.
+Cloud scenario persistence is wired at the UI boundary, but every transient pointer movement is intentionally not stored as a separate event. VOD notes become tactical events only when an active scenario exists. The richer Plan × Execution playback panel still needs to be mounted into the VOD/Tactical UI. No browser QA has been claimed yet.
 
 ## Next engineering priorities
-1. Wire Tactical Board scenario save/create and coach-plan changes to the cloud bridge.
-2. Persist meaningful tactical events/markers without storing every transient pointer movement.
-3. Connect Tactical Board timestamps to VOD Review and support direct seek when a native video element is available.
-4. Finish Playback Coach with Plan × Execution and map snapshots.
-5. Convert qualifying mistakes into Training Items without duplicates.
-6. Add organization administration: members, roles, invitations and multi-team management.
-7. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
+1. Finish Playback Coach with Plan × Execution, tactical-event timeline and direct native-video seek.
+2. Load cloud tactical events into the VOD/Tactical playback surface and keep map/VOD timestamps distinct.
+3. Convert qualifying mistakes into Training Items with deterministic deduplication.
+4. Add organization administration: members, roles, invitations and multi-team management.
+5. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
 
 ## Security rules
 - Never expose a Supabase service-role key in the browser.
