@@ -1,0 +1,100 @@
+/* FROMBOS V20 — Tactical Board + VOD Review analysis workspace */
+
+.content[data-page="tactical"],.content[data-page="vod"]{max-width:1840px;margin:0 auto;width:100%}
+.content[data-page="tactical"]>.page-head,.content[data-page="vod"]>.page-head{margin-bottom:16px}
+.content[data-page="tactical"]>.page-head h1,.content[data-page="vod"]>.page-head h1{font-size:clamp(38px,4.2vw,64px)}
+
+/* Tactical Board */
+.content[data-page="tactical"] .tactical-shell{gap:10px}
+.content[data-page="tactical"] .tactical-topline{padding:10px 12px;border:1px solid rgba(121,155,213,.15);border-radius:10px;background:linear-gradient(180deg,rgba(10,24,50,.88),rgba(6,15,32,.92))}
+.content[data-page="tactical"] .scenario-control{min-width:260px}
+.content[data-page="tactical"] .scenario-control .select{min-height:38px}
+.content[data-page="tactical"] .tactical-topline .top-actions{gap:5px}
+.content[data-page="tactical"] .tactical-topline .btn{min-height:36px;padding:7px 10px;font-size:9px}
+.content[data-page="tactical"] .tactical-grid{grid-template-columns:205px minmax(620px,1fr) 285px;gap:10px;min-height:760px}
+.content[data-page="tactical"] .tb-panel{top:86px;padding:11px;border-color:rgba(121,155,213,.15);background:linear-gradient(180deg,#0b1831,#07111f)}
+.content[data-page="tactical"] .tb-left .section-title{margin-bottom:8px}
+.content[data-page="tactical"] .tb-left .section-title h3{font-size:15px}
+.content[data-page="tactical"] .team-toggle{margin:7px 0}
+.content[data-page="tactical"] .team-toggle button{min-height:35px}
+.content[data-page="tactical"] #tbChampionSearch{min-height:38px}
+.content[data-page="tactical"] .tb-champ-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;max-height:600px}
+.content[data-page="tactical"] .tb-champ{min-height:68px;border-radius:7px;background:#07111e;border-color:rgba(112,151,212,.15)}
+.content[data-page="tactical"] .tb-champ:hover{border-color:rgba(80,220,255,.32);background:#0a1830}
+.content[data-page="tactical"] .tb-center{min-width:0;display:flex;flex-direction:column}
+.content[data-page="tactical"] .tb-toolbar{position:sticky;top:76px;z-index:20;padding:6px;gap:4px;border-radius:10px 10px 0 0;background:rgba(6,14,29,.96);backdrop-filter:blur(16px);border-color:rgba(122,155,210,.17)}
+.content[data-page="tactical"] .tb-tool{min-width:55px!important;height:49px;border-radius:7px}
+.content[data-page="tactical"] .tb-tool b{font-size:7px!important}
+.content[data-page="tactical"] .tb-board-card{border-color:rgba(121,155,213,.18);box-shadow:0 30px 90px rgba(0,0,0,.38);border-radius:0 0 12px 12px}
+.content[data-page="tactical"] .tb-board-meta{min-height:42px;padding:8px 11px;background:#06101d}
+.content[data-page="tactical"] .tb-board-meta strong{color:#f0c97a}
+.content[data-page="tactical"] .tb-viewport{max-height:78vh;padding:8px;background:radial-gradient(circle at 50% 50%,#14293b,#02060b 72%)}
+.content[data-page="tactical"] .tb-stage{min-width:640px;width:min(100%,940px)}
+.content[data-page="tactical"] .tb-stage svg{border-radius:10px;box-shadow:0 28px 80px rgba(0,0,0,.5)}
+.content[data-page="tactical"] .tb-board-footer{min-height:38px;padding:8px 11px;background:#06101d}
+.content[data-page="tactical"] .tb-right{max-height:calc(100vh - 104px);overflow:auto;scrollbar-width:thin}
+.content[data-page="tactical"] .tb-right>.section-title{margin-top:4px}
+.content[data-page="tactical"] .tb-right>label,.content[data-page="tactical"] .tb-right .form-row,.content[data-page="tactical"] .tb-right .layer-grid,.content[data-page="tactical"] .tb-right .summary-card{background:#07111f!important;border-color:rgba(112,151,212,.14)!important}
+.content[data-page="tactical"] .tb-v12-panel{margin-top:12px;padding-top:12px}
+.content[data-page="tactical"] #tbV12Panel .section-title h3{font-size:14px}
+.content[data-page="tactical"] .summary-card{min-height:92px}
+.content[data-page="tactical"] .tag-cloud button{font-size:9px!important;min-height:30px!important;padding:5px 8px!important}
+
+/* VOD Review */
+.content[data-page="vod"] .vod-pro{gap:10px}
+.content[data-page="vod"] .vod-command{padding:15px 16px;border-color:rgba(212,175,112,.16);background:linear-gradient(120deg,rgba(13,29,60,.97),rgba(6,15,32,.98))}
+.content[data-page="vod"] .vod-command h3{font-size:20px;margin:4px 0 5px}
+.content[data-page="vod"] .vod-command p{margin:0;max-width:780px}
+.content[data-page="vod"] .vod-command .top-actions{gap:6px}
+.content[data-page="vod"] .vod-command .btn{min-height:38px}
+.content[data-page="vod"] .vod-session-strip{grid-template-columns:minmax(210px,.85fr) minmax(240px,1.15fr) minmax(210px,.8fr) 88px;gap:8px;padding:11px 12px;background:linear-gradient(180deg,#0a1730,#07111f)}
+.content[data-page="vod"] .vod-session-strip label{font-size:9px}
+.content[data-page="vod"] .vod-session-strip .input,.content[data-page="vod"] .vod-session-strip .select{min-height:38px}
+.content[data-page="vod"] .vod-session-kpi{height:58px;border-color:rgba(226,189,119,.2);background:rgba(226,189,119,.045)}
+.content[data-page="vod"] .vod-layout{grid-template-columns:minmax(0,1fr) 365px;gap:10px;align-items:start}
+.content[data-page="vod"] .vod-layout>section.card{padding:12px;border-color:rgba(113,151,211,.17);background:linear-gradient(180deg,#0a1730,#06101f)}
+.content[data-page="vod"] .vod-player-stage{border-radius:10px;border-color:rgba(122,159,218,.22);box-shadow:0 28px 75px rgba(0,0,0,.4)}
+.content[data-page="vod"] .vod-freeze-badge{font-size:8px;padding:7px 10px}
+.content[data-page="vod"] .vod-transport{display:grid;grid-template-columns:repeat(5,max-content) minmax(150px,1fr);gap:5px;align-items:center;margin-top:8px;padding:0 0 8px}
+.content[data-page="vod"] .vod-transport .btn{min-height:35px;padding:6px 9px;font-size:8px}
+.content[data-page="vod"] .vod-transport label{justify-self:end}
+.content[data-page="vod"] .vod-tools{display:grid;grid-template-columns:repeat(5,max-content) 42px minmax(115px,auto) max-content max-content max-content;gap:5px;margin-top:8px;align-items:center}
+.content[data-page="vod"] .vod-tools .btn{min-height:35px;padding:6px 9px;font-size:8px}
+.content[data-page="vod"] .vod-note-entry{grid-template-columns:140px 130px minmax(220px,1fr) max-content max-content;gap:6px;margin-top:10px}
+.content[data-page="vod"] .vod-note-entry .input,.content[data-page="vod"] .vod-note-entry .select,.content[data-page="vod"] .vod-note-entry .btn{min-height:39px}
+.content[data-page="vod"] .vod-help{font-size:9px;line-height:1.55;color:#7487a5}
+.content[data-page="vod"] .vod-timeline{position:sticky;top:86px;max-height:calc(100vh - 104px);padding:12px;background:linear-gradient(180deg,#0a1730,#07111f);border-color:rgba(113,151,211,.17)}
+.content[data-page="vod"] .vod-timeline .section-title{margin-bottom:9px}
+.content[data-page="vod"] .vod-timeline h3{font-size:16px}
+.content[data-page="vod"] .vod-filters{gap:6px}
+.content[data-page="vod"] .vod-filters .input,.content[data-page="vod"] .vod-filters .select{min-height:36px;font-size:10px}
+.content[data-page="vod"] .vod-note-card{border-radius:8px;border-color:rgba(113,151,211,.15);background:#07111f;margin-bottom:7px}
+.content[data-page="vod"] .vod-note-card:hover,.content[data-page="vod"] .vod-note-card.active{border-color:rgba(226,189,119,.46);background:linear-gradient(90deg,rgba(226,189,119,.055),#07111f)}
+.content[data-page="vod"] .vod-note-main{padding:10px}
+.content[data-page="vod"] .vod-note-meta span,.content[data-page="vod"] .vod-note-meta b{font-size:9px}
+.content[data-page="vod"] .vod-note-meta em{font-size:8px}
+.content[data-page="vod"] .vod-note-card p{font-size:10px;line-height:1.5}
+
+@media(max-width:1380px){
+  .content[data-page="tactical"] .tactical-grid{grid-template-columns:185px minmax(560px,1fr)}
+  .content[data-page="tactical"] .tb-right{grid-column:1/-1;position:static;max-height:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .content[data-page="tactical"] .tb-right>.section-title,.content[data-page="tactical"] .tb-right>.tag-cloud,.content[data-page="tactical"] .tb-right>.layer-grid,.content[data-page="tactical"] .tb-right>.summary-card,.content[data-page="tactical"] .tb-right>#tbV12Panel{grid-column:1/-1}
+  .content[data-page="vod"] .vod-layout{grid-template-columns:minmax(0,1fr) 320px}
+  .content[data-page="vod"] .vod-transport{grid-template-columns:repeat(3,max-content) 1fr}
+  .content[data-page="vod"] .vod-tools{display:flex;flex-wrap:wrap}
+}
+@media(max-width:980px){
+  .content[data-page="tactical"] .tactical-grid{grid-template-columns:1fr;min-height:0}
+  .content[data-page="tactical"] .tb-left,.content[data-page="tactical"] .tb-right{position:static;max-height:none}
+  .content[data-page="tactical"] .tb-left{order:2}.content[data-page="tactical"] .tb-center{order:1}.content[data-page="tactical"] .tb-right{order:3}
+  .content[data-page="tactical"] .tb-champ-grid{grid-template-columns:repeat(7,minmax(0,1fr));max-height:240px}
+  .content[data-page="vod"] .vod-layout{grid-template-columns:1fr}
+  .content[data-page="vod"] .vod-timeline{position:static;max-height:none}
+  .content[data-page="vod"] .vod-transport{display:flex;flex-wrap:wrap}.content[data-page="vod"] .vod-transport label{justify-self:auto}
+}
+@media(max-width:680px){
+  .content[data-page="tactical"] .tactical-topline{align-items:stretch}.content[data-page="tactical"] .scenario-control{min-width:0}.content[data-page="tactical"] .tactical-topline .top-actions{overflow-x:auto;flex-wrap:nowrap}
+  .content[data-page="tactical"] .tb-champ-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.content[data-page="tactical"] .tb-stage{min-width:520px}
+  .content[data-page="vod"] .vod-session-strip{grid-template-columns:1fr}.content[data-page="vod"] .vod-note-entry{grid-template-columns:1fr}.content[data-page="vod"] .vod-tools,.content[data-page="vod"] .vod-transport{display:grid;grid-template-columns:repeat(2,1fr)}
+  .content[data-page="vod"] .vod-tools label,.content[data-page="vod"] .vod-transport label{grid-column:1/-1}.content[data-page="vod"] .vod-tools .btn,.content[data-page="vod"] .vod-transport .btn{min-height:42px}
+}
