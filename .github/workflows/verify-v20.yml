@@ -146,6 +146,25 @@ jobs:
           grep -q 'analysis-context-v20' assets/css/analysis-controls-v20.css
           grep -q 'vod-category-quick-v20' assets/css/analysis-controls-v20.css
 
+      - name: V20 analysis focus workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/analysis-flow-v20.js
+          test -f assets/css/analysis-flow-v20.css
+          grep -q 'analysis-flow-v20.js?v=20.11' index.html
+          grep -q 'analysis-flow-v20.css?v=20.11' index.html
+          grep -q "'./assets/js/analysis-flow-v20.js'" sw.js
+          grep -q "'./assets/css/analysis-flow-v20.css'" sw.js
+          grep -q 'coachCompletion' assets/js/analysis-flow-v20.js
+          grep -q 'tactical-focus-v20' assets/js/analysis-flow-v20.js
+          grep -q 'data-tactical-focus' assets/js/analysis-flow-v20.js
+          grep -q 'vod-focus-v20' assets/js/analysis-flow-v20.js
+          grep -q 'data-vod-focus' assets/js/analysis-flow-v20.js
+          grep -q 'analysis-focus-v20' assets/css/analysis-flow-v20.css
+          grep -q 'data-focus-v20' assets/css/analysis-flow-v20.css
+          grep -q 'data-vod-focus-v20' assets/css/analysis-flow-v20.css
+
       - name: V20 operations workspace
         shell: bash
         run: |
@@ -201,7 +220,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js scripts/build-champion-registry.mjs
+          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js scripts/build-champion-registry.mjs
           grep -q 'RIOT_OFFICIAL' scripts/build-champion-registry.mjs
           grep -q 'wildrift.leagueoflegends.com' scripts/build-champion-registry.mjs
 
