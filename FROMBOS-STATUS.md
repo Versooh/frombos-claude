@@ -13,34 +13,29 @@ _Last updated: 2026-09-15_
 - Verified the real Supabase columns and RLS policies for `series_plans` and `draft_sessions`; frontend relies on existing authorization policies.
 - Boot hydrates cloud Series/Draft state before importing `app.js`.
 - Draft Room no longer uses the legacy `store.js` as its state authority; active draft state now lives in Core.
-- Draft Room loads the most recent hydrated Core draft when available.
 - BAN/PICK actions update Core and persist to `draft_sessions.state_snapshot`.
-- `last_sequence_no` tracks the number of recorded draft actions.
-- Game switching, undo, reset, Fearless, ruleset changes and branches trigger the cloud save queue.
-- Existing Draft Room UI/flow was preserved while moving its state boundary from legacy Store → Core → Supabase.
 - Added Tactical Pro enhancement layer without replacing the validated Wild Rift map implementation.
-- Tactical Board now has an execution timeline with 15-second granularity and coach-defined tactical markers.
-- Added map grid toggle for spacing/route analysis.
-- Added point-to-point map measurement tool.
-- Added board framing/reset control.
-- Added non-destructive visual-layer hide/show control.
-- Added SVG snapshot export for sharing tactical boards without altering the source scenario.
-- Added Tactical Pro visual badge and responsive enhancement styling.
-- PWA cache includes Tactical Pro assets.
+- Tactical Board has execution timeline, coach-defined tactical markers, grid, measurement, framing, visual-layer control and SVG snapshot export.
+- Added Supabase `tactical_scenarios` and `tactical_events` with organization-scoped RLS.
+- Added `assets/js/core/cloud-tactical.js` for scenario/event persistence and authenticated boot hydration.
+- Added `assets/js/core/tactical-cloud-bridge.js` so UI modules can persist tactical state without coupling directly to Supabase.
+- Tactical events support both map timestamp and a separate VOD timestamp reference.
+- Plan × Execution playback controller exists as an integration layer.
 
 ## Tactical Board direction
-The Tactical Board remains the tactical analysis surface, with scenarios, champion markers, wards, control wards, objectives, routes, zones, notes and coach plan. The new enhancement layer adds execution-oriented tooling without duplicating or replacing the underlying tactical state model.
+The Tactical Board remains the tactical analysis surface, with scenarios, champion markers, wards, control wards, objectives, routes, zones, notes and coach plan. Cloud persistence is now available at the Core boundary while the existing board UI remains protected from a large rewrite.
 
 ## Current limitation
-Tactical timeline markers and measurement overlays are currently session/UI enhancements and are not yet persisted as first-class cloud annotations. Tactical scenarios themselves remain local-first until the Tactical/VOD persistence migration.
+The cloud model and hydration are implemented, but the existing `tactical.js` UI has not yet been fully rewired to persist every scenario/annotation automatically. The VOD seek bridge also requires integration with the actual VOD player lifecycle. No browser QA has been claimed yet.
 
 ## Next engineering priorities
-1. Persist Tactical scenarios, timeline markers and annotations to Supabase with organization/season RLS.
-2. Connect Tactical Board timestamps to VOD Review so a tactical marker can open the corresponding video moment.
-3. Add organization administration: members, roles, invitations and multi-team management.
-4. Persist VOD/Training and connect annotation → drill workflows.
-5. Add cloud-aware backup/import plus dirty-state/conflict handling.
-6. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
+1. Wire Tactical Board scenario save/create and coach-plan changes to the cloud bridge.
+2. Persist meaningful tactical events/markers without storing every transient pointer movement.
+3. Connect Tactical Board timestamps to VOD Review and support direct seek when a native video element is available.
+4. Finish Playback Coach with Plan × Execution and map snapshots.
+5. Convert qualifying mistakes into Training Items without duplicates.
+6. Add organization administration: members, roles, invitations and multi-team management.
+7. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
 
 ## Security rules
 - Never expose a Supabase service-role key in the browser.
