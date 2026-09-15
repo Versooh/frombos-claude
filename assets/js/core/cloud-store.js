@@ -10,6 +10,8 @@ const ACTIVE_SEASON_KEY = 'frombos.active.team-season';
 const getActiveOrgId = () => localStorage.getItem(ACTIVE_ORG_KEY) || null;
 const getActiveTeamId = () => localStorage.getItem(ACTIVE_TEAM_KEY) || null;
 const getActiveSeasonId = () => localStorage.getItem(ACTIVE_SEASON_KEY) || null;
+const dbRole = role => role === 'DUO' ? 'dragon' : String(role || '').toLowerCase();
+const coreRole = role => role === 'dragon' ? 'DUO' : String(role || '').toUpperCase();
 
 async function requireUser() {
   const { data, error } = await supabase.auth.getUser();
@@ -92,7 +94,7 @@ export async function listPlayers(seasonId = getActiveSeasonId()) {
 export async function upsertPlayer({ id, teamSeasonId = getActiveSeasonId(), displayName, primaryRole, secondaryRoles = [], active = true }) {
   if (!teamSeasonId) throw new Error('Nenhuma temporada ativa.');
   await requireUser();
-  const payload = { team_season_id: teamSeasonId, display_name: displayName.trim(), primary_role: primaryRole, secondary_roles: secondaryRoles, active };
+  const payload = { team_season_id: teamSeasonId, display_name: displayName.trim(), primary_role: dbRole(primaryRole), secondary_roles: secondaryRoles.map(dbRole), active };
   if (id) payload.id = id;
   const { data, error } = await supabase.from('players').upsert(payload).select('id, team_season_id, display_name, primary_role, secondary_roles, active, created_at').single();
   if (error) throw error;
@@ -109,7 +111,7 @@ export async function listChampionPools(playerIds = []) {
 
 function roleMap(players) {
   const map = {};
-  for (const player of players) map[player.primary_role] = player;
+  for (const player of players) map[coreRole(player.primary_role)] = player;
   return map;
 }
 
@@ -178,7 +180,7 @@ export async function persistCoreTeam({ createMissing = true } = {}) {
   if (!team) throw new Error('Time ativo não encontrado.');
   if (team.name !== coreStore.state.team.name.trim()) team = await updateTeam(teamId, { name: coreStore.state.team.name, slug: team.slug });
 
-  let seasons = await listSeasons(teamId);
+  const seasons = await listSeasons(teamId);
   let season = seasons.find(s => s.id === getActiveSeasonId()) || seasons.find(s => s.active) || seasons[0] || null;
   if (!season && createMissing) season = await createSeason(teamId, `${new Date().getFullYear()}`);
   if (!season) return { team, season: null, players: [] };
@@ -198,11 +200,11 @@ export async function persistCoreTeam({ createMissing = true } = {}) {
     if (error) throw error;
   }
   const poolRows = [];
-  const savedByRole = Object.fromEntries(players.map(player => [player.primary_role, player]));
+  const savedByRole = Object.fromEntries(players.map(player => [coreRole(player.primary_role), player]));
   for (const [role, player] of Object.entries(coreStore.state.team.players)) {
     const saved = savedByRole[role];
     if (!saved) continue;
-    for (const championId of player.pool || []) poolRows.push({ player_id: saved.id, champion_id: championId, role, tier: 'developing' });
+    for (const championId of player.pool || []) poolRows.push({ player_id: saved.id, champion_id: championId, role: dbRole(role), tier: 'developing' });
   }
   if (poolRows.length) {
     const { error } = await supabase.from('player_champion_pool').insert(poolRows);
@@ -213,7 +215,7 @@ export async function persistCoreTeam({ createMissing = true } = {}) {
   coreStore.update(core => {
     core.team.id = team.id;
     for (const saved of players) {
-      const role = saved.primary_role;
+      const role = coreRole(saved.primary_role);
       if (core.team.players[role]) core.team.players[role].id = saved.id;
     }
     core.meta.cloud = { organizationId: orgId, teamId, teamSeasonId: season.id, hydratedAt: core.meta.cloud?.hydratedAt || null, syncedAt: new Date().toISOString() };
