@@ -55,10 +55,11 @@ jobs:
           const cssFiles=['assets/css/experience-v22.css','assets/css/champion-flow-v22.css','assets/css/meta-lab-v22.css','assets/css/draft-decision-v22.css'];
           const js=jsFiles.map(f=>fs.readFileSync(f,'utf8')).join('\n');
           const combined=js+'\n'+cssFiles.map(f=>fs.readFileSync(f,'utf8')).join('\n');
+          const guarded=combined.replaceAll('NO WIN PROBABILITY','');
           if(/store\.update|store\.save|localStorage|sessionStorage/.test(js)) throw new Error('V22 experience must not mutate competitive state');
           if(/fetch\s*\(|XMLHttpRequest|WebSocket|axios/i.test(js)) throw new Error('V22 experience must not acquire network data');
           if(/ddragon\.leagueoflegends|lol-game-data|CommunityDragon/i.test(combined)) throw new Error('League PC fallback detected');
-          if(/prediction|probability/i.test(combined)) throw new Error('Invented prediction language detected');
+          if(/prediction|probability/i.test(guarded)) throw new Error('Invented prediction language detected');
           for(const token of ['CURATED','UNKNOWN','WILD RIFT','FROMBOS_STRUCTURAL']) if(!combined.includes(token)) throw new Error(`Missing evidence token: ${token}`);
           NODE
       - name: Validate continuous champion flow
