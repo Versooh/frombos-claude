@@ -6,18 +6,17 @@ _Last updated: 2026-09-15_
 `rebuild/frombos-v2-next`
 
 ## Product phase
-**Phase 1 — Product Foundation → SaaS foundation.** Authentication, organization context, Team/Roster cloud persistence and the first Composition Lab cloud path are connected to the existing Supabase backend.
+**Phase 1 — Product Foundation → SaaS foundation.** Authentication, organization context, Team/Roster, Composition Lab and the Series/Draft cloud persistence path are connected to the existing Supabase backend.
 
 ## Completed in the latest sequence
-- Added `assets/js/core/cloud-store.js` as the organization-aware cloud persistence adapter.
-- Cloud reads load the active organization team, active season, roster and champion pools before `app.js` boots.
-- Team Workspace supports organization-scoped team selection and queued cloud persistence.
-- Core/database role mapping is explicit: `BARON/JUNGLE/MID/DUO/SUPPORT` ↔ `baron/jungle/mid/dragon/support`.
-- Added `assets/js/core/cloud-compositions.js` for organization-scoped Composition Lab persistence.
-- Composition Lab reads private compositions from `team_compositions` + `team_composition_slots` and keeps recovered public/curated compositions separate.
-- Composition slot writes use the database's five role values and replace slots transactionally at the application flow level.
-- Updated PWA cache to include the cloud Composition module.
-- Verified the real database columns for compositions, series plans and draft sessions before integrating them; no parallel schema was created.
+- Added `assets/js/core/cloud-store.js` for organization-scoped Team/Roster persistence.
+- Added `assets/js/core/cloud-compositions.js` for organization/season-scoped Composition Lab persistence.
+- Added `assets/js/core/cloud-series.js` for Series Plans and Draft Sessions.
+- `series_plans` now maps to the Core series model with opponent, format, Fearless mode and ruleset.
+- `draft_sessions` now maps to Core drafts with game number, side, Fearless, ruleset, sequence number and JSON state snapshot.
+- Boot hydrates cloud Series/Draft state before importing `app.js`.
+- PWA cache now includes the cloud Series/Draft module.
+- Verified the real Supabase columns for `series_plans` and `draft_sessions` before integrating; no parallel schema was created.
 
 ## Product direction
 FROMBOS is a **multi-tenant SaaS product**:
@@ -27,12 +26,12 @@ FROMBOS is a **multi-tenant SaaS product**:
 Cloud is canonical for authenticated organization/team data. Local Core remains an offline/cache layer during migration.
 
 ## Current limitation
-Series/Draft, Tactical, VOD and Training are not yet fully cloud-persisted. Their Core state can still be local while migration proceeds module by module.
+Tactical, VOD and Training are not yet fully cloud-persisted. Draft event/branch granularity will be connected after the base Draft Session persistence is stable.
 
 ## Next engineering priorities
-1. Connect Draft/Series to `series_plans` + `draft_sessions` and existing draft event/branch structures.
+1. Connect Draft Room actions to `draft_sessions.state_snapshot` and `last_sequence_no` with cloud-safe save/load.
 2. Add organization administration: members, roles, invitations and multi-team management.
-3. Persist Tactical/VOD/Training and remove remaining local-only paths progressively.
+3. Persist Tactical/VOD/Training to cloud and remove remaining local-only paths progressively.
 4. Add cloud-aware backup/import and conflict/dirty-state handling.
 5. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
 
