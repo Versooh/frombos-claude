@@ -35,7 +35,7 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const html=fs.readFileSync('index.html','utf8');
-          if(!/serviceWorker\.register\('\.\/sw\.js\?v=(?:20\.\d+|21\.\d+)'\)/.test(html)) throw new Error('Missing compatible service worker registration');
+          if(!/serviceWorker\.register\('\.\/sw\.js\?v=(?:20\.\d+|21\.\d+|22\.\d+)'\)/.test(html)) throw new Error('Missing compatible service worker registration');
           NODE
 
       - name: Validate decision bridge behavior
