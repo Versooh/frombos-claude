@@ -50,22 +50,29 @@
 
 ### Series / Draft cloud foundation
 - Added `assets/js/core/cloud-series.js` for organization/season-scoped `series_plans` and `draft_sessions` persistence.
-- Boot now hydrates cloud series plans and draft sessions into Core before the application loads.
+- Boot hydrates cloud series plans and draft sessions into Core before the application loads.
 - Draft session snapshots preserve actions, Fearless state, branches, game number, side, ruleset and sequence number.
-- Verified the live Supabase columns for `series_plans` and `draft_sessions` before integration; no duplicate schema was created.
+- Verified the live Supabase columns and RLS policies for `series_plans` and `draft_sessions` before integration; no duplicate schema was created.
 - Updated the PWA cache for the cloud Series/Draft module.
-- Current Draft Room remains UI/local-store driven; the cloud adapter is now the persistence boundary for the next integration pass.
+
+### Draft Room Core migration
+- Moved Draft Room state authority from legacy `store.js` to `coreStore.state.ui.activeDraft`.
+- Draft Room now consumes the Core team/roster instead of legacy team state.
+- BAN/PICK, game switching, undo, reset, Fearless, ruleset and branches update Core first.
+- Added an ordered cloud save queue so Draft actions persist into `draft_sessions.state_snapshot` and `last_sequence_no`.
+- Cloud-hydrated drafts can seed the active Draft Room instead of creating an unrelated local draft.
+- Kept `store.js` intact for the remaining legacy modules.
 
 ### Product direction
-FROMBOS is now explicitly being built as a multi-tenant SaaS:
+FROMBOS is explicitly being built as a multi-tenant SaaS:
 
 `Account → Organization → Teams → Seasons/Rosters → Competitive Workflow`
 
 Cloud is canonical for authenticated organization/team data; local Core remains an offline/cache layer during migration.
 
 ### Next
-- Finish Draft Room action-level autosave against `draft_sessions` and reconnect branches/Fearless to the cloud session identity.
 - Add organization member/role/invitation and multi-team administration.
+- Decide whether collaborative Draft requires dedicated event/branch rows beyond the current JSON snapshot contract.
 - Persist Tactical/VOD/Training to cloud and progressively retire local-only state.
 - Add cloud-aware backup/import plus dirty-state/conflict handling.
 - Run authenticated browser QA against a non-production organization before promoting to `main`.
