@@ -3,6 +3,8 @@
 
 const route=()=>location.hash.replace('#/','').split('?')[0]||'home';
 const reduceMotion=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const championContextRoutes=new Set(['champions','matchups','builds','meta','competitive']);
+const currentChampion=()=>new URLSearchParams(location.hash.split('?')[1]||'').get('champion');
 
 const routeMap={
   home:{label:'Command Center',links:[['draft','Preparar Draft'],['pool','Champion Pool'],['meta','Meta Pulse'],['scouting','Scouting']]},
@@ -20,7 +22,10 @@ const routeMap={
   reports:{label:'Reports',links:[['training','Treinos'],['match-center','Match Center'],['competitive','Open Series'],['data','Data Center']]}
 };
 
-function go(id){location.hash=`#/${id}`;}
+function go(id){
+  const champ=currentChampion();
+  location.hash=champ&&championContextRoutes.has(id)?`#/${id}?champion=${encodeURIComponent(champ)}`:`#/${id}`;
+}
 function button(id,label,primary=false){return `<button class="v22-context-link${primary?' is-primary':''}" type="button" data-v22-go="${id}">${label}</button>`;}
 
 function bindGo(root=document){
