@@ -47,6 +47,31 @@ jobs:
             node --check "$file"
           done
 
+      - name: V20 shared runtime scheduling
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/runtime-v20.js
+          grep -q 'runtime-v20.js?v=20.17' index.html
+          grep -q "'./assets/js/runtime-v20.js'" sw.js
+          grep -q 'FROMBOS_V20_RUNTIME' assets/js/runtime-v20.js
+          grep -q 'subscribers' assets/js/runtime-v20.js
+          grep -q 'requestAnimationFrame' assets/js/runtime-v20.js
+          grep -q "document.querySelector('#app')" assets/js/runtime-v20.js
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('index.html','utf8');
+          const runtimePos=html.indexOf('assets/js/runtime-v20.js?v=20.17');
+          if(runtimePos<0) throw new Error('runtime not loaded');
+          const modules=['competitive-flow-v20.js','analysis-flow-v20.js','tactical-vision-v20.js','intel-series-flow-v20.js','operations-flow-v20.js','workspace-flow-v20.js','mobile-shell-v20.js'];
+          for(const file of modules){
+            const pos=html.indexOf(`assets/js/${file}`);
+            if(pos<0||pos<runtimePos) throw new Error(`runtime load order invalid for ${file}`);
+            const source=fs.readFileSync(`assets/js/${file}`,'utf8');
+            if(!source.includes('runtime?.subscribe')) throw new Error(`${file} is not subscribed to shared runtime`);
+          }
+          NODE
+
       - name: V20 portrait ownership
         shell: bash
         run: |
@@ -305,7 +330,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js assets/js/tactical-vision-v20.js assets/js/intel-series-flow-v20.js assets/js/operations-flow-v20.js assets/js/workspace-flow-v20.js assets/js/mobile-shell-v20.js scripts/build-champion-registry.mjs
+          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js assets/js/tactical-vision-v20.js assets/js/intel-series-flow-v20.js assets/js/operations-flow-v20.js assets/js/workspace-flow-v20.js assets/js/mobile-shell-v20.js assets/js/runtime-v20.js scripts/build-champion-registry.mjs
           grep -q 'RIOT_OFFICIAL' scripts/build-champion-registry.mjs
           grep -q 'wildrift.leagueoflegends.com' scripts/build-champion-registry.mjs
 
