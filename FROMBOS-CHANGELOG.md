@@ -30,18 +30,27 @@
 - Verified the database already contains organization/team/season/player/composition/series/draft structures with organization-aware RLS policies.
 - Verified the organization creation RPC is executable by `authenticated` and not `anon`.
 
+### Organization cloud workspace
+- Added `assets/js/core/cloud-store.js` as the Supabase organization-aware Cloud Store boundary.
+- Boot now hydrates the active organization/team/season/roster/champion pools before importing the main application.
+- Team Workspace can select the active cloud team.
+- Team name, roster and champion pools sync to Supabase through an ordered save queue.
+- First save can create the team's first season automatically.
+- Normalized Wild Rift role values between Core and database (`DUO ↔ dragon`).
+- Updated the service-worker cache to include the new cloud-store module.
+- Kept the legacy local migration bridge gated so an already-hydrated cloud team is not overwritten by stale local state.
+
 ### Product direction
 FROMBOS is now explicitly being built as a multi-tenant SaaS:
 
 `Account → Organization → Teams → Seasons/Rosters → Competitive Workflow`
 
-The next boundary is cloud synchronization: Team/Roster/Pools → Compositions → Series/Draft, followed by organization administration and then Tactical/VOD/Training persistence.
+Cloud is canonical for authenticated organization/team data; local Core remains an offline/cache layer during migration.
 
 ### Next
-- Build the organization-aware Cloud Store adapter against the existing Supabase schema.
-- Load/create/select teams and active seasons from the cloud.
-- Persist roster and champion pools with existing RLS.
-- Persist Composition Lab entities.
-- Connect Draft/Series to existing cloud draft/session structures.
-- Add organization member/role administration.
-- Run authenticated browser QA before promoting to `main`.
+- Persist Composition Lab entities to existing composition tables.
+- Connect Draft/Series to existing series/draft/session structures.
+- Add organization member/role/invitation and multi-team administration.
+- Persist Tactical/VOD/Training to cloud and progressively retire local-only state.
+- Add cloud-aware backup/import plus dirty-state/conflict handling.
+- Run authenticated browser QA against a non-production organization before promoting to `main`.
