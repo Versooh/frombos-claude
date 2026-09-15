@@ -111,6 +111,24 @@ jobs:
           grep -q 'draft-reference-v20' assets/css/lab-controls-v20.css
           grep -q 'ci-card.is-selected' assets/css/lab-controls-v20.css
 
+      - name: V20 competitive decision flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/competitive-flow-v20.js
+          test -f assets/css/competitive-flow-v20.css
+          grep -q 'competitive-flow-v20.js?v=20.10' index.html
+          grep -q 'competitive-flow-v20.css?v=20.10' index.html
+          grep -q "'./assets/js/competitive-flow-v20.js'" sw.js
+          grep -q "'./assets/css/competitive-flow-v20.css'" sw.js
+          grep -q 'compositionCompare' assets/js/competitive-flow-v20.js
+          grep -q 'comp-compare-v20' assets/js/competitive-flow-v20.js
+          grep -q 'ci-flow-v20' assets/js/competitive-flow-v20.js
+          grep -q 'draft-flow-v20' assets/js/competitive-flow-v20.js
+          grep -q 'comp-compare-grid-v20' assets/css/competitive-flow-v20.css
+          grep -q 'ci-flow-evidence-v20' assets/css/competitive-flow-v20.css
+          grep -q 'draft-progress-v20' assets/css/competitive-flow-v20.css
+
       - name: V20 analysis controls
         shell: bash
         run: |
@@ -183,7 +201,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js scripts/build-champion-registry.mjs
+          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js scripts/build-champion-registry.mjs
           grep -q 'RIOT_OFFICIAL' scripts/build-champion-registry.mjs
           grep -q 'wildrift.leagueoflegends.com' scripts/build-champion-registry.mjs
 
