@@ -267,11 +267,28 @@ jobs:
           grep -q 'workspace-evidence-v20' assets/css/workspace-flow-v20.css
           grep -q 'team-pipeline-v20' assets/css/workspace-flow-v20.css
 
+      - name: V20 mobile shell hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/mobile-shell-v20.js
+          test -f assets/css/mobile-shell-v20.css
+          grep -q 'mobile-shell-v20.js?v=20.15' index.html
+          grep -q 'mobile-shell-v20.css?v=20.15' index.html
+          grep -q "'./assets/js/mobile-shell-v20.js'" sw.js
+          grep -q "'./assets/css/mobile-shell-v20.css'" sw.js
+          grep -q 'ensureScrim' assets/js/mobile-shell-v20.js
+          grep -q 'mobile-nav-open-v20' assets/js/mobile-shell-v20.js
+          grep -q 'aria-expanded' assets/js/mobile-shell-v20.js
+          grep -q 'safe-area-inset-top' assets/css/mobile-shell-v20.css
+          grep -q 'mobile-scrim-v20' assets/css/mobile-shell-v20.css
+          grep -q '100dvh' assets/css/mobile-shell-v20.css
+
       - name: Wild Rift only guard
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js assets/js/intel-series-flow-v20.js assets/js/operations-flow-v20.js assets/js/workspace-flow-v20.js scripts/build-champion-registry.mjs
+          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js assets/js/intel-series-flow-v20.js assets/js/operations-flow-v20.js assets/js/workspace-flow-v20.js assets/js/mobile-shell-v20.js scripts/build-champion-registry.mjs
           grep -q 'RIOT_OFFICIAL' scripts/build-champion-registry.mjs
           grep -q 'wildrift.leagueoflegends.com' scripts/build-champion-registry.mjs
 
