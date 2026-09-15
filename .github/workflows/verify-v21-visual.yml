@@ -1,0 +1,85 @@
+name: Verify FROMBOS V21 Visual Rebuild
+
+on:
+  push:
+    branches: [rebuild/frombos-v21-visual]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  visual-rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate V21 assets and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v21-rebuild.css
+          test -f assets/js/visual-v21-shell.js
+          node --check assets/js/visual-v21-shell.js
+          grep -q 'visual-v21-rebuild.css?v=21.0' index.html
+          grep -q 'visual-v21-shell.js?v=21.0' index.html
+          grep -q 'sw.js?v=21.0' index.html
+          grep -q "'./assets/css/visual-v21-rebuild.css'" sw.js
+          grep -q "'./assets/js/visual-v21-shell.js'" sw.js
+          grep -q 'v21-visual-rebuild' sw.js
+
+      - name: Ensure V21 owns the final visual cascade
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('index.html','utf8');
+          const oldCss=html.lastIndexOf('render-performance-v20.css?v=20.18');
+          const v21Css=html.indexOf('visual-v21-rebuild.css?v=21.0');
+          const runtime=html.indexOf('runtime-v20.js?v=20.17');
+          const v21Js=html.indexOf('visual-v21-shell.js?v=21.0');
+          if(oldCss<0||v21Css<0||v21Css<oldCss) throw new Error('V21 CSS must load after all V20 visual layers');
+          if(runtime<0||v21Js<0||v21Js<runtime) throw new Error('V21 shell must load after shared runtime');
+          NODE
+
+      - name: Preserve competitive data and evidence policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/visual-v21-shell.js','utf8');
+          const forbidden=/fetch\s*\(|XMLHttpRequest|WebSocket|axios|store\.update|store\.reset|store\.importJSON|\.origin\s*=|win\s*rate|winrate|prediction|probability|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i;
+          if(forbidden.test(js)) throw new Error('V21 shell may not mutate data, call network sources or invent competitive metrics');
+          if(!js.includes("import { MODULES } from './data.js'")) throw new Error('V21 shell must reuse existing module metadata');
+          if(!js.includes("import { store } from './store.js'")) throw new Error('V21 shell may only read local workspace state');
+          if(!js.includes('window.FROMBOS_V20_RUNTIME')) throw new Error('V21 shell must use shared runtime');
+          NODE
+
+      - name: Validate esports shell and responsive ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in '.app-shell' '.sidebar' '.topbar' '.v21-brand-symbol' '.v21-route-strip' '.content[data-page="home"] .hero' '.content[data-page="champions"]' '.content[data-page="draft"]' '.content[data-page="comps"]'; do
+            grep -Fq "$token" assets/css/visual-v21-rebuild.css || { echo "Missing V21 selector: $token"; exit 1; }
+          done
+          grep -q '@media(max-width:760px)' assets/css/visual-v21-rebuild.css
+          grep -q '@media(max-width:460px)' assets/css/visual-v21-rebuild.css
+          grep -q '100dvh' assets/css/visual-v21-rebuild.css
+          grep -q 'safe-area-inset-top' assets/css/visual-v21-rebuild.css
+
+      - name: Validate shell integration tokens
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in 'Competitive Systems' 'v21-top-status' 'v21-route-strip' 'MATCH PREP / DRAFT / ANALYSIS / REVIEW'; do
+            grep -Fq "$token" assets/js/visual-v21-shell.js || { echo "Missing V21 shell token: $token"; exit 1; }
+          done
