@@ -1,20 +1,23 @@
 import { MODULES, ROLES, CHAMPIONS, RECOVERED_COMPOSITIONS, DATA_SOURCES } from './data.js';
 import { store } from './store.js';
 import { coreStore } from './core/store-adapter.js';
+import { cloudStore } from './core/cloud-store.js';
 import { draftRoomHTML, bindDraftRoom } from './draft-room.js';
 import { tacticalHTML, bindTacticalBoard } from './tactical.js';
 import { vodReviewHTML, bindVodReview } from './vod-review.js';
 
 const app=document.querySelector('#app');
 let currentRoute=location.hash.replace('#/','').split('?')[0]||'home';
-const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escapeHTML=value=>String(value??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const navGroups=[...new Set(MODULES.map(m=>m.group))];
 const download=(name,text,type='application/json')=>{const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),300);};
+let cloudSaveQueue=Promise.resolve();
 
-// Compatibility bridge: legacy modules continue to render while new state is written through Core.
-// This is deliberately non-destructive during migration. Core is the new persistence boundary.
+// Compatibility bridge: legacy modules continue to render while the SaaS workspace migrates.
+// Once an organization/team has been hydrated from Supabase, cloud becomes authoritative.
 function syncLegacyToCore(){
   const legacy=store.state;
+  if(coreStore.state.meta?.cloud?.organizationId) return;
   coreStore.update(core=>{
     core.team.name=legacy.team?.name||core.team.name;
     core.team.opponent=legacy.team?.opponent||core.team.opponent;
@@ -27,10 +30,25 @@ function syncLegacyToCore(){
   });
 }
 
+function queueCloudTeamSave(){
+  cloudSaveQueue=cloudSaveQueue.then(async()=>{
+    try{
+      await cloudStore.persistCoreTeam({createMissing:true});
+      const status=document.querySelector('#cloudStatus');
+      if(status){status.className='badge green';status.textContent='SINCRONIZADO';}
+    }catch(error){
+      const status=document.querySelector('#cloudStatus');
+      if(status){status.className='badge red';status.textContent='ERRO AO SALVAR';status.title=error.message||'';}
+      console.warn('FROMBOS cloud save failed:',error);
+    }
+  }).catch(()=>{});
+  return cloudSaveQueue;
+}
+
 function shell(content){
   const nav=navGroups.map(group=>`<div class="nav-group"><div class="nav-group-title">${group}</div>${MODULES.filter(m=>m.group===group).map(m=>`<button class="nav-item ${m.id===currentRoute?'active':''}" data-route="${m.id}"><span>${m.icon}</span><span>${m.label}</span></button>`).join('')}</div>`).join('');
   const mod=MODULES.find(m=>m.id===currentRoute)||MODULES[0];
-  app.innerHTML=`<div class="app-shell"><aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-mark">F</div><div><strong>FROMBOS</strong><small>Competitive Intelligence</small></div></div>${nav}<div class="footer-note">V2 · rebuild/frombos-v2-next<br>Core migration active · local-first.</div></aside><main class="main"><header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="btn mobile-toggle" id="menuToggle">☰</button><div class="crumb">FROMBOS / ${mod.label}</div></div><div class="top-actions"><span class="badge green">CORE WORKSPACE</span><button class="btn" id="quickExport">Backup</button></div></header><div class="content">${content}</div></main></div>`;
+  app.innerHTML=`<div class="app-shell"><aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-mark">F</div><div><strong>FROMBOS</strong><small>Competitive Intelligence</small></div></div>${nav}<div class="footer-note">SaaS foundation · Supabase cloud<br>Organization-scoped workspace.</div></aside><main class="main"><header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="btn mobile-toggle" id="menuToggle">☰</button><div class="crumb">FROMBOS / ${mod.label}</div></div><div class="top-actions"><span class="badge green">CLOUD WORKSPACE</span><button class="btn" id="quickExport">Backup</button></div></header><div class="content">${content}</div></main></div>`;
   document.querySelectorAll('[data-route]').forEach(el=>el.onclick=()=>location.hash=`#/${el.dataset.route}`);
   document.querySelector('#menuToggle')?.addEventListener('click',()=>document.querySelector('#sidebar')?.classList.toggle('open'));
   document.querySelector('#quickExport')?.addEventListener('click',()=>download(`FROMBOS-WORKSPACE-${new Date().toISOString().slice(0,10)}.json`,coreStore.exportJSON()));
@@ -40,13 +58,28 @@ function goBindings(){document.querySelectorAll('[data-go]').forEach(b=>b.onclic
 
 function renderHome(){
   const configured=Object.values(coreStore.state.team.players).filter(p=>p.name||p.pool.length).length;
-  shell(`<section class="hero"><div><div class="eyebrow">FROMBOS CORE · COMPETITIVE PLATFORM</div><h1>Visão. Leitura. Execução.</h1><p>Prepare a equipe, construa drafts de torneio, planeje séries Fearless, desenhe jogadas no mapa exato e transforme revisão em treino.</p><div class="top-actions" style="margin-top:18px"><button class="btn primary" data-go="draft">Abrir Draft Room</button><button class="btn info" data-go="tactical">Abrir Tactical Board</button></div></div><div class="hero-panel"><div class="eyebrow">WORKSPACE</div><h2>${escapeHTML(coreStore.state.team.name||'Meu time')}</h2><p class="muted">${configured}/5 posições configuradas · G${coreStore.state.drafts.length?coreStore.state.drafts.at(-1).game:1} ativa · Core local-first.</p><span class="badge gold">CORE ATIVO</span></div></section><div class="kpis"><div class="metric"><small>Composições recuperadas</small><b>${RECOVERED_COMPOSITIONS.length}</b></div><div class="metric"><small>Roster catalogado</small><b>${CHAMPIONS.length}</b></div><div class="metric"><small>Fontes registradas</small><b>${DATA_SOURCES.length}</b></div><div class="metric"><small>Drafts no Core</small><b>${coreStore.state.drafts.length}</b></div></div><div class="grid cols-3">${['team','comps','draft','tactical','vod','data'].map(id=>{const m=MODULES.find(x=>x.id===id);return `<article class="card"><div class="eyebrow">${m.group}</div><h3>${m.label}</h3><p class="muted">${({team:'Roster e champion pools privados.',comps:'Composições e planos de execução.',draft:'Tournament Draft + Fearless + branches.',tactical:'Mapa exato, visão, rotas e cenários.',vod:'Player local com notas por timestamp.',data:'Proveniência e separação de evidência.'})[id]}</p><button class="btn" data-go="${id}">Abrir módulo</button></article>`}).join('')}</div>`);goBindings();
+  const cloud=coreStore.state.meta?.cloud;
+  shell(`<section class="hero"><div><div class="eyebrow">FROMBOS · ORGANIZATION CLOUD</div><h1>Visão. Leitura. Execução.</h1><p>O workspace agora nasce dentro da organização e pode carregar o mesmo time entre dispositivos. Prepare a equipe, construa drafts de torneio, planeje séries Fearless, desenhe jogadas e transforme revisão em treino.</p><div class="top-actions" style="margin-top:18px"><button class="btn primary" data-go="team">Administrar time</button><button class="btn info" data-go="draft">Abrir Draft Room</button></div></div><div class="hero-panel"><div class="eyebrow">WORKSPACE</div><h2>${escapeHTML(coreStore.state.team.name||'Nenhum time ativo')}</h2><p class="muted">${configured}/5 posições configuradas · ${cloud?.teamId?'time cloud conectado':'aguardando cadastro do time'}</p><span class="badge ${cloud?.teamId?'green':'gold'}">${cloud?.teamId?'SUPABASE SYNC':'CLOUD READY'}</span></div></section><div class="kpis"><div class="metric"><small>Composições recuperadas</small><b>${RECOVERED_COMPOSITIONS.length}</b></div><div class="metric"><small>Roster catalogado</small><b>${CHAMPIONS.length}</b></div><div class="metric"><small>Fontes registradas</small><b>${DATA_SOURCES.length}</b></div><div class="metric"><small>Drafts no Core</small><b>${coreStore.state.drafts.length}</b></div></div><div class="grid cols-3">${['team','comps','draft','tactical','vod','data'].map(id=>{const m=MODULES.find(x=>x.id===id);return `<article class="card"><div class="eyebrow">${m.group}</div><h3>${m.label}</h3><p class="muted">${({team:'Roster e champion pools privados por organização.',comps:'Composições e planos de execução.',draft:'Tournament Draft + Fearless + branches.',tactical:'Mapa exato, visão, rotas e cenários.',vod:'Player local com notas por timestamp.',data:'Proveniência e separação de evidência.'})[id]}</p><button class="btn" data-go="${id}">Abrir módulo</button></article>`}).join('')}</div>`);goBindings();
 }
 
 function renderTeam(){
+  const cloud=coreStore.state.meta?.cloud;
   const rows=ROLES.map(r=>{const p=coreStore.state.team.players[r.id];return `<div class="role-row"><div class="role-label">${r.label}</div><input class="input" data-player="${r.id}" value="${escapeHTML(p.name)}" placeholder="Nome do jogador"><div><div class="pool-list">${p.pool.map(c=>`<span class="chip">${escapeHTML(c)} <button data-remove-pool="${r.id}" data-champ="${escapeHTML(c)}" style="all:unset;cursor:pointer">×</button></span>`).join('')}</div><div style="display:flex;gap:7px;margin-top:7px"><select class="select" data-pool-select="${r.id}"><option value="">Adicionar campeão...</option>${CHAMPIONS.filter(c=>!p.pool.includes(c)).map(c=>`<option>${escapeHTML(c)}</option>`).join('')}</select><button class="btn" data-add-pool="${r.id}">Adicionar</button></div></div></div>`}).join('');
-  shell(`${pageHead('TEAM WORKSPACE','Meu time & pools','Champion pools alimentam Draft, Fearless e Composições.')}<div class="card"><div class="form-row"><label>Time<input class="input" id="teamName" value="${escapeHTML(coreStore.state.team.name)}"></label><label>Próximo adversário<input class="input" id="opponent" value="${escapeHTML(coreStore.state.team.opponent)}"></label></div><div class="section-title"><h2>Roster competitivo</h2><span class="badge blue">USER_PRIVATE</span></div>${rows}</div>`);
-  document.querySelector('#teamName').onchange=e=>coreStore.update(s=>s.team.name=e.target.value);document.querySelector('#opponent').onchange=e=>coreStore.update(s=>s.team.opponent=e.target.value);document.querySelectorAll('[data-player]').forEach(i=>i.onchange=e=>coreStore.update(s=>s.team.players[e.target.dataset.player].name=e.target.value));document.querySelectorAll('[data-add-pool]').forEach(b=>b.onclick=()=>{const role=b.dataset.addPool,sel=document.querySelector(`[data-pool-select="${role}"]`);if(!sel.value)return;coreStore.update(s=>s.team.players[role].pool.push(sel.value));renderTeam();});document.querySelectorAll('[data-remove-pool]').forEach(b=>b.onclick=()=>{coreStore.update(s=>s.team.players[b.dataset.removePool].pool=s.team.players[b.dataset.removePool].pool.filter(x=>x!==b.dataset.champ));renderTeam();});
+  shell(`${pageHead('TEAM WORKSPACE','Meu time & pools','Cadastre o time da organização, o roster e os champion pools. Alterações deste módulo são sincronizadas para Supabase.',`<div class="top-actions"><span id="cloudStatus" class="badge ${cloud?.teamId?'green':'gold'}">${cloud?.teamId?'SINCRONIZADO':'NOVO TIME'}</span><button class="btn primary" id="saveCloud">Salvar na organização</button></div>`)}<div class="card"><div class="form-row"><label>Time<input class="input" id="teamName" value="${escapeHTML(coreStore.state.team.name)}" placeholder="Ex.: UOL E-sports"></label><label>Próximo adversário<input class="input" id="opponent" value="${escapeHTML(coreStore.state.team.opponent)}"></label></div><div class="form-row" style="margin-top:12px"><label>Organização<input class="input" value="${escapeHTML(localStorage.getItem('frombos.active.organization.meta') ? JSON.parse(localStorage.getItem('frombos.active.organization.meta')).name || '' : '')}" disabled></label><label>Time cloud<select class="select" id="teamSelector"><option value="">Carregando…</option></select></label></div><div class="section-title"><h2>Roster competitivo</h2><span class="badge blue">USER_PRIVATE · RLS</span></div>${rows}<div class="muted" style="margin-top:14px">Salve com o botão acima ou continue editando: as mudanças do roster/pools entram em uma fila de sincronização.</div></div>`);
+
+  const save=()=>{const status=document.querySelector('#cloudStatus');if(status){status.className='badge gold';status.textContent='SALVANDO…';status.title='';}return queueCloudTeamSave();};
+  document.querySelector('#saveCloud').onclick=async()=>{await save();};
+  document.querySelector('#teamName').onchange=e=>{coreStore.update(s=>s.team.name=e.target.value);save();};
+  document.querySelector('#opponent').onchange=e=>coreStore.update(s=>s.team.opponent=e.target.value);
+  document.querySelectorAll('[data-player]').forEach(i=>i.onchange=e=>{coreStore.update(s=>s.team.players[e.target.dataset.player].name=e.target.value);save();});
+  document.querySelectorAll('[data-add-pool]').forEach(b=>b.onclick=async()=>{const role=b.dataset.addPool,sel=document.querySelector(`[data-pool-select="${role}"]`);if(!sel.value)return;coreStore.update(s=>s.team.players[role].pool.push(sel.value));renderTeam();await save();});
+  document.querySelectorAll('[data-remove-pool]').forEach(b=>b.onclick=async()=>{coreStore.update(s=>s.team.players[b.dataset.removePool].pool=s.team.players[b.dataset.removePool].pool.filter(x=>x!==b.dataset.champ));renderTeam();await save();});
+
+  const selector=document.querySelector('#teamSelector');
+  cloudStore.listTeams().then(teams=>{
+    selector.innerHTML=teams.length?teams.map(t=>`<option value="${t.id}" ${t.id===cloudStore.activeTeamId?'selected':''}>${escapeHTML(t.name)}</option>`).join(''):'<option value="">Nenhum time cloud</option>';
+  }).catch(error=>{selector.innerHTML='<option value="">Erro ao carregar</option>';selector.title=error.message||'';});
+  selector.onchange=()=>{if(!selector.value)return;localStorage.setItem('frombos.active.team',selector.value);localStorage.removeItem('frombos.active.team-season');location.reload();};
 }
 
 function compCard(c){return `<article class="card"><div style="display:flex;justify-content:space-between;gap:8px"><div><div class="eyebrow">${escapeHTML(c.archetype)}</div><h3>${escapeHTML(c.name)}</h3></div><span class="badge gold">${escapeHTML(c.origin)}</span></div><div class="comp-lineup">${ROLES.map(r=>`<div class="champ-slot"><small>${r.label}</small><b>${escapeHTML(c.lineup[r.id]||'—')}</b></div>`).join('')}</div><p>${escapeHTML(c.plan)}</p><p class="muted"><b>Win condition:</b> ${escapeHTML(c.winCondition||'Não documentada.')}</p><button class="btn info" data-comp-draft="${c.id}">Levar ao Draft</button></article>`;}
