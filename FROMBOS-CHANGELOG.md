@@ -63,6 +63,18 @@
 - Cloud-hydrated drafts can seed the active Draft Room instead of creating an unrelated local draft.
 - Kept `store.js` intact for the remaining legacy modules.
 
+### Tactical Board Pro enhancement
+- Added `assets/js/tactical-enhancements.js` as a non-destructive enhancement layer around the existing Tactical Board.
+- Added execution timeline from 00:00 to 30:00 with 15-second precision.
+- Added coach-defined tactical timeline markers for openings, objective windows, rotations and other review moments.
+- Added map grid toggle for spacing, pathing and setup analysis.
+- Added point-to-point measurement tool directly on the Wild Rift map.
+- Added board framing/reset control.
+- Added non-destructive visual-layer hide/show control for clean coach presentations.
+- Added SVG snapshot export for sharing a tactical board state.
+- Added responsive Tactical Pro controls and PWA caching for the enhancement layer.
+- Preserved the existing validated Wild Rift map and underlying scenario/marker model; the enhancement layer does not replace tactical state.
+
 ### Product direction
 FROMBOS is explicitly being built as a multi-tenant SaaS:
 
@@ -71,8 +83,9 @@ FROMBOS is explicitly being built as a multi-tenant SaaS:
 Cloud is canonical for authenticated organization/team data; local Core remains an offline/cache layer during migration.
 
 ### Next
+- Persist Tactical scenarios, timeline markers and annotations to Supabase.
+- Connect Tactical timeline markers directly to VOD Review timestamps.
 - Add organization member/role/invitation and multi-team administration.
-- Decide whether collaborative Draft requires dedicated event/branch rows beyond the current JSON snapshot contract.
-- Persist Tactical/VOD/Training to cloud and progressively retire local-only state.
+- Persist VOD/Training and connect annotation → drill workflows.
 - Add cloud-aware backup/import plus dirty-state/conflict handling.
 - Run authenticated browser QA against a non-production organization before promoting to `main`.
