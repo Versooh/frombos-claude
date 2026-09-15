@@ -47,7 +47,7 @@ function evidenceCard(note){
   </article>`;
 }
 function emptyVod(session){
-  return `<section class="v22-vod-intelligence v22-reveal" data-v22-vod-intelligence><header class="v22-vod-intel-head"><div><span>VOD INTELLIGENCE LENS · V22.6</span><h2>${esc(session?.title||'Crie uma análise para começar')}</h2><p>Transforme timestamps e quadros anotados em um pacote de evidências para o Tactical Board.</p></div><div class="v22-vod-intel-badges"><b>WILD RIFT</b><span>USER_PRIVATE</span><span>FROMBOS_STRUCTURAL</span></div></header><div class="v22-vod-intel-empty"><b>Nenhuma evidência nesta sessão.</b><span>Use “Marcar timestamp” ou “Salvar quadro + imagem” no VOD Review. O FROMBOS só organiza o que sua equipe realmente anotou.</span></div></section>`;
+  return `<section class="v22-vod-intelligence v22-reveal" data-v22-vod-intelligence data-session="${esc(session?.id||'')}"><header class="v22-vod-intel-head"><div><span>VOD INTELLIGENCE LENS · V22.6</span><h2>${esc(session?.title||'Crie uma análise para começar')}</h2><p>Transforme timestamps e quadros anotados em um pacote de evidências para o Tactical Board.</p></div><div class="v22-vod-intel-badges"><b>WILD RIFT</b><span>USER_PRIVATE</span><span>FROMBOS_STRUCTURAL</span></div></header><div class="v22-vod-intel-empty"><b>Nenhuma evidência nesta sessão.</b><span>Use “Marcar timestamp” ou “Salvar quadro + imagem” no VOD Review. O FROMBOS só organiza o que sua equipe realmente anotou.</span></div></section>`;
 }
 function vodWorkspace(session,notes){
   const focus=annotationFocus(notes),visible=visibleNotes(notes),selectedCount=selectedIdsForCurrent(notes).size;
@@ -84,7 +84,7 @@ function applyVod(force=false){
   if(route()!=='vod')return;
   const host=document.querySelector('.vod-pro');if(!host){requestAnimationFrame(()=>requestAnimationFrame(()=>applyVod(force)));return;}
   const session=requestedSession();const notes=session?notesFor(session.id):[];
-  const old=host.querySelector('[data-v22-vod-intelligence]');if(old&&!force&&old.dataset.session===session?.id)return;old?.remove();
+  const old=host.querySelector('[data-v22-vod-intelligence]');if(old&&!force&&old.dataset.session===(session?.id||''))return;old?.remove();
   const anchor=host.querySelector('.vod-command')||host.firstElementChild;if(!anchor)return;
   anchor.insertAdjacentHTML('afterend',session&&notes.length?vodWorkspace(session,notes):emptyVod(session));
   const root=host.querySelector('[data-v22-vod-intelligence]');if(root&&session)bindVod(root,session,notes);
