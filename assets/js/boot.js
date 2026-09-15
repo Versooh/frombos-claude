@@ -1,4 +1,5 @@
 import { createOrganization, getSession, listOrganizations, signIn, signOut, signUp, slugify } from './core/auth.js';
+import { bootstrapCloudWorkspace } from './core/cloud-store.js';
 
 const app = document.querySelector('#app');
 const esc = value => String(value ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
@@ -64,6 +65,8 @@ function organizationScreen(organizations) {
 async function selectOrganization(id, org) {
   localStorage.setItem('frombos.active.organization', id);
   localStorage.setItem('frombos.active.organization.meta', JSON.stringify(org || { id }));
+  localStorage.removeItem('frombos.active.team');
+  localStorage.removeItem('frombos.active.team-season');
   await boot();
 }
 
@@ -78,6 +81,7 @@ async function boot() {
     localStorage.setItem('frombos.active.organization', active.id);
     localStorage.setItem('frombos.active.organization.meta', JSON.stringify(active));
     app.className = '';
+    await bootstrapCloudWorkspace({ organizationId: active.id });
     await import('./app.js');
   } catch (error) {
     authLayout(`<div class="eyebrow">FROMBOS / CONNECTION</div><h2>Não foi possível iniciar</h2><p class="muted">${esc(error.message || 'Erro de conexão.')}</p><button class="btn" id="retry">Tentar novamente</button>`);
