@@ -106,6 +106,22 @@ jobs:
           grep -q 'draft-filterbar-v20' assets/css/lab-controls-v20.css
           grep -q 'ci-card.is-selected' assets/css/lab-controls-v20.css
 
+      - name: V20 operations workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-ops.css
+          grep -q 'visual-v20-ops.css?v=20.5' index.html
+          grep -q "'./assets/css/visual-v20-ops.css'" sw.js
+          grep -q 'data-page="training"' assets/css/visual-v20-ops.css
+          grep -q 'data-page="scouting"' assets/css/visual-v20-ops.css
+          grep -q 'data-page="reports"' assets/css/visual-v20-ops.css
+          grep -q 'match-center-v18' assets/css/visual-v20-ops.css
+          grep -q 'performance-vod-bridge' assets/css/visual-v20-ops.css
+          grep -q 'scout-command' assets/css/visual-v20-ops.css
+          grep -q 'report-metrics' assets/css/visual-v20-ops.css
+          grep -q 'mc-filters' assets/css/visual-v20-ops.css
+
       - name: Wild Rift only guard
         shell: bash
         run: |
