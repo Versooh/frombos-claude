@@ -20,6 +20,10 @@ function teamControls(){
     controls.append(makeRouteButton('Composições','comps'),makeRouteButton('Draft Room','draft','btn info'),makeRouteButton('Treinos','training'));
     (head.lastElementChild||head).appendChild(controls);
   }
+  qa('[data-player]',content).forEach(input=>{
+    if(input.dataset.v20SummaryBound==='1')return;
+    input.dataset.v20SummaryBound='1';input.addEventListener('input',schedule);
+  });
   const rows=qa('.role-row',content);const configured=rows.filter(row=>{const name=q('[data-player]',row)?.value?.trim();const pool=qa('.pool-list .chip',row).length;return name||pool;}).length;
   let summary=q('.team-summary-v20',content);
   if(!summary){
