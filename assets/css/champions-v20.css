@@ -1,0 +1,126 @@
+/* FROMBOS V20 — champion visual system */
+:root{
+  --champ-xs:28px;
+  --champ-sm:38px;
+  --champ-md:58px;
+  --champ-lg:92px;
+  --champ-xl:132px;
+}
+.champion-visual{
+  --champ-size:var(--champ-md);
+  position:relative;
+  display:inline-grid;
+  grid-template-columns:var(--champ-size) minmax(0,1fr);
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.champion-xs{--champ-size:var(--champ-xs)}
+.champion-sm{--champ-size:var(--champ-sm)}
+.champion-md{--champ-size:var(--champ-md)}
+.champion-lg{--champ-size:var(--champ-lg)}
+.champion-xl{--champ-size:var(--champ-xl)}
+.champion-image,.champion-fallback{
+  grid-area:1/1;
+  width:var(--champ-size);
+  height:var(--champ-size);
+  border-radius:10px;
+}
+.champion-image{
+  display:block;
+  object-fit:cover;
+  object-position:center 20%;
+  border:1px solid rgba(125,154,214,.28);
+  opacity:0;
+  transform:scale(.985);
+  transition:opacity .2s ease,transform .2s ease,border-color .2s ease;
+  background:#07111f;
+}
+.champion-visual.has-image .champion-image{opacity:1;transform:scale(1)}
+.champion-fallback{
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle at 35% 25%,rgba(0,212,255,.15),transparent 34%),
+    linear-gradient(145deg,#13284d,#081224 70%);
+  border:1px solid rgba(64,127,224,.28);
+  color:#ccefff;
+  font-weight:900;
+  letter-spacing:.04em;
+  font-size:calc(var(--champ-size)*.22);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+}
+.champion-visual.image-missing .champion-fallback:after{
+  content:"";
+  position:absolute;
+  inset:auto auto 4px 4px;
+  width:5px;height:5px;border-radius:50%;
+  background:#617493;
+}
+.champion-copy{display:grid;gap:2px;min-width:0}
+.champion-copy b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#eef5ff}
+.champion-role{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#7487a7}
+
+/* Composition cards: one portrait per champion, no duplicate image layer. */
+.comp-lineup{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  margin:16px 0;
+}
+.comp-lineup .champ-slot{
+  display:grid;
+  justify-items:center;
+  gap:7px;
+  min-width:0;
+  padding:10px 6px;
+  border:1px solid rgba(125,154,214,.14);
+  background:linear-gradient(180deg,rgba(12,29,59,.72),rgba(7,15,32,.78));
+  border-radius:9px;
+  text-align:center;
+}
+.comp-lineup .champ-slot>.champion-visual{grid-template-columns:var(--champ-size);gap:0}
+.comp-lineup .champ-slot small{font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:#6f82a1}
+.comp-lineup .champ-slot b{font-size:10px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* Team pools */
+.pool-list{display:flex;flex-wrap:wrap;gap:7px}
+.pool-entry{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 7px 4px 4px;
+  border:1px solid rgba(125,154,214,.18);
+  background:rgba(20,122,255,.045);
+  border-radius:8px;
+}
+.pool-entry .champion-visual{grid-template-columns:var(--champ-size);gap:0}
+.pool-entry>span{font-size:10px;color:#c8d3e6}
+.pool-remove{all:unset;cursor:pointer;color:#778ba8;font-size:13px}.pool-remove:hover{color:#ff7d8b}
+
+/* Draft */
+.dr-slot.filled{display:flex;align-items:center;justify-content:flex-start;gap:7px;text-align:left;padding:7px 9px}
+.dr-slot.filled>.champion-visual{grid-template-columns:var(--champ-size) minmax(0,1fr);width:100%}
+.dr-slot.ban.filled>.champion-visual{--champ-size:32px}
+.dr-slot.pick.filled>.champion-visual{--champ-size:44px}
+.dr-slot .champion-copy b{font-size:10px}
+.draft-champ-card{padding:6px;min-height:86px}
+.draft-champ-card .champion-visual{grid-template-columns:var(--champ-size);gap:0}
+.draft-champ-card .champion-image,.draft-champ-card .champion-fallback{border-radius:8px}
+.draft-champ-card b{font-size:9px;line-height:1.1;text-align:center}
+.draft-champ-card small{font-size:6px}
+
+/* Series */
+.series-pick-list{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.series-pick-list .champion-visual{grid-template-columns:var(--champ-size);gap:0}
+
+@media(max-width:900px){
+  .comp-lineup{grid-template-columns:repeat(5,minmax(64px,1fr));overflow-x:auto;padding-bottom:4px}
+  .comp-lineup .champ-slot{min-width:72px}
+}
+@media(max-width:600px){
+  :root{--champ-md:52px;--champ-lg:78px}
+  .comp-lineup{grid-template-columns:repeat(5,72px)}
+  .draft-champ-card{min-height:82px}
+}
+@media(prefers-reduced-motion:reduce){.champion-image{transition:none}}
