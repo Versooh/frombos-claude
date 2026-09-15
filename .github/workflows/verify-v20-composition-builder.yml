@@ -41,7 +41,7 @@ jobs:
             'assets/css/composition-builder-v20.css?v=20.20',
             'assets/js/composition-builder-v20.js?v=20.20'
           ]) if(!html.includes(token)) throw new Error(`Missing index integration: ${token}`);
-          if(!/serviceWorker\.register\('\.\/sw\.js\?v=20\.\d+'\)/.test(html)) throw new Error('Missing current V20 service worker registration');
+          if(!/serviceWorker\.register\('\.\/sw\.js\?v=(?:20\.\d+|21\.\d+)'\)/.test(html)) throw new Error('Missing compatible service worker registration');
           for(const token of [
             "'./assets/css/composition-builder-v20.css'",
             "'./assets/js/composition-builder-v20.js'"
