@@ -48,12 +48,14 @@
   <link rel="stylesheet" href="assets/css/system-controls-v20.css?v=20.7">
   <link rel="stylesheet" href="assets/css/workspace-flow-v20.css?v=20.14">
   <link rel="stylesheet" href="assets/css/mobile-shell-v20.css?v=20.15">
+  <link rel="stylesheet" href="assets/css/render-performance-v20.css?v=20.18">
 </head>
 <body>
   <div id="app"></div>
   <noscript>O FROMBOS precisa de JavaScript habilitado.</noscript>
   <script type="module" src="assets/js/app.js?v=20"></script>
   <script type="module" src="assets/js/runtime-v20.js?v=20.17"></script>
+  <script type="module" src="assets/js/render-performance-v20.js?v=20.18"></script>
   <script type="module" src="assets/js/match-center-router.js?v=18"></script>
   <script type="module" src="assets/js/vod-v14.js?v=14"></script>
   <script type="module" src="assets/js/vod-performance-v15.js?v=15"></script>
@@ -88,7 +90,7 @@
   <script type="module" src="assets/js/ui-stabilization-v19.js?v=19"></script>
   <script src="assets/js/i18n-v19.js?v=19" defer></script>
   <script>
-    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=20.17').catch(console.warn));
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=20.18').catch(console.warn));
   </script>
 </body>
 </html>
