@@ -40,6 +40,14 @@
 - Updated the service-worker cache to include the new cloud-store module.
 - Kept the legacy local migration bridge gated so an already-hydrated cloud team is not overwritten by stale local state.
 
+### Composition cloud workspace
+- Added `assets/js/core/cloud-compositions.js` for organization/season-scoped Composition Lab persistence.
+- Composition reads join `team_composition_slots` and reconstruct the Core lineup model.
+- Composition writes create/update the parent row and synchronize its five role slots using the existing schema.
+- Recovered compositions remain separate from organization-private cloud compositions.
+- Updated the Composition Lab route to prefer cloud compositions when available.
+- Updated the PWA cache for the new cloud Composition module.
+
 ### Product direction
 FROMBOS is now explicitly being built as a multi-tenant SaaS:
 
@@ -48,7 +56,6 @@ FROMBOS is now explicitly being built as a multi-tenant SaaS:
 Cloud is canonical for authenticated organization/team data; local Core remains an offline/cache layer during migration.
 
 ### Next
-- Persist Composition Lab entities to existing composition tables.
 - Connect Draft/Series to existing series/draft/session structures.
 - Add organization member/role/invitation and multi-team administration.
 - Persist Tactical/VOD/Training to cloud and progressively retire local-only state.
