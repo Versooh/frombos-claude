@@ -1,5 +1,6 @@
 import { store } from './store.js';
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+import { tacticalCloudBridge } from './core/tactical-cloud-bridge.js';
+const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const fmt=s=>`${String(Math.floor((s||0)/60)).padStart(2,'0')}:${String(Math.floor((s||0)%60)).padStart(2,'0')}`;
 const uid=()=>crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
 function ensure(){store.update(s=>{s.vod=s.vod||{};s.vod.reviews=Array.isArray(s.vod.reviews)?s.vod.reviews:[];s.vod.sessions=Array.isArray(s.vod.sessions)?s.vod.sessions:[];});}
@@ -24,7 +25,23 @@ export function bindVodReview(rerender){
  canvas.addEventListener('pointermove',e=>{if(!down||!current)return;const p=pos(e);if(current.type==='pen')current.points.push(p);else current.b=p;redraw();});
  canvas.addEventListener('pointerup',()=>{if(current)strokes.push(current);current=null;down=false;redraw();});
  document.querySelector('#vodClearDraw').onclick=()=>{strokes=[];redraw();};
- function saveNote(forceDrawing=false){const note=document.querySelector('#vodNote').value.trim();if(!note&&!forceDrawing)return;const t=video.currentTime||0;const category=document.querySelector('#vodCategory').value;const drawing=strokes.length?strokes:null;store.update(s=>s.vod.reviews.push({id:uid(),time:t,category,note:note||'Quadro tático',drawing,hasDrawing:!!drawing,createdAt:new Date().toISOString()}));rerender();}
+ async function persistTacticalEvent(event){
+   const scenarioId=store.state?.tactical?.activeScenario;
+   if(!scenarioId) return;
+   try{
+     await tacticalCloudBridge.saveEvent(scenarioId,event);
+     window.dispatchEvent(new CustomEvent('frombos:tactical-save'));
+   }catch(error){console.warn('[FROMBOS] VOD tactical event save failed:',error);}
+ }
+ function saveNote(forceDrawing=false){
+   const note=document.querySelector('#vodNote').value.trim();if(!note&&!forceDrawing)return;
+   const t=video.currentTime||0;const category=document.querySelector('#vodCategory').value;const drawing=strokes.length?strokes:null;
+   const eventId=uid();
+   const review={id:eventId,time:t,category,note:note||'Quadro tático',drawing,hasDrawing:!!drawing,createdAt:new Date().toISOString()};
+   store.update(s=>s.vod.reviews.push(review));
+   persistTacticalEvent({id:eventId,timestamp:Math.round(t),vodTimestampSeconds:Math.round(t),type:category==='Erro'?'mistake':category==='Objetivo'?'objective':category==='Visão'?'vision':category==='Macro'?'decision':'note',title:category,note:review.note,severity:category==='Erro'?'warning':'info',tags:[category],vodId:store.state?.vod?.activeVodId||null});
+   rerender();
+ }
  document.querySelector('#vodSaveNote').onclick=()=>saveNote(false);document.querySelector('#vodCapture').onclick=()=>saveNote(true);
  document.querySelectorAll('[data-vod-time]').forEach(b=>b.onclick=()=>{video.currentTime=Number(b.dataset.vodTime)||0;video.pause();});
  window.addEventListener('resize',resize,{once:true});requestAnimationFrame(resize);
