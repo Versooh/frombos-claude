@@ -1,5 +1,5 @@
-const CACHE='frombos-v2-2026-09-15-v20-champions';
-const CORE=['./','./index.html','./manifest.webmanifest','./assets/css/app.css','./assets/css/features.css','./assets/css/visual-v10.css','./assets/css/champions-v20.css','./assets/js/i18n-ptbr.js','./assets/js/app.js','./assets/js/data.js','./assets/js/store.js','./assets/js/champion-visual.js','./assets/js/draft-room.js','./assets/js/tactical.js'];
+const CACHE='frombos-v2-2026-09-15-v20-champions-2';
+const CORE=['./','./index.html','./manifest.webmanifest','./assets/css/app.css','./assets/css/features.css','./assets/css/visual-v10.css','./assets/css/champions-v20.css','./assets/js/i18n-ptbr.js','./assets/js/app.js','./assets/js/data.js','./assets/js/store.js','./assets/js/champion-visual.js','./assets/js/champion-enhancer.js','./assets/js/draft-room.js','./assets/js/tactical.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
