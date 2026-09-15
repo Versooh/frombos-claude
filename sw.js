@@ -1,5 +1,5 @@
-const CACHE='frombos-v2-2026-09-14-2';
-const CORE=['./','./index.html','./manifest.webmanifest','./assets/css/app.css','./assets/css/features.css','./assets/js/app.js','./assets/js/data.js','./assets/js/store.js','./assets/js/draft-room.js','./assets/js/tactical.js','./assets/js/vod-review.js'];
+const CACHE='frombos-core-auth-2026-09-15-1';
+const CORE=['./','./index.html','./manifest.webmanifest','./assets/css/app.css','./assets/css/features.css','./assets/css/auth.css','./assets/js/boot.js','./assets/js/core/auth.js','./assets/js/core/schema.js','./assets/js/core/workspace.js','./assets/js/core/store-adapter.js','./assets/js/app.js','./assets/js/data.js','./assets/js/store.js','./assets/js/draft-room.js','./assets/js/tactical.js','./assets/js/vod-review.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
