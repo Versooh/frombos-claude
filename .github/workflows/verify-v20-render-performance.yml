@@ -63,5 +63,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -qE '\.remove\(|removeChild\(|replaceChildren\(|innerHTML[[:space:]]*=[[:space:]]*["'"']' assets/js/render-performance-v20.js
-          ! grep -qE 'IntersectionObserver|virtualiz|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/render-performance-v20.js assets/css/render-performance-v20.css
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/render-performance-v20.js','utf8');
+          const css=fs.readFileSync('assets/css/render-performance-v20.css','utf8');
+          const forbiddenDom=[/\.remove\s*\(/,/removeChild\s*\(/,/replaceChildren\s*\(/,/innerHTML\s*=/];
+          if(forbiddenDom.some(pattern=>pattern.test(js))) throw new Error('V20.18 must preserve complete DOM nodes');
+          const forbiddenSources=/IntersectionObserver|virtualiz|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i;
+          if(forbiddenSources.test(js)||forbiddenSources.test(css)) throw new Error('V20.18 contains forbidden virtualization or League PC source');
+          NODE
