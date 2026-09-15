@@ -165,6 +165,23 @@ jobs:
           grep -q 'data-focus-v20' assets/css/analysis-flow-v20.css
           grep -q 'data-vod-focus-v20' assets/css/analysis-flow-v20.css
 
+      - name: V20 tactical vision system
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/tactical-vision-v20.js
+          test -f assets/css/tactical-vision-v20.css
+          grep -q 'tactical-vision-v20.js?v=20.16' index.html
+          grep -q 'tactical-vision-v20.css?v=20.16' index.html
+          grep -q "'./assets/js/tactical-vision-v20.js'" sw.js
+          grep -q "'./assets/css/tactical-vision-v20.css'" sw.js
+          grep -q 'BOARD_VISUAL' assets/js/tactical-vision-v20.js
+          grep -q 'visionOnly' assets/js/tactical-vision-v20.js
+          grep -q 'FROMBOS_STRUCTURAL' assets/js/tactical-vision-v20.js
+          grep -q 'vision-command-v20' assets/css/tactical-vision-v20.css
+          grep -q 'vision-range-v20' assets/css/tactical-vision-v20.css
+          ! grep -qE 'ddragon\.leagueoflegends\.com|CommunityDragon|lol-game-data' assets/js/tactical-vision-v20.js
+
       - name: V20 intelligence labs and series flow
         shell: bash
         run: |
@@ -288,7 +305,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js assets/js/intel-series-flow-v20.js assets/js/operations-flow-v20.js assets/js/workspace-flow-v20.js assets/js/mobile-shell-v20.js scripts/build-champion-registry.mjs
+          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js assets/js/tactical-vision-v20.js assets/js/intel-series-flow-v20.js assets/js/operations-flow-v20.js assets/js/workspace-flow-v20.js assets/js/mobile-shell-v20.js scripts/build-champion-registry.mjs
           grep -q 'RIOT_OFFICIAL' scripts/build-champion-registry.mjs
           grep -q 'wildrift.leagueoflegends.com' scripts/build-champion-registry.mjs
 
