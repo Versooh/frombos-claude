@@ -1,0 +1,44 @@
+/* FROMBOS V20.11 — Tactical Board + VOD Review focus/navigation layer */
+
+.analysis-focus-v20{display:grid;grid-template-columns:minmax(260px,1.05fr) minmax(260px,.95fr) max-content;gap:10px;align-items:center;padding:9px 10px;border:1px solid rgba(111,151,212,.14);border-radius:10px;background:linear-gradient(180deg,rgba(9,22,45,.94),rgba(5,14,29,.97));box-shadow:0 14px 34px rgba(0,0,0,.14)}
+.analysis-focus-main-v20{display:grid;gap:5px;min-width:0}.analysis-focus-main-v20>span{font-size:7px;font-weight:900;letter-spacing:.14em;color:#677f9f}.analysis-focus-main-v20>div{display:flex;gap:5px;min-width:0;overflow:auto;scrollbar-width:thin}.analysis-focus-main-v20 button{flex:0 0 auto;min-height:30px;padding:5px 9px;border:1px solid rgba(112,151,212,.16);border-radius:7px;background:#07111f;color:#7e91ad;font-size:8px;font-weight:900;cursor:pointer}.analysis-focus-main-v20 button[aria-pressed="true"]{border-color:rgba(80,220,255,.5);background:rgba(80,220,255,.08);color:#cdf3ff;box-shadow:inset 0 -2px #50dcff}
+.analysis-focus-scenario-v20{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;gap:7px;align-items:center}.analysis-focus-scenario-v20>div{display:grid;gap:2px;min-width:0;text-align:center}.analysis-focus-scenario-v20 small,.analysis-focus-session-v20 small{font-size:6px;font-weight:900;letter-spacing:.1em;color:#637997}.analysis-focus-scenario-v20 b,.analysis-focus-session-v20 b{font-size:11px;color:#e9f2ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.analysis-focus-scenario-v20 .btn{min-height:30px;padding:5px 8px;font-size:8px}
+.analysis-focus-kpis-v20{display:grid;grid-template-columns:1fr 1fr;gap:5px}.analysis-focus-kpis-v20>span{display:grid;gap:2px;min-width:84px;padding:6px 8px;border:1px solid rgba(112,151,212,.12);border-radius:7px;background:#07111f}.analysis-focus-kpis-v20 small{font-size:6px;color:#617795;white-space:nowrap}.analysis-focus-kpis-v20 b{font-size:14px;line-height:1;color:#e5eefb;font-variant-numeric:tabular-nums}
+.analysis-focus-session-v20{display:flex;justify-content:space-between;gap:12px;align-items:center;min-width:0}.analysis-focus-session-v20>div{display:grid;gap:2px;min-width:0}.analysis-focus-session-v20>span{flex:0 0 auto;padding:5px 8px;border:1px solid rgba(112,151,212,.13);border-radius:999px;color:#778ba8;font-size:7px;font-weight:900;white-space:nowrap}
+.analysis-focus-note-nav-v20{display:flex;gap:6px}.analysis-focus-note-nav-v20 .btn{min-height:31px;padding:5px 8px;font-size:8px;white-space:nowrap}
+
+/* Desktop: focus means navigation emphasis, never hides analytical context. */
+.content[data-page="tactical"] .tactical-shell[data-focus-v20="map"] .tb-center,
+.content[data-page="tactical"] .tactical-shell[data-focus-v20="pieces"] .tb-left,
+.content[data-page="tactical"] .tactical-shell[data-focus-v20="coach"] .tb-right{outline:1px solid rgba(80,220,255,.16);outline-offset:2px}
+.content[data-page="vod"] .vod-pro[data-vod-focus-v20="player"] .vod-player-stage,
+.content[data-page="vod"] .vod-pro[data-vod-focus-v20="annotate"] .vod-note-entry,
+.content[data-page="vod"] .vod-pro[data-vod-focus-v20="timeline"] .vod-timeline{outline:1px solid rgba(226,189,119,.2);outline-offset:2px}
+
+@media(max-width:1180px){
+  .analysis-focus-v20{grid-template-columns:1fr auto}.analysis-focus-kpis-v20,.analysis-focus-note-nav-v20{grid-column:2;grid-row:1}.analysis-focus-scenario-v20,.analysis-focus-session-v20{grid-column:1/-1;grid-row:2}
+}
+@media(max-width:980px){
+  .analysis-focus-v20{grid-template-columns:1fr}.analysis-focus-main-v20,.analysis-focus-scenario-v20,.analysis-focus-kpis-v20,.analysis-focus-session-v20,.analysis-focus-note-nav-v20{grid-column:1;grid-row:auto}.analysis-focus-kpis-v20{grid-template-columns:1fr 1fr}.analysis-focus-note-nav-v20{display:grid;grid-template-columns:1fr 1fr}.analysis-focus-note-nav-v20 .btn{width:100%}
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="map"] .tb-left,
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="map"] .tb-right,
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="pieces"] .tb-center,
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="pieces"] .tb-right,
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="coach"] .tb-left,
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="coach"] .tb-center{display:none!important}
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="map"] .tb-center,
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="pieces"] .tb-left,
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="coach"] .tb-right{display:block!important;order:1!important;outline:none}
+  .content[data-page="tactical"] .tactical-shell[data-focus-v20="coach"] .tb-right{grid-column:auto;display:block!important}
+  .content[data-page="vod"] .vod-pro[data-vod-focus-v20="timeline"] .vod-layout>section.card{display:none!important}
+  .content[data-page="vod"] .vod-pro[data-vod-focus-v20="timeline"] .vod-timeline{display:block!important;outline:none}
+  .content[data-page="vod"] .vod-pro[data-vod-focus-v20="player"] .vod-timeline,
+  .content[data-page="vod"] .vod-pro[data-vod-focus-v20="annotate"] .vod-timeline{display:none!important}
+  .content[data-page="vod"] .vod-pro[data-vod-focus-v20="player"] .vod-note-entry,
+  .content[data-page="vod"] .vod-pro[data-vod-focus-v20="player"] .vod-tools{display:none!important}
+  .content[data-page="vod"] .vod-pro[data-vod-focus-v20="annotate"] .vod-transport{display:none!important}
+}
+@media(max-width:560px){
+  .analysis-focus-v20{padding:8px}.analysis-focus-main-v20>div{width:100%}.analysis-focus-main-v20 button{flex:1 0 auto}.analysis-focus-session-v20{align-items:flex-start;flex-direction:column}.analysis-focus-scenario-v20 b,.analysis-focus-session-v20 b{white-space:normal}.analysis-focus-kpis-v20 small{white-space:normal;line-height:1.2}
+}
+@media(prefers-reduced-motion:reduce){.analysis-focus-main-v20 button,.analysis-focus-v20 .btn{transition:none!important}}

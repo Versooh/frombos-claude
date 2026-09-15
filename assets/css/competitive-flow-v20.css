@@ -1,0 +1,44 @@
+/* FROMBOS V20.10 — competitive decision flow for Compositions, Champion Intelligence and Draft Room */
+
+/* Composition comparison */
+.comp-compare-toggle-v20[aria-pressed="true"]{border-color:rgba(226,189,119,.55)!important;background:rgba(226,189,119,.09)!important;color:#f0d39a!important;box-shadow:inset 0 -2px #e2bd77}
+.content[data-page="comps"] .composition-card.is-compare-selected-v20{border-color:rgba(226,189,119,.42)!important;box-shadow:0 18px 44px rgba(0,0,0,.25),0 0 0 1px rgba(226,189,119,.08)}
+.comp-compare-v20{display:grid;gap:10px;margin:0 0 14px;padding:11px;border:1px solid rgba(226,189,119,.16);border-radius:11px;background:linear-gradient(180deg,rgba(11,24,49,.94),rgba(6,14,29,.97));box-shadow:0 14px 34px rgba(0,0,0,.16)}
+.comp-compare-head-v20{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.comp-compare-head-v20>div{display:grid;gap:2px;min-width:0}.comp-compare-head-v20>div>span{font-size:7px;font-weight:900;letter-spacing:.14em;color:#a58a59}.comp-compare-head-v20>div>b{font-size:12px;color:#edf4ff}.comp-compare-head-v20>small{max-width:760px;color:#7386a4;font-size:9px;line-height:1.45;text-align:right}
+.comp-compare-grid-v20{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.comp-compare-card-v20,.comp-compare-empty-v20{min-width:0;padding:11px;border:1px solid rgba(113,151,214,.14);border-radius:9px;background:#07111f}
+.comp-compare-empty-v20{display:grid;place-items:center;min-height:156px;color:#667a98;font-size:9px;text-align:center;border-style:dashed}
+.comp-compare-card-head-v20{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.comp-compare-card-head-v20>div{display:grid;gap:3px;min-width:0}.comp-compare-card-head-v20>div>span{font-size:7px;font-weight:900;letter-spacing:.1em;color:#6f83a3;text-transform:uppercase}.comp-compare-card-head-v20>div>b{font-size:13px;color:#f2f6fc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.comp-compare-card-head-v20>small{flex:0 0 auto;padding:4px 6px;border:1px solid rgba(82,217,152,.2);border-radius:999px;color:#8fc6aa;font-size:7px;font-weight:900}
+.comp-compare-lineup-v20{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:9px 0}.comp-compare-lineup-v20>span{display:grid;gap:3px;min-width:0;padding:6px;border:1px solid rgba(112,151,212,.11);border-radius:7px;background:rgba(14,28,54,.6)}.comp-compare-lineup-v20 small{font-size:6px;color:#617692;text-transform:uppercase;letter-spacing:.08em}.comp-compare-lineup-v20 b{font-size:8px;color:#cdd9e9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comp-compare-card-v20 p{display:grid;gap:4px;margin:0;padding-top:8px;border-top:1px solid rgba(255,255,255,.045);font-size:9px;line-height:1.45;color:#8fa0b8}.comp-compare-card-v20 p strong{font-size:7px;letter-spacing:.1em;color:#c4a96f}
+
+/* Champion Intelligence flow */
+.ci-flow-v20{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(0,1.4fr) max-content;gap:9px;align-items:stretch;margin:0;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.055);background:linear-gradient(180deg,#081426,#06101d)}
+.ci-flow-nav-v20{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;gap:8px;align-items:center}.ci-flow-nav-v20>div{display:grid;gap:1px;min-width:0;text-align:center}.ci-flow-nav-v20>div>span{font-size:6px;font-weight:900;letter-spacing:.12em;color:#647a99}.ci-flow-nav-v20>div>b{font-size:11px;color:#eef5ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ci-flow-nav-v20>div>small{font-size:7px;color:#6d809c}.ci-flow-nav-v20 .btn{min-height:30px;padding:5px 7px;font-size:8px}
+.ci-flow-evidence-v20{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.ci-flow-evidence-v20>span{display:grid;gap:3px;min-width:0;padding:6px 7px;border:1px solid rgba(112,151,212,.12);border-radius:7px;background:#07111f}.ci-flow-evidence-v20 small{font-size:6px;line-height:1.2;color:#667c9a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ci-flow-evidence-v20 b{font-size:7px;color:#9fb2ca;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ci-flow-evidence-v20 [data-evidence-type="OFFICIAL"] b{color:#83deb0}.ci-flow-evidence-v20 [data-evidence-type="CURATED"] b{color:#e2bd77}.ci-flow-evidence-v20 [data-evidence-type="FROMBOS_STRUCTURAL"] b{color:#7fdff7}.ci-flow-evidence-v20 [data-evidence-type="UNKNOWN"] b{color:#7a8ba4}
+.ci-flow-actions-v20{display:flex;align-items:center;gap:6px}.ci-flow-actions-v20 .btn{min-height:32px;padding:6px 8px;font-size:8px;white-space:nowrap}
+
+/* Draft flow */
+.draft-flow-v20{display:grid;grid-template-columns:minmax(290px,1.15fr) minmax(260px,.85fr) max-content;gap:10px;align-items:center;padding:10px 11px;border:1px solid rgba(80,220,255,.13);border-radius:10px;background:linear-gradient(180deg,rgba(8,23,47,.95),rgba(5,14,29,.98));box-shadow:0 14px 34px rgba(0,0,0,.15)}
+.draft-flow-state-v20{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.75fr);gap:10px;align-items:center}.draft-flow-state-v20>div:first-child{display:grid;gap:2px;min-width:0}.draft-flow-state-v20>div:first-child>span{font-size:7px;font-weight:900;letter-spacing:.12em;color:#62809f}.draft-flow-state-v20>div:first-child>b{font-size:13px;color:#edf6ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.draft-flow-state-v20>div:first-child>small{font-size:7px;color:#6f82a0}
+.draft-progress-v20{position:relative;min-height:34px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(112,151,212,.15);border-radius:8px;background:#06101e}.draft-progress-v20 i{position:absolute;inset:0 auto 0 0;width:var(--draft-progress);background:linear-gradient(90deg,rgba(37,130,255,.34),rgba(80,220,255,.24));border-right:1px solid rgba(80,220,255,.48)}.draft-progress-v20 span{position:relative;z-index:1;font-size:8px;font-weight:900;color:#c8d8ea;letter-spacing:.05em}
+.draft-flow-kpis-v20{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.draft-flow-kpis-v20>span{display:grid;gap:2px;padding:6px 7px;border:1px solid rgba(112,151,212,.12);border-radius:7px;background:#07111f}.draft-flow-kpis-v20 small{font-size:6px;color:#627795;white-space:nowrap}.draft-flow-kpis-v20 b{font-size:14px;line-height:1;color:#e5effb;font-variant-numeric:tabular-nums}
+.draft-flow-actions-v20{display:flex;gap:6px}.draft-flow-actions-v20 .btn{min-height:32px;padding:6px 9px;font-size:8px;white-space:nowrap}
+
+@media(max-width:1240px){
+  .ci-flow-v20{grid-template-columns:1fr}.ci-flow-actions-v20{justify-content:flex-end}
+  .draft-flow-v20{grid-template-columns:1fr auto}.draft-flow-kpis-v20{grid-column:1/-1;grid-row:2}.draft-flow-actions-v20{grid-column:2;grid-row:1}
+}
+@media(max-width:820px){
+  .comp-compare-grid-v20{grid-template-columns:1fr}.comp-compare-lineup-v20{grid-template-columns:repeat(5,92px);overflow-x:auto;padding-bottom:12px}.comp-compare-head-v20{align-items:flex-start;flex-direction:column}.comp-compare-head-v20>small{text-align:left}
+  .ci-flow-nav-v20{grid-template-columns:1fr 1fr}.ci-flow-nav-v20>div{grid-column:1/-1;grid-row:1}.ci-flow-nav-v20 [data-ci-prev-v20]{grid-column:1}.ci-flow-nav-v20 [data-ci-next-v20]{grid-column:2}.ci-flow-evidence-v20{grid-template-columns:repeat(2,minmax(0,1fr))}.ci-flow-actions-v20{display:grid;grid-template-columns:1fr 1fr}.ci-flow-actions-v20 .btn{white-space:normal}
+  .draft-flow-v20{grid-template-columns:1fr}.draft-flow-state-v20{grid-template-columns:1fr}.draft-flow-kpis-v20,.draft-flow-actions-v20{grid-column:1;grid-row:auto}.draft-flow-actions-v20{display:grid;grid-template-columns:1fr 1fr}.draft-flow-actions-v20 .btn{width:100%}
+}
+@media(max-width:520px){
+  .comp-compare-v20{padding:9px}.comp-compare-card-head-v20{flex-direction:column}.comp-compare-lineup-v20{grid-template-columns:repeat(5,76px)}
+  .ci-flow-v20{padding:9px}.ci-flow-evidence-v20{grid-template-columns:1fr 1fr}.ci-flow-actions-v20{grid-template-columns:1fr}
+  .draft-flow-kpis-v20{grid-template-columns:repeat(3,minmax(0,1fr))}.draft-flow-kpis-v20 small{white-space:normal;line-height:1.2}.draft-flow-state-v20>div:first-child>b{white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){.comp-compare-toggle-v20,.draft-flow-v20 .btn,.ci-flow-v20 .btn{transition:none!important}}

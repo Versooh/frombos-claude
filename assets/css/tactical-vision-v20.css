@@ -1,0 +1,12 @@
+/* FROMBOS V20.16 — Tactical Vision System */
+.vision-command-v20{display:grid;gap:9px;margin:10px 0;padding:10px;border:1px solid rgba(80,220,255,.16);border-radius:9px;background:linear-gradient(180deg,rgba(8,24,45,.94),rgba(5,15,31,.97))}.vision-command-v20.has-control{border-color:rgba(255,97,115,.2)}
+.vision-command-head-v20{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.vision-command-head-v20>div{display:grid;gap:2px}.vision-command-head-v20>div>span{font-size:7px;font-weight:900;letter-spacing:.13em;color:#65dcff}.vision-command-head-v20>div>b{font-size:13px;color:#eef7ff}.vision-provenance-v20{padding:4px 6px;border:1px solid rgba(177,140,255,.28);border-radius:999px;background:rgba(177,140,255,.06);color:#c4a8ff;font-size:6px;font-weight:900;letter-spacing:.06em}
+.vision-command-kpis-v20{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.vision-command-kpis-v20>span{display:grid;gap:2px;min-height:46px;padding:7px;border:1px solid rgba(112,151,212,.12);border-radius:7px;background:#07111f;color:#6f84a3;font-size:7px;text-transform:uppercase}.vision-command-kpis-v20 b{font-size:16px;color:#e9f5ff;font-variant-numeric:tabular-nums}
+.vision-command-actions-v20{display:grid;grid-template-columns:1fr 1fr;gap:5px}.vision-command-actions-v20 .btn{min-height:34px;padding:6px 7px;font-size:8px}.vision-command-v20 p,.vision-command-v20 small{margin:0;line-height:1.45}.vision-command-v20 p{font-size:8px;color:#8194ae}.vision-command-v20 small{font-size:7px!important;color:#617590}
+#tbVision [data-marker-id][data-vision-type="ward"] .vision-range-v20{stroke:#65dcff!important;stroke-opacity:.38!important;fill:#65dcff!important;fill-opacity:.055!important}
+#tbVision [data-marker-id][data-vision-type="control"] .vision-range-v20{stroke:#ff6173!important;stroke-opacity:.4!important;fill:#ff6173!important;fill-opacity:.055!important}
+#tbVision [data-marker-id] .vision-range-v20{stroke-dasharray:9 8!important;vector-effect:non-scaling-stroke}
+.vision-legend-v20{margin-left:auto;color:#6f84a3;font-size:8px;white-space:nowrap}
+@media(max-width:980px){.vision-command-v20{margin:8px 0}.vision-command-kpis-v20{grid-template-columns:repeat(3,minmax(90px,1fr))}}
+@media(max-width:680px){.vision-command-actions-v20{grid-template-columns:1fr}.vision-command-actions-v20 .btn{min-height:40px}.vision-legend-v20{width:100%;margin-left:0;white-space:normal;padding-top:4px}}
+@media(prefers-reduced-motion:reduce){#tbVision [data-marker-id] *{transition:none!important}}

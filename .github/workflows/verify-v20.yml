@@ -1,0 +1,343 @@
+name: Verify FROMBOS V20
+
+on:
+  push:
+    branches: [rebuild/frombos-v20]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build official Wild Rift champion registry
+        run: node scripts/build-champion-registry.mjs
+
+      - name: Validate champion coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const {CHAMPION_REGISTRY,CHAMPION_REGISTRY_META}=await import('./assets/js/champion-registry.generated.js');
+          const entries=Object.values(CHAMPION_REGISTRY);
+          const resolved=entries.filter(x=>x.portrait).length;
+          if(entries.length<135) throw new Error(`registry too small: ${entries.length}`);
+          if(resolved<135) throw new Error(`portrait coverage too low: ${resolved}`);
+          if(entries.some(x=>x.source!=='RIOT_OFFICIAL')) throw new Error('non-Riot asset source in official registry');
+          console.log(`Wild Rift portrait coverage ${resolved}/${entries.length}`,CHAMPION_REGISTRY_META.validation);
+          NODE
+
+      - name: JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assets/js/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+
+      - name: V20 shared runtime scheduling
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/runtime-v20.js
+          grep -q 'runtime-v20.js?v=20.17' index.html
+          grep -q "'./assets/js/runtime-v20.js'" sw.js
+          grep -q 'FROMBOS_V20_RUNTIME' assets/js/runtime-v20.js
+          grep -q 'subscribers' assets/js/runtime-v20.js
+          grep -q 'requestAnimationFrame' assets/js/runtime-v20.js
+          grep -q "document.querySelector('#app')" assets/js/runtime-v20.js
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('index.html','utf8');
+          const runtimePos=html.indexOf('assets/js/runtime-v20.js?v=20.17');
+          if(runtimePos<0) throw new Error('runtime not loaded');
+          const modules=['competitive-flow-v20.js','analysis-flow-v20.js','tactical-vision-v20.js','intel-series-flow-v20.js','operations-flow-v20.js','workspace-flow-v20.js','mobile-shell-v20.js'];
+          for(const file of modules){
+            const pos=html.indexOf(`assets/js/${file}`);
+            if(pos<0||pos<runtimePos) throw new Error(`runtime load order invalid for ${file}`);
+            const source=fs.readFileSync(`assets/js/${file}`,'utf8');
+            if(!source.includes('runtime?.subscribe')) throw new Error(`${file} is not subscribed to shared runtime`);
+          }
+          NODE
+
+      - name: V20 portrait ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'champion-visual-upgrade.js?v=20' index.html
+          grep -q 'champion-visual-upgrade.css?v=20' index.html
+          ! grep -q 'assets/js/visual-polish.js' index.html
+          ! grep -q "'./assets/js/visual-polish.js'" sw.js
+          grep -q 'comp-v20-portrait comp-v19-portrait-wrap' assets/js/champion-visual-upgrade.js
+          grep -q 'exactly one direct portrait per slot\|one canonical node' assets/js/champion-visual-upgrade.js
+
+      - name: V20 pro module layout ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-pro.css
+          test -f assets/js/layout-v20.js
+          grep -q 'visual-v20-pro.css?v=20.2' index.html
+          grep -q 'layout-v20.js?v=20.2' index.html
+          grep -q "'./assets/css/visual-v20-pro.css'" sw.js
+          grep -q "'./assets/js/layout-v20.js'" sw.js
+          grep -q "dataset.page=page" assets/js/layout-v20.js
+          grep -q 'composition-card' assets/js/layout-v20.js
+          grep -q 'PLANO DE JOGO' assets/js/layout-v20.js
+          grep -q 'CONDIÇÃO DE VITÓRIA' assets/js/layout-v20.js
+          grep -q 'data-page="comps"' assets/css/visual-v20-pro.css
+          grep -q 'data-page="champions"' assets/css/visual-v20-pro.css
+          grep -q 'data-page="draft"' assets/css/visual-v20-pro.css
+
+      - name: V20 analysis workspace layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-analysis.css
+          grep -q 'visual-v20-analysis.css?v=20.3' index.html
+          grep -q "'./assets/css/visual-v20-analysis.css'" sw.js
+          grep -q 'data-page="tactical"' assets/css/visual-v20-analysis.css
+          grep -q 'data-page="vod"' assets/css/visual-v20-analysis.css
+          grep -q 'tb-viewport' assets/css/visual-v20-analysis.css
+          grep -q 'vod-player-stage' assets/css/visual-v20-analysis.css
+          grep -q 'vod-timeline' assets/css/visual-v20-analysis.css
+
+      - name: V20 decision controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/lab-controls-v20.css
+          test -f assets/js/lab-controls-v20.js
+          grep -q 'lab-controls-v20.css?v=20.8' index.html
+          grep -q 'lab-controls-v20.js?v=20.8' index.html
+          grep -q "'./assets/css/lab-controls-v20.css'" sw.js
+          grep -q "'./assets/js/lab-controls-v20.js'" sw.js
+          grep -q 'comp-toolbar-v20' assets/js/lab-controls-v20.js
+          grep -q 'comp-pool-toggle-v20' assets/js/lab-controls-v20.js
+          grep -q 'compositionPoolFit' assets/js/lab-controls-v20.js
+          grep -q 'draft-reference-v20' assets/js/lab-controls-v20.js
+          grep -q 'data-ci-filter' assets/js/lab-controls-v20.js
+          grep -q 'data-draft-filter' assets/js/lab-controls-v20.js
+          grep -q 'applyCompositionFilters' assets/js/lab-controls-v20.js
+          grep -q 'applyChampionFilter' assets/js/lab-controls-v20.js
+          grep -q 'applyDraftFilters' assets/js/lab-controls-v20.js
+          grep -q 'draft-reference-v20' assets/css/lab-controls-v20.css
+          grep -q 'ci-card.is-selected' assets/css/lab-controls-v20.css
+
+      - name: V20 competitive decision flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/competitive-flow-v20.js
+          test -f assets/css/competitive-flow-v20.css
+          grep -q 'competitive-flow-v20.js?v=20.10' index.html
+          grep -q 'competitive-flow-v20.css?v=20.10' index.html
+          grep -q "'./assets/js/competitive-flow-v20.js'" sw.js
+          grep -q "'./assets/css/competitive-flow-v20.css'" sw.js
+          grep -q 'compositionCompare' assets/js/competitive-flow-v20.js
+          grep -q 'comp-compare-v20' assets/js/competitive-flow-v20.js
+          grep -q 'ci-flow-v20' assets/js/competitive-flow-v20.js
+          grep -q 'draft-flow-v20' assets/js/competitive-flow-v20.js
+          grep -q 'comp-compare-grid-v20' assets/css/competitive-flow-v20.css
+          grep -q 'ci-flow-evidence-v20' assets/css/competitive-flow-v20.css
+          grep -q 'draft-progress-v20' assets/css/competitive-flow-v20.css
+
+      - name: V20 analysis controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/analysis-controls-v20.js
+          test -f assets/css/analysis-controls-v20.css
+          grep -q 'analysis-controls-v20.js?v=20.9' index.html
+          grep -q 'analysis-controls-v20.css?v=20.9' index.html
+          grep -q "'./assets/js/analysis-controls-v20.js'" sw.js
+          grep -q "'./assets/css/analysis-controls-v20.css'" sw.js
+          grep -q 'tacticalStats' assets/js/analysis-controls-v20.js
+          grep -q 'applyLayerPreset' assets/js/analysis-controls-v20.js
+          grep -q 'vodStats' assets/js/analysis-controls-v20.js
+          grep -q "VOD_CORRECTION_DRILL" assets/js/analysis-controls-v20.js
+          grep -q 'analysis-context-v20' assets/css/analysis-controls-v20.css
+          grep -q 'vod-category-quick-v20' assets/css/analysis-controls-v20.css
+
+      - name: V20 analysis focus workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/analysis-flow-v20.js
+          test -f assets/css/analysis-flow-v20.css
+          grep -q 'analysis-flow-v20.js?v=20.11' index.html
+          grep -q 'analysis-flow-v20.css?v=20.11' index.html
+          grep -q "'./assets/js/analysis-flow-v20.js'" sw.js
+          grep -q "'./assets/css/analysis-flow-v20.css'" sw.js
+          grep -q 'coachCompletion' assets/js/analysis-flow-v20.js
+          grep -q 'tactical-focus-v20' assets/js/analysis-flow-v20.js
+          grep -q 'data-tactical-focus' assets/js/analysis-flow-v20.js
+          grep -q 'vod-focus-v20' assets/js/analysis-flow-v20.js
+          grep -q 'data-vod-focus' assets/js/analysis-flow-v20.js
+          grep -q 'analysis-focus-v20' assets/css/analysis-flow-v20.css
+          grep -q 'data-focus-v20' assets/css/analysis-flow-v20.css
+          grep -q 'data-vod-focus-v20' assets/css/analysis-flow-v20.css
+
+      - name: V20 tactical vision system
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/tactical-vision-v20.js
+          test -f assets/css/tactical-vision-v20.css
+          grep -q 'tactical-vision-v20.js?v=20.16' index.html
+          grep -q 'tactical-vision-v20.css?v=20.16' index.html
+          grep -q "'./assets/js/tactical-vision-v20.js'" sw.js
+          grep -q "'./assets/css/tactical-vision-v20.css'" sw.js
+          grep -q 'BOARD_VISUAL' assets/js/tactical-vision-v20.js
+          grep -q 'visionOnly' assets/js/tactical-vision-v20.js
+          grep -q 'FROMBOS_STRUCTURAL' assets/js/tactical-vision-v20.js
+          grep -q 'vision-command-v20' assets/css/tactical-vision-v20.css
+          grep -q 'vision-range-v20' assets/css/tactical-vision-v20.css
+          ! grep -qE 'ddragon\.leagueoflegends\.com|CommunityDragon|lol-game-data' assets/js/tactical-vision-v20.js
+
+      - name: V20 intelligence labs and series flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/intel-series-flow-v20.js
+          test -f assets/css/intel-series-flow-v20.css
+          grep -q 'intel-series-flow-v20.js?v=20.12' index.html
+          grep -q 'intel-series-flow-v20.css?v=20.12' index.html
+          grep -q "'./assets/js/intel-series-flow-v20.js'" sw.js
+          grep -q "'./assets/css/intel-series-flow-v20.css'" sw.js
+          grep -q 'evidenceState' assets/js/intel-series-flow-v20.js
+          grep -q 'intel-lab-flow-v20' assets/js/intel-series-flow-v20.js
+          grep -q 'series-command-v20' assets/js/intel-series-flow-v20.js
+          grep -q 'data-series-open' assets/js/intel-series-flow-v20.js
+          grep -q 'intel-lab-evidence-v20' assets/css/intel-series-flow-v20.css
+          grep -q 'series-command-games-v20' assets/css/intel-series-flow-v20.css
+
+      - name: V20 operations workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-ops.css
+          grep -q 'visual-v20-ops.css?v=20.5' index.html
+          grep -q "'./assets/css/visual-v20-ops.css'" sw.js
+          grep -q 'data-page="training"' assets/css/visual-v20-ops.css
+          grep -q 'data-page="scouting"' assets/css/visual-v20-ops.css
+          grep -q 'data-page="reports"' assets/css/visual-v20-ops.css
+          grep -q 'match-center-v18' assets/css/visual-v20-ops.css
+          grep -q 'performance-vod-bridge' assets/css/visual-v20-ops.css
+          grep -q 'scout-command' assets/css/visual-v20-ops.css
+          grep -q 'report-metrics' assets/css/visual-v20-ops.css
+          grep -q 'mc-filters' assets/css/visual-v20-ops.css
+
+      - name: V20 operations routing flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/operations-flow-v20.js
+          test -f assets/css/operations-flow-v20.css
+          grep -q 'operations-flow-v20.js?v=20.13' index.html
+          grep -q 'operations-flow-v20.css?v=20.13' index.html
+          grep -q "'./assets/js/operations-flow-v20.js'" sw.js
+          grep -q "'./assets/css/operations-flow-v20.css'" sw.js
+          grep -q 'trainingFlow' assets/js/operations-flow-v20.js
+          grep -q 'scoutingFlow' assets/js/operations-flow-v20.js
+          grep -q 'reportsFlow' assets/js/operations-flow-v20.js
+          grep -q 'matchFlow' assets/js/operations-flow-v20.js
+          grep -q 'vodDrillState' assets/js/operations-flow-v20.js
+          grep -q 'ops-flow-v20' assets/css/operations-flow-v20.css
+
+      - name: V20 system and intelligence workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-system.css
+          grep -q 'visual-v20-system.css?v=20.6' index.html
+          grep -q "'./assets/css/visual-v20-system.css'" sw.js
+          grep -q 'data-page="team"' assets/css/visual-v20-system.css
+          grep -q 'data-page="competitive"' assets/css/visual-v20-system.css
+          grep -q 'data-page="meta"' assets/css/visual-v20-system.css
+          grep -q 'data-page="data"' assets/css/visual-v20-system.css
+          grep -q 'data-page="settings"' assets/css/visual-v20-system.css
+          grep -q 'team-ops-v17' assets/css/visual-v20-system.css
+          grep -q 'competitive-center' assets/css/visual-v20-system.css
+          grep -q 'meta-intelligence' assets/css/visual-v20-system.css
+          grep -q 'source-row' assets/css/visual-v20-system.css
+
+      - name: V20 system intelligence controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/system-controls-v20.js
+          test -f assets/css/system-controls-v20.css
+          grep -q 'system-controls-v20.js?v=20.7' index.html
+          grep -q 'system-controls-v20.css?v=20.7' index.html
+          grep -q "'./assets/js/system-controls-v20.js'" sw.js
+          grep -q "'./assets/css/system-controls-v20.css'" sw.js
+          grep -q 'team-quick-v20' assets/js/system-controls-v20.js
+          grep -q 'competitive-tools-v20' assets/js/system-controls-v20.js
+          grep -q 'meta-filterbar-v20' assets/js/system-controls-v20.js
+          grep -q 'data-evidence-legend-v20' assets/js/system-controls-v20.js
+          grep -q 'applyCompetitiveFilter' assets/js/system-controls-v20.js
+          grep -q 'applyMetaFilter' assets/js/system-controls-v20.js
+          grep -q 'applyDataFilter' assets/js/system-controls-v20.js
+
+      - name: V20 workspace command cockpit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/workspace-flow-v20.js
+          test -f assets/css/workspace-flow-v20.css
+          grep -q 'workspace-flow-v20.js?v=20.14' index.html
+          grep -q 'workspace-flow-v20.css?v=20.14' index.html
+          grep -q "'./assets/js/workspace-flow-v20.js'" sw.js
+          grep -q "'./assets/css/workspace-flow-v20.css'" sw.js
+          grep -q 'homeFlow' assets/js/workspace-flow-v20.js
+          grep -q 'teamFlow' assets/js/workspace-flow-v20.js
+          grep -q 'settingsFlow' assets/js/workspace-flow-v20.js
+          grep -q 'workspace-command-v20' assets/css/workspace-flow-v20.css
+          grep -q 'workspace-evidence-v20' assets/css/workspace-flow-v20.css
+          grep -q 'team-pipeline-v20' assets/css/workspace-flow-v20.css
+
+      - name: V20 mobile shell hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/mobile-shell-v20.js
+          test -f assets/css/mobile-shell-v20.css
+          grep -q 'mobile-shell-v20.js?v=20.15' index.html
+          grep -q 'mobile-shell-v20.css?v=20.15' index.html
+          grep -q "'./assets/js/mobile-shell-v20.js'" sw.js
+          grep -q "'./assets/css/mobile-shell-v20.css'" sw.js
+          grep -q 'ensureScrim' assets/js/mobile-shell-v20.js
+          grep -q 'mobile-nav-open-v20' assets/js/mobile-shell-v20.js
+          grep -q 'aria-expanded' assets/js/mobile-shell-v20.js
+          grep -q 'safe-area-inset-top' assets/css/mobile-shell-v20.css
+          grep -q 'mobile-scrim-v20' assets/css/mobile-shell-v20.css
+          grep -q '100dvh' assets/css/mobile-shell-v20.css
+
+      - name: Wild Rift only guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RniE 'ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/champion-intelligence.js assets/js/champion-visual-upgrade.js assets/js/competitive-flow-v20.js assets/js/analysis-flow-v20.js assets/js/tactical-vision-v20.js assets/js/intel-series-flow-v20.js assets/js/operations-flow-v20.js assets/js/workspace-flow-v20.js assets/js/mobile-shell-v20.js assets/js/runtime-v20.js scripts/build-champion-registry.mjs
+          grep -q 'RIOT_OFFICIAL' scripts/build-champion-registry.mjs
+          grep -q 'wildrift.leagueoflegends.com' scripts/build-champion-registry.mjs
+
+      - name: V20 composition duplicate regression guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          COUNT=$(grep -o 'src="assets/js/champion-visual-upgrade.js' index.html | wc -l)
+          test "$COUNT" -eq 1
+          ! grep -q 'src="assets/js/visual-polish.js' index.html

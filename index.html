@@ -24,7 +24,6 @@
   <link rel="stylesheet" href="assets/css/vod-review.css?v=14">
   <link rel="stylesheet" href="assets/css/tactical-share.css">
   <link rel="stylesheet" href="assets/css/scouting-results.css">
-  <link rel="stylesheet" href="assets/css/champion-visual-upgrade.css?v=4">
   <link rel="stylesheet" href="assets/css/champion-grid-v4.css?v=4">
   <link rel="stylesheet" href="assets/css/comps-build-v7.css?v=7">
   <link rel="stylesheet" href="assets/css/tactical-v8.css?v=8">
@@ -34,11 +33,33 @@
   <link rel="stylesheet" href="assets/css/draft-v13.css?v=13">
   <link rel="stylesheet" href="assets/css/visual-v10.css?v=10">
   <link rel="stylesheet" href="assets/css/ui-stabilization-v19.css?v=19">
+  <link rel="stylesheet" href="assets/css/champion-visual-upgrade.css?v=20">
+  <link rel="stylesheet" href="assets/css/visual-v20-pro.css?v=20.2">
+  <link rel="stylesheet" href="assets/css/visual-v20-analysis.css?v=20.3">
+  <link rel="stylesheet" href="assets/css/lab-controls-v20.css?v=20.8">
+  <link rel="stylesheet" href="assets/css/competitive-flow-v20.css?v=20.10">
+  <link rel="stylesheet" href="assets/css/composition-builder-v20.css?v=20.20">
+  <link rel="stylesheet" href="assets/css/champion-decision-bridge-v20.css?v=20.21">
+  <link rel="stylesheet" href="assets/css/analysis-controls-v20.css?v=20.9">
+  <link rel="stylesheet" href="assets/css/analysis-flow-v20.css?v=20.11">
+  <link rel="stylesheet" href="assets/css/tactical-vision-v20.css?v=20.16">
+  <link rel="stylesheet" href="assets/css/tactical-map-delivery-v20.css?v=20.19">
+  <link rel="stylesheet" href="assets/css/intel-series-flow-v20.css?v=20.12">
+  <link rel="stylesheet" href="assets/css/visual-v20-ops.css?v=20.5">
+  <link rel="stylesheet" href="assets/css/operations-flow-v20.css?v=20.13">
+  <link rel="stylesheet" href="assets/css/visual-v20-system.css?v=20.6">
+  <link rel="stylesheet" href="assets/css/system-controls-v20.css?v=20.7">
+  <link rel="stylesheet" href="assets/css/workspace-flow-v20.css?v=20.14">
+  <link rel="stylesheet" href="assets/css/mobile-shell-v20.css?v=20.15">
+  <link rel="stylesheet" href="assets/css/render-performance-v20.css?v=20.18">
 </head>
 <body>
   <div id="app"></div>
   <noscript>O FROMBOS precisa de JavaScript habilitado.</noscript>
-  <script type="module" src="assets/js/app.js?v=19"></script>
+  <script type="module" src="assets/js/app.js?v=20"></script>
+  <script type="module" src="assets/js/runtime-v20.js?v=20.17"></script>
+  <script type="module" src="assets/js/render-performance-v20.js?v=20.18"></script>
+  <script type="module" src="assets/js/tactical-map-delivery-v20.js?v=20.19"></script>
   <script type="module" src="assets/js/match-center-router.js?v=18"></script>
   <script type="module" src="assets/js/vod-v14.js?v=14"></script>
   <script type="module" src="assets/js/vod-performance-v15.js?v=15"></script>
@@ -47,12 +68,24 @@
   <script type="module" src="assets/js/meta-router.js"></script>
   <script type="module" src="assets/js/reports-router.js"></script>
   <script type="module" src="assets/js/team-operations-v17.js?v=17"></script>
-  <script type="module" src="assets/js/visual-polish.js"></script>
   <script type="module" src="assets/js/open-series-observed-ui.js"></script>
   <script type="module" src="assets/js/scouting-registry-ui.js"></script>
   <script type="module" src="assets/js/tactical-share-restore.js"></script>
   <script type="module" src="assets/js/scouting-results-ui.js"></script>
-  <script type="module" src="assets/js/champion-visual-upgrade.js?v=4"></script>
+  <script type="module" src="assets/js/champion-visual-upgrade.js?v=20"></script>
+  <script type="module" src="assets/js/layout-v20.js?v=20.2"></script>
+  <script type="module" src="assets/js/lab-controls-v20.js?v=20.8"></script>
+  <script type="module" src="assets/js/competitive-flow-v20.js?v=20.10"></script>
+  <script type="module" src="assets/js/composition-builder-v20.js?v=20.20"></script>
+  <script type="module" src="assets/js/champion-decision-bridge-v20.js?v=20.21"></script>
+  <script type="module" src="assets/js/analysis-controls-v20.js?v=20.9"></script>
+  <script type="module" src="assets/js/analysis-flow-v20.js?v=20.11"></script>
+  <script type="module" src="assets/js/tactical-vision-v20.js?v=20.16"></script>
+  <script type="module" src="assets/js/intel-series-flow-v20.js?v=20.12"></script>
+  <script type="module" src="assets/js/operations-flow-v20.js?v=20.13"></script>
+  <script type="module" src="assets/js/system-controls-v20.js?v=20.7"></script>
+  <script type="module" src="assets/js/workspace-flow-v20.js?v=20.14"></script>
+  <script type="module" src="assets/js/mobile-shell-v20.js?v=20.15"></script>
   <script type="module" src="assets/js/build-item-upgrade.js?v=7"></script>
   <script type="module" src="assets/js/tactical-ux-v8.js?v=8"></script>
   <script type="module" src="assets/js/tactical-v11.js?v=11"></script>
@@ -63,7 +96,7 @@
   <script type="module" src="assets/js/ui-stabilization-v19.js?v=19"></script>
   <script src="assets/js/i18n-v19.js?v=19" defer></script>
   <script>
-    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=19').catch(console.warn));
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=20.21').catch(console.warn));
   </script>
 </body>
 </html>

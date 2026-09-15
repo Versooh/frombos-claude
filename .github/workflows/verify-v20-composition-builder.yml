@@ -1,0 +1,91 @@
+name: Verify FROMBOS V20 Composition Builder
+
+on:
+  push:
+    branches: [rebuild/frombos-v20]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  composition-builder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate V20.20 assets and integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/composition-builder-v20.js
+          test -f assets/css/composition-builder-v20.css
+          node --check assets/js/composition-builder-v20.js
+          node --check assets/js/app.js
+          node --check assets/js/store.js
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('index.html','utf8');
+          const sw=fs.readFileSync('sw.js','utf8');
+          const runtime=html.indexOf('assets/js/runtime-v20.js?v=20.17');
+          const builder=html.indexOf('assets/js/composition-builder-v20.js?v=20.20');
+          if(runtime<0||builder<0||builder<runtime) throw new Error('Composition Builder must load after the shared V20 runtime');
+          for(const token of [
+            'assets/css/composition-builder-v20.css?v=20.20',
+            'assets/js/composition-builder-v20.js?v=20.20'
+          ]) if(!html.includes(token)) throw new Error(`Missing index integration: ${token}`);
+          if(!/serviceWorker\.register\('\.\/sw\.js\?v=20\.\d+'\)/.test(html)) throw new Error('Missing current V20 service worker registration');
+          for(const token of [
+            "'./assets/css/composition-builder-v20.css'",
+            "'./assets/js/composition-builder-v20.js'"
+          ]) if(!sw.includes(token)) throw new Error(`Missing service worker integration: ${token}`);
+          NODE
+
+      - name: Validate USER_PRIVATE evidence isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/composition-builder-v20.js','utf8');
+          const app=fs.readFileSync('assets/js/app.js','utf8');
+          const required=[
+            "origin:'USER_PRIVATE'",
+            'CHAMPIONS.includes',
+            'RECOVERED_COMPOSITIONS',
+            'ROLES.map',
+            'store.state.customComps',
+            'runtime?.subscribe',
+            'WILD RIFT ONLY',
+            'NENHUMA INFERIDA',
+            'NÃO OBSERVED'
+          ];
+          for(const token of required) if(!js.includes(token)) throw new Error(`Missing V20.20 safety contract: ${token}`);
+          if(!app.includes('[...RECOVERED_COMPOSITIONS,...store.state.customComps]')) throw new Error('App must materialize recovered + local custom compositions without reclassification');
+          if(/origin\s*:\s*['"](?:OFFICIAL|OBSERVED|CURATED|FROMBOS_STRUCTURAL)['"]/i.test(js)) throw new Error('Builder must never assign public evidence provenance');
+          if(/ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon|leagueoflegends\.com/i.test(js)) throw new Error('League PC source detected in Composition Builder');
+          NODE
+
+      - name: Validate Wild Rift roster and private authoring controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/composition-builder-v20.js','utf8');
+          const css=fs.readFileSync('assets/css/composition-builder-v20.css','utf8');
+          for(const token of ['Nova composição','Adaptar','Editar','Excluir','Plano de jogo','Condição de vitória']) {
+            if(!js.includes(token)) throw new Error(`Missing authoring control: ${token}`);
+          }
+          for(const token of ['comp-author-v20','comp-builder-modal-v20','is-user-private-v20','100dvh','safe-area-inset']) {
+            if(!css.includes(token)) throw new Error(`Missing V20.20 responsive/private style: ${token}`);
+          }
+          if(/fetch\s*\(|XMLHttpRequest|WebSocket/i.test(js)) throw new Error('Composition Builder must remain local-only');
+          NODE

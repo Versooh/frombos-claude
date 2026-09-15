@@ -1,0 +1,104 @@
+name: Verify FROMBOS V20 Performance
+
+on:
+  push:
+    branches: [rebuild/frombos-v20]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate V20.18 assets and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/render-performance-v20.css
+          test -f assets/js/render-performance-v20.js
+          node --check assets/js/render-performance-v20.js
+          grep -q 'render-performance-v20.css?v=20.18' index.html
+          grep -q 'render-performance-v20.js?v=20.18' index.html
+          grep -q "'./assets/css/render-performance-v20.css'" sw.js
+          grep -q "'./assets/js/render-performance-v20.js'" sw.js
+
+      - name: Validate V20.18 runtime order
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('index.html','utf8');
+          const runtime=html.indexOf('assets/js/runtime-v20.js?v=20.17');
+          const performance=html.indexOf('assets/js/render-performance-v20.js?v=20.18');
+          if(runtime<0||performance<0||performance<runtime) throw new Error('render performance must load after shared runtime');
+          NODE
+          grep -q 'runtime?.subscribe' assets/js/render-performance-v20.js
+
+      - name: Validate safe rendering hints
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'content-visibility:auto' assets/css/render-performance-v20.css
+          grep -q 'contain-intrinsic-size' assets/css/render-performance-v20.css
+          grep -q 'contain:paint' assets/css/render-performance-v20.css
+          grep -q "img.loading='lazy'" assets/js/render-performance-v20.js
+          grep -q "img.loading='eager'" assets/js/render-performance-v20.js
+          grep -q "img.decoding='async'" assets/js/render-performance-v20.js
+          grep -q "img.fetchPriority='low'" assets/js/render-performance-v20.js
+          grep -q "img.fetchPriority='high'" assets/js/render-performance-v20.js
+
+      - name: Preserve complete DOM and Wild Rift-only policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/render-performance-v20.js','utf8');
+          const css=fs.readFileSync('assets/css/render-performance-v20.css','utf8');
+          const forbiddenDom=[/\.remove\s*\(/,/removeChild\s*\(/,/replaceChildren\s*\(/,/innerHTML\s*=/];
+          if(forbiddenDom.some(pattern=>pattern.test(js))) throw new Error('V20.18 must preserve complete DOM nodes');
+          const forbiddenSources=/IntersectionObserver|virtualiz|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i;
+          if(forbiddenSources.test(js)||forbiddenSources.test(css)) throw new Error('V20.18 contains forbidden virtualization or League PC source');
+          NODE
+
+      - name: Validate V20.19 Tactical Map Delivery
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/tactical-map-delivery-v20.js
+          test -f assets/css/tactical-map-delivery-v20.css
+          node --check assets/js/tactical-map-delivery-v20.js
+          grep -q 'tactical-map-delivery-v20.js?v=20.19' index.html
+          grep -q 'tactical-map-delivery-v20.css?v=20.19' index.html
+          grep -q "'./assets/js/tactical-map-delivery-v20.js'" sw.js
+          grep -q "'./assets/css/tactical-map-delivery-v20.css'" sw.js
+          grep -q "MAP_URL='./assets/img/wild-rift-map.jpg'" assets/js/tactical-map-delivery-v20.js
+          grep -q 'runtime?.subscribe' assets/js/tactical-map-delivery-v20.js
+          grep -q "addEventListener('pointerenter'" assets/js/tactical-map-delivery-v20.js
+          grep -q 'saveData' assets/js/tactical-map-delivery-v20.js
+          grep -q "image.fetchPriority='high'" assets/js/tactical-map-delivery-v20.js
+          grep -q 'map-delivery-v20' assets/css/tactical-map-delivery-v20.css
+
+      - name: Preserve exact map ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/tactical-map-delivery-v20.js','utf8');
+          if(/setAttribute\s*\(\s*['"]href['"]/.test(js)) throw new Error('V20.19 must never mutate Tactical map href');
+          if(/puu\.sh|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i.test(js)) throw new Error('V20.19 must only prewarm the exact local Wild Rift map');
+          if(!js.includes("getAttribute('href')")) throw new Error('V20.19 must inspect, not replace, Tactical map source');
+          NODE

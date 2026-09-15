@@ -1,7 +1,8 @@
 import { CHAMPIONS } from './data.js';
 import { store } from './store.js';
 
-const MAP_URL = 'https://puu.sh/j5JOG/0f458a62b3.jpg';
+const MAP_URL = './assets/img/wild-rift-map.jpg';
+const MAP_FALLBACK_URL = 'https://puu.sh/j5JOG/0f458a62b3.jpg';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DEFAULT_SCENARIOS = ['LVL 1','03:00','1º OBJ','MID GAME','BARON'];
 const TOOLS = [
@@ -15,7 +16,7 @@ const emptyScenario = (name='CENÁRIO') => ({ id: uid(), name, markers: [], path
 function ensureState(){
   store.update(s=>{
     if (!s.tactical || typeof s.tactical !== 'object') s.tactical = {};
-    if (!s.tactical.scenarios || Array.isArray(s.tactical.scenarios)) s.tactical.scenarios = DEFAULT_SCENARIOS.map(emptyScenario);
+    if (!Array.isArray(s.tactical.scenarios)) s.tactical.scenarios = DEFAULT_SCENARIOS.map(emptyScenario);
     if (!s.tactical.scenarios.length) s.tactical.scenarios = DEFAULT_SCENARIOS.map(emptyScenario);
     if (!s.tactical.activeScenario || !s.tactical.scenarios.some(x=>x.id===s.tactical.activeScenario)) s.tactical.activeScenario = s.tactical.scenarios[0].id;
     if (Array.isArray(s.tactical.strokes) && s.tactical.strokes.length) {
@@ -25,7 +26,7 @@ function ensureState(){
     }
   });
 }
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));}
 function active(){ return store.state.tactical.scenarios.find(x=>x.id===store.state.tactical.activeScenario) || store.state.tactical.scenarios[0]; }
 
 export function tacticalHTML(){
@@ -79,6 +80,8 @@ export function bindTacticalBoard(rerender){
   const $=q=>document.querySelector(q);
   const els={board:$('#tbBoard'),routes:$('#tbRoutes'),zones:$('#tbZones'),objectives:$('#tbObjectives'),vision:$('#tbVision'),champions:$('#tbChampions'),notes:$('#tbNotes'),temp:$('#tbTemp')};
   if(!els.board) return;
+  const mapImage=$('#tbMapImage');
+  mapImage?.addEventListener('error',()=>{if(mapImage.getAttribute('href')!==MAP_FALLBACK_URL)mapImage.setAttribute('href',MAP_FALLBACK_URL);},{once:true});
   const scenario=()=>active();
   const save=()=>store.save();
   const snapshot=()=>clone(scenario());

@@ -1,0 +1,71 @@
+name: Verify FROMBOS V20 Champion Decision Bridge
+
+on:
+  push:
+    branches: [rebuild/frombos-v20]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  champion-decision:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate V20.21 assets and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/champion-decision-bridge-v20.js
+          test -f assets/css/champion-decision-bridge-v20.css
+          node --check assets/js/champion-decision-bridge-v20.js
+          grep -q 'champion-decision-bridge-v20.css?v=20.21' index.html
+          grep -q 'champion-decision-bridge-v20.js?v=20.21' index.html
+          grep -q "'./assets/css/champion-decision-bridge-v20.css'" sw.js
+          grep -q "'./assets/js/champion-decision-bridge-v20.js'" sw.js
+          grep -q 'sw.js?v=20.21' index.html
+
+      - name: Validate decision bridge behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'runtime?.subscribe' assets/js/champion-decision-bridge-v20.js
+          grep -q "target==='matchups'" assets/js/champion-decision-bridge-v20.js
+          grep -q "target==='builds'" assets/js/champion-decision-bridge-v20.js
+          grep -q "target==='comps'" assets/js/champion-decision-bridge-v20.js
+          grep -q "target==='draft'" assets/js/champion-decision-bridge-v20.js
+          grep -q "search.dispatchEvent(new Event('input'" assets/js/champion-decision-bridge-v20.js
+          grep -q 'Nenhum pick ou ban é executado automaticamente' assets/js/champion-decision-bridge-v20.js
+          grep -q 'USER_PRIVATE' assets/js/champion-decision-bridge-v20.js
+
+      - name: Preserve evidence and Wild Rift-only policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/champion-decision-bridge-v20.js','utf8');
+          const css=fs.readFileSync('assets/css/champion-decision-bridge-v20.css','utf8');
+          const combined=js+'\n'+css;
+          const forbidden=/ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon|puu\.sh|fetch\s*\(|XMLHttpRequest|axios|\.origin\s*=\s*['"](?:OFFICIAL|OBSERVED|CURATED|FROMBOS_STRUCTURAL)['"]|win\s*rate|winrate|prediction|probability/i;
+          if(forbidden.test(combined)) throw new Error('V20.21 contains forbidden source, network call, evidence mutation or invented metric language');
+          if(!js.includes("import { CHAMPIONS, RECOVERED_COMPOSITIONS, ROLES } from './data.js'")) throw new Error('V20.21 must use the Wild Rift roster/composition data source');
+          if(!js.includes("import { store } from './store.js'")) throw new Error('V20.21 must read local workspace state');
+          NODE
+
+      - name: Validate mobile decision UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '@media(max-width:760px)' assets/css/champion-decision-bridge-v20.css
+          grep -q '@media(max-width:460px)' assets/css/champion-decision-bridge-v20.css
+          grep -q 'min-height:44px' assets/css/champion-decision-bridge-v20.css

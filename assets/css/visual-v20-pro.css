@@ -1,0 +1,203 @@
+/* FROMBOS V20 — Pro module layouts
+   Loaded last. This file owns layout hierarchy only; it does not mutate competitive data. */
+
+:root{
+  --v20-panel:#09142b;
+  --v20-panel-hi:#0d1c39;
+  --v20-line:rgba(119,153,210,.18);
+  --v20-line-hi:rgba(119,153,210,.32);
+  --v20-gold:#e2bd77;
+  --v20-cyan:#50dcff;
+  --v20-blue:#2582ff;
+  --v20-red:#ff6475;
+  --v20-muted:#8fa1bd;
+}
+
+.content[data-page="comps"],
+.content[data-page="champions"],
+.content[data-page="draft"]{max-width:1760px;margin:0 auto;width:100%}
+.content[data-page="comps"]>.page-head,
+.content[data-page="champions"]>.page-head,
+.content[data-page="draft"]>.page-head{margin-bottom:18px}
+.content[data-page="comps"]>.page-head h1,
+.content[data-page="champions"]>.page-head h1,
+.content[data-page="draft"]>.page-head h1{font-size:clamp(38px,4.4vw,66px)}
+
+/* ───────────────────────────── COMPOSITION LAB ───────────────────────────── */
+.content[data-page="comps"]>.grid.cols-2{gap:18px;align-items:stretch}
+.content[data-page="comps"] .composition-card{
+  position:relative;
+  min-height:100%;
+  padding:0;
+  overflow:hidden;
+  border-color:rgba(212,175,112,.18);
+  background:
+    radial-gradient(circle at 90% 0%,rgba(37,130,255,.11),transparent 30%),
+    linear-gradient(180deg,rgba(13,28,57,.98),rgba(6,14,31,.98));
+}
+.content[data-page="comps"] .composition-card:after{
+  content:"";position:absolute;inset:0 0 auto;height:2px;
+  background:linear-gradient(90deg,var(--v20-gold),rgba(80,220,255,.62),transparent 72%);
+  pointer-events:none;
+}
+.comp-card-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:20px 20px 14px;border-bottom:1px solid rgba(255,255,255,.055)}
+.comp-card-head h3{margin:5px 0 0;font-size:22px;line-height:1.1;letter-spacing:-.02em}
+.comp-card-head .badge{max-width:190px;font-size:9px!important;opacity:.9}
+.content[data-page="comps"] .comp-lineup{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:9px!important;
+  padding:16px 18px 14px;
+  margin:0!important;
+  overflow:visible!important;
+}
+.content[data-page="comps"] .comp-lineup .champ-slot{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:auto auto auto!important;
+  justify-items:center;
+  align-content:start;
+  gap:5px;
+  min-height:150px;
+  padding:8px 6px 10px!important;
+  border:1px solid rgba(113,151,214,.16);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(18,38,77,.74),rgba(6,15,34,.78));
+  transition:transform .17s ease,border-color .17s ease,background .17s ease;
+}
+.content[data-page="comps"] .comp-lineup .champ-slot:hover{transform:translateY(-2px);border-color:rgba(80,220,255,.28);background:linear-gradient(180deg,rgba(22,47,91,.82),rgba(7,17,38,.86))}
+.content[data-page="comps"] .comp-lineup .champ-slot>.comp-v20-portrait{
+  grid-row:1!important;grid-column:1!important;
+  width:min(100%,82px)!important;height:auto!important;aspect-ratio:3/4;
+  border-radius:9px!important;
+  border-color:rgba(120,162,228,.32)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.32)!important;
+}
+.content[data-page="comps"] .comp-lineup .champ-slot small,
+.content[data-page="comps"] .comp-lineup .champ-slot b{grid-column:1!important;max-width:100%;text-align:center}
+.content[data-page="comps"] .comp-lineup .champ-slot small{grid-row:2;color:#6f84a5!important;font-size:8px!important;letter-spacing:.12em!important}
+.content[data-page="comps"] .comp-lineup .champ-slot b{grid-row:3;color:#f3f7ff;font-size:11px!important;line-height:1.15}
+.comp-gameplan{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 14px}
+.comp-plan-block,.comp-win-block{min-height:104px;padding:13px 14px;border:1px solid rgba(113,151,214,.14);border-radius:9px;background:rgba(4,12,28,.46)}
+.comp-plan-block small,.comp-win-block small{display:block;margin-bottom:7px;color:#7185a6;font-size:8px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.comp-plan-block p,.comp-win-block p{margin:0;font-size:12px;line-height:1.58;color:#b6c3d8}
+.comp-win-block{border-color:rgba(226,189,119,.2);background:linear-gradient(135deg,rgba(226,189,119,.055),rgba(4,12,28,.48))}
+.comp-win-block small{color:var(--v20-gold)}
+.content[data-page="comps"] .comp-intel{margin:0 18px 14px!important;border-color:rgba(80,220,255,.12)!important;background:rgba(5,16,35,.72)!important}
+.content[data-page="comps"] .comp-intel-head{padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.content[data-page="comps"] .comp-intel-chips{gap:5px!important}
+.content[data-page="comps"] .comp-intel-chips span{font-size:9px!important;min-height:27px}
+.comp-card-actions{display:flex;justify-content:flex-end;padding:0 18px 18px;margin-top:auto}
+.comp-card-actions .btn{min-width:150px}
+
+/* ─────────────────────────── CHAMPION INTELLIGENCE ───────────────────────── */
+.content[data-page="champions"] .champion-intelligence{grid-template-columns:minmax(380px,.72fr) minmax(0,1.28fr);gap:18px;align-items:start}
+.content[data-page="champions"] .ci-browser{position:sticky;top:92px;max-height:calc(100vh - 112px);overflow:hidden;padding:15px}
+.content[data-page="champions"] .ci-browser-head{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+.content[data-page="champions"] .ci-browser-head h3{font-size:20px;margin:4px 0}
+.content[data-page="champions"] .ci-browser-head p{margin:0}
+.content[data-page="champions"] .ci-browser-head .input{max-width:none;width:100%;min-height:42px}
+.content[data-page="champions"] .ci-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-height:calc(100vh - 252px);padding:2px 4px 8px 0;margin-top:10px}
+.content[data-page="champions"] .ci-card{border-radius:9px;background:#07111f;box-shadow:none;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.content[data-page="champions"] .ci-card:hover{transform:translateY(-3px);border-color:rgba(80,220,255,.42);box-shadow:0 12px 28px rgba(0,0,0,.25)}
+.content[data-page="champions"] .ci-art{aspect-ratio:3/4!important}
+.content[data-page="champions"] .ci-card-body{padding:8px 8px 9px!important}
+.content[data-page="champions"] .ci-card-body b{font-size:11px!important;letter-spacing:.01em}
+.content[data-page="champions"] .ci-card-body small{font-size:8px!important;line-height:1.35;min-height:22px}
+.content[data-page="champions"] .ci-detail{padding:0!important;overflow:hidden}
+.content[data-page="champions"] .ci-hero{min-height:350px;grid-template-columns:190px minmax(0,1fr);gap:26px;padding:28px;align-items:end;border:0;border-radius:0;background:linear-gradient(120deg,#0c1930,#07101f)}
+.content[data-page="champions"] .ci-hero.has-splash:before{background-image:linear-gradient(90deg,rgba(4,9,18,.98) 0%,rgba(4,9,18,.88) 38%,rgba(4,9,18,.28) 72%,rgba(4,9,18,.42)),var(--ci-splash);filter:saturate(1.03) contrast(1.02)}
+.content[data-page="champions"] .ci-hero-portrait{aspect-ratio:3/4;border-radius:12px;border-color:rgba(226,189,119,.58);box-shadow:0 22px 52px rgba(0,0,0,.45)}
+.content[data-page="champions"] .ci-hero h2{font-size:clamp(46px,5vw,76px);line-height:.92;letter-spacing:-.045em;margin:8px 0 12px}
+.content[data-page="champions"] .ci-hero p{font-size:13px;line-height:1.65;max-width:650px}
+.content[data-page="champions"] .ci-evidence-strip{margin:0;padding:12px 18px;border-top:1px solid rgba(255,255,255,.055);border-bottom:1px solid rgba(255,255,255,.055);background:#07101e}
+.content[data-page="champions"] .ci-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px 16px 18px}
+.content[data-page="champions"] .intel-state{min-height:112px;padding:14px;border-color:rgba(112,151,211,.16);background:linear-gradient(180deg,rgba(10,24,51,.86),rgba(6,14,31,.9))}
+.content[data-page="champions"] .intel-state-head b{font-size:12px}
+.content[data-page="champions"] .intel-state p{font-size:11px;line-height:1.55;color:#97a7bf}
+
+/* ─────────────────────────────── DRAFT ROOM ─────────────────────────────── */
+.content[data-page="draft"] .draft-pro{gap:12px}
+.content[data-page="draft"] .draft-command{padding:13px 14px;background:linear-gradient(180deg,rgba(11,25,53,.96),rgba(7,16,35,.96));border-color:rgba(226,189,119,.18)}
+.content[data-page="draft"] .draft-context{gap:8px!important}
+.content[data-page="draft"] .draft-context label{font-size:10px!important;text-transform:uppercase;letter-spacing:.08em;color:#7d8eaa}
+.content[data-page="draft"] .draft-context .select{margin-top:5px;min-height:38px}
+.content[data-page="draft"] .series-strip{padding-top:3px}
+.content[data-page="draft"] .series-game{min-width:46px;min-height:36px;padding:7px 10px}
+.content[data-page="draft"] .draft-arena{gap:12px!important;align-items:stretch}
+.content[data-page="draft"] .draft-team-panel{padding:14px!important;min-height:0!important;border-radius:11px!important;background:linear-gradient(180deg,#0a1730,#06101f)!important}
+.content[data-page="draft"] .draft-team-head{margin-bottom:12px!important;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.055)}
+.content[data-page="draft"] .draft-team-head h2{font-size:18px;margin:3px 0 0}
+.content[data-page="draft"] .draft-section-label{margin:12px 0 7px!important;font-size:9px!important}
+.content[data-page="draft"] .ban-grid{gap:5px!important}
+.content[data-page="draft"] .ban-grid .dr-slot{min-height:64px;border-radius:7px!important;background:#07101d!important}
+.content[data-page="draft"] .ban-grid .dr-slot-art{height:39px!important}
+.content[data-page="draft"] .pick-stack{gap:6px!important}
+.content[data-page="draft"] .pick-stack .dr-slot{min-height:68px;border-radius:8px!important}
+.content[data-page="draft"] .pick-stack .dr-slot-art{width:48px!important;min-width:48px;height:68px!important}
+.content[data-page="draft"] .dr-slot-portrait{object-position:center 16%}
+.content[data-page="draft"] .draft-center-panel{padding:12px!important;background:linear-gradient(180deg,#0c1933,#07111f)!important}
+.content[data-page="draft"] .draft-stage-head{padding:8px 6px 11px!important}
+.content[data-page="draft"] .draft-stage-head h2{font-size:24px!important;letter-spacing:-.02em}
+.content[data-page="draft"] .draft-stage-head p{font-size:10px!important;line-height:1.45}
+.content[data-page="draft"] .draft-sequence-pro{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px!important;margin:9px 0 11px!important}
+.content[data-page="draft"] .draft-seq-row{grid-template-columns:25px 58px 48px minmax(0,1fr)!important;padding:6px 7px!important;min-height:31px;background:#07101d!important}
+.content[data-page="draft"] .draft-seq-row>*{font-size:9px!important}
+.content[data-page="draft"] .draft-branches{padding-top:10px!important}
+.content[data-page="draft"] .draft-branches p{font-size:9px!important;margin:5px 0}
+.content[data-page="draft"] .champion-select{border-color:rgba(80,220,255,.16)!important;background:linear-gradient(180deg,#0b1933,#07111f)!important}
+.content[data-page="draft"] .champion-select-head{padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.055)}
+.content[data-page="draft"] .champion-select-head h3{font-size:18px;margin:4px 0}
+.content[data-page="draft"] .champion-select-head p{font-size:9px!important;line-height:1.45;margin:4px 0 0}
+.content[data-page="draft"] .draft-champ-grid{gap:7px!important;padding-top:2px}
+.content[data-page="draft"] .draft-champ-card{border-radius:8px!important;background:#07101d!important;border-color:rgba(111,151,211,.18)!important}
+.content[data-page="draft"] .draft-champ-card:hover:not(.disabled){border-color:rgba(80,220,255,.52)!important;box-shadow:0 9px 24px rgba(0,0,0,.28)}
+.content[data-page="draft"] .draft-champ-card.in-pool{border-color:rgba(226,189,119,.42)!important;box-shadow:inset 0 -2px var(--v20-gold)!important}
+.content[data-page="draft"] .draft-champ-card.disabled{opacity:.34!important;filter:grayscale(.68)}
+.content[data-page="draft"] .draft-champ-art{aspect-ratio:3/4!important}
+.content[data-page="draft"] .draft-champ-state{font-size:7px!important;min-height:20px!important;padding:3px 5px!important}
+.content[data-page="draft"] .draft-champ-card>b{font-size:10px!important;padding-top:5px!important}
+.content[data-page="draft"] .draft-champ-card>small{font-size:7px!important;padding-bottom:7px!important;color:#7789a6!important}
+.content[data-page="draft"] .draft-evidence{padding-top:8px;border-top:1px solid rgba(255,255,255,.05)}
+.content[data-page="draft"] .draft-evidence span{font-size:8px!important;min-height:26px!important}
+
+@media(min-width:1320px){
+  .content[data-page="draft"] .draft-pro{grid-template-columns:minmax(0,1fr) 405px!important}
+  .content[data-page="draft"] .champion-select{top:86px!important;max-height:calc(100vh - 104px)!important}
+}
+@media(min-width:1620px){
+  .content[data-page="draft"] .draft-pro{grid-template-columns:minmax(0,1fr) 455px!important}
+}
+
+@media(max-width:1300px){
+  .content[data-page="champions"] .champion-intelligence{grid-template-columns:1fr}
+  .content[data-page="champions"] .ci-browser{position:static;max-height:none}
+  .content[data-page="champions"] .ci-grid{grid-template-columns:repeat(7,minmax(0,1fr));max-height:390px}
+}
+@media(max-width:980px){
+  .content[data-page="comps"]>.grid.cols-2{grid-template-columns:1fr!important}
+  .content[data-page="draft"] .draft-sequence-pro{grid-template-columns:1fr}
+  .content[data-page="champions"] .ci-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media(max-width:720px){
+  .content[data-page="comps"] .comp-lineup{grid-template-columns:repeat(5,76px)!important;overflow-x:auto!important;padding-bottom:18px}
+  .content[data-page="comps"] .comp-lineup .champ-slot{min-height:132px}
+  .comp-gameplan{grid-template-columns:1fr;padding:0 12px 12px}
+  .comp-card-head{padding:16px 14px 12px;flex-direction:column}.comp-card-head .badge{max-width:100%}
+  .content[data-page="comps"] .comp-intel{margin:0 12px 12px!important}.comp-card-actions{padding:0 12px 14px}
+  .content[data-page="champions"] .ci-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-height:360px}
+  .content[data-page="champions"] .ci-hero{grid-template-columns:96px minmax(0,1fr);min-height:245px;padding:16px;gap:14px}
+  .content[data-page="champions"] .ci-hero h2{font-size:36px}
+  .content[data-page="champions"] .ci-tabs{grid-template-columns:1fr;padding:10px}
+  .content[data-page="draft"] .draft-stage-head h2{font-size:20px!important}
+}
+@media(max-width:520px){
+  .content[data-page="champions"] .ci-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .content[data-page="champions"] .ci-card-body small{display:none}
+  .content[data-page="draft"] .draft-context{grid-template-columns:1fr!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .content[data-page="comps"] .comp-lineup .champ-slot,
+  .content[data-page="champions"] .ci-card{transition:none!important}
+}

@@ -1,0 +1,20 @@
+/* FROMBOS V20.13 — operational command flow */
+.ops-flow-v20{
+  display:grid;
+  grid-template-columns:minmax(210px,.75fr) minmax(0,1.8fr) max-content;
+  gap:10px;
+  align-items:center;
+  padding:10px 11px;
+  border:1px solid rgba(112,151,212,.15);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(9,22,47,.94),rgba(5,14,30,.97));
+  box-shadow:0 14px 34px rgba(0,0,0,.16);
+}
+.ops-flow-head-v20{display:grid;gap:3px;min-width:0}.ops-kicker-v20{font-size:7px;font-weight:900;letter-spacing:.14em;color:#6f84a3}.ops-title-v20{font-size:13px;color:#edf5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ops-metrics-v20{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;min-width:0}.ops-metric-v20{display:grid;gap:2px;min-height:50px;padding:7px 8px;border:1px solid rgba(112,151,212,.12);border-radius:8px;background:#07111f;color:#70839e;font-size:7px;text-transform:uppercase;letter-spacing:.05em}.ops-metric-v20>b{font-size:16px;line-height:1;color:#e9f2ff;font-variant-numeric:tabular-nums}.ops-metric-v20>small{font-size:6px;line-height:1.25;color:#60738f;text-transform:none;letter-spacing:0}
+.ops-links-v20{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap}.ops-links-v20 .btn{min-height:32px;padding:5px 8px;font-size:8px}
+.training-ops-flow-v20{border-color:rgba(80,220,255,.16)}.scouting-ops-flow-v20{border-color:rgba(138,92,255,.18)}.reports-ops-flow-v20{border-color:rgba(82,217,152,.16)}.matches-ops-flow-v20{border-color:rgba(226,189,119,.18)}
+.content[data-page="training"] .performance-hero+.training-ops-flow-v20,.content[data-page="scouting"] .scout-command+.scouting-ops-flow-v20,.content[data-page="reports"] .report-hero+.reports-ops-flow-v20,.match-center-v18 .mc-hero+.matches-ops-flow-v20{margin-top:0}
+@media(max-width:1180px){.ops-flow-v20{grid-template-columns:1fr auto}.ops-metrics-v20{grid-column:1/-1;grid-row:2}.ops-links-v20{grid-column:2;grid-row:1}.ops-metrics-v20{grid-template-columns:repeat(5,minmax(120px,1fr));overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}}
+@media(max-width:720px){.ops-flow-v20{grid-template-columns:1fr;padding:9px}.ops-flow-head-v20,.ops-metrics-v20,.ops-links-v20{grid-column:1;grid-row:auto}.ops-title-v20{white-space:normal}.ops-metrics-v20{grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.ops-links-v20{justify-content:flex-start}.ops-links-v20 .btn{flex:1 1 120px;min-height:38px}}
+@media(max-width:430px){.ops-metrics-v20{grid-template-columns:1fr 1fr}.ops-metric-v20{min-height:54px}}

@@ -1,0 +1,120 @@
+/* FROMBOS V20 — Operations Workspace
+   Training, Scouting, Reports and Match Center. Loaded after legacy module CSS. */
+
+.content[data-page="training"],
+.content[data-page="scouting"],
+.content[data-page="reports"]{max-width:1780px;margin:0 auto;width:100%}
+.content[data-page="training"]>.page-head,
+.content[data-page="scouting"]>.page-head,
+.content[data-page="reports"]>.page-head{margin-bottom:16px}
+.content[data-page="training"]>.page-head h1,
+.content[data-page="scouting"]>.page-head h1,
+.content[data-page="reports"]>.page-head h1{font-size:clamp(38px,4.3vw,64px)}
+
+/* ───────────────────────────── PERFORMANCE CENTER ───────────────────────── */
+.content[data-page="training"] .performance-center{gap:12px}
+.content[data-page="training"] .performance-hero{
+  min-height:220px;
+  padding:24px 28px;
+  border-color:rgba(226,189,119,.17);
+  background:
+    radial-gradient(circle at 82% 18%,rgba(80,220,255,.12),transparent 26%),
+    linear-gradient(115deg,rgba(13,28,57,.98),rgba(6,15,32,.98));
+}
+.content[data-page="training"] .performance-hero h2{font-size:clamp(30px,3.2vw,48px);line-height:1;letter-spacing:-.035em;margin:7px 0 10px}
+.content[data-page="training"] .performance-hero p{max-width:800px;font-size:12px;line-height:1.7;color:#9babc1}
+.content[data-page="training"] .coach-score{min-width:142px;min-height:142px;border-radius:50%;display:grid;place-items:center;align-content:center;border:1px solid rgba(80,220,255,.28);background:radial-gradient(circle,rgba(80,220,255,.1),rgba(7,17,31,.9) 68%);box-shadow:0 20px 50px rgba(0,0,0,.28)}
+.content[data-page="training"] .coach-score b{font-size:34px;line-height:1;color:#eef8ff}.content[data-page="training"] .coach-score span{font-size:8px;color:#7185a4;text-transform:uppercase;letter-spacing:.1em;margin-top:5px}
+.content[data-page="training"] .performance-kpis{gap:8px}
+.content[data-page="training"] .performance-kpis>div{padding:12px 14px;border-radius:8px;border-color:rgba(111,151,211,.16);background:linear-gradient(180deg,#0b1831,#07111f)}
+.content[data-page="training"] .performance-kpis small{font-size:8px!important}.content[data-page="training"] .performance-kpis b{font-size:28px!important}
+.content[data-page="training"] .performance-grid{grid-template-columns:minmax(0,1.45fr) minmax(300px,.55fr);gap:12px;align-items:start}
+.content[data-page="training"] .objective-trainer,.content[data-page="training"] .vision-trainer{border-color:rgba(112,151,212,.16);background:linear-gradient(180deg,#0a1730,#07111f)}
+.content[data-page="training"] .objective-timeline{gap:7px}
+.content[data-page="training"] .coach-stage{border-color:rgba(112,151,212,.15);background:#07111f;border-radius:8px;padding:11px}
+.content[data-page="training"] .coach-stage-time{color:#50dcff;font-size:9px;font-weight:900;letter-spacing:.08em}
+.content[data-page="training"] .coach-stage h4{font-size:13px;margin:4px 0 9px}
+.content[data-page="training"] .coach-check{min-height:32px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.035)}
+.content[data-page="training"] .coach-check:last-child{border-bottom:0}
+.content[data-page="training"] .coach-call{margin-top:10px;padding:12px;border:1px solid rgba(226,189,119,.17);border-radius:9px;background:rgba(226,189,119,.035)}
+.content[data-page="training"] .coach-call-buttons{gap:5px}.content[data-page="training"] .coach-call-buttons .btn{min-height:34px;padding:6px 9px}
+.content[data-page="training"] .vision-purpose-grid{gap:7px}
+.content[data-page="training"] .vision-purpose{border-radius:8px;border-color:rgba(112,151,212,.15);background:#07111f;padding:10px}
+.content[data-page="training"] .vision-purpose.active{border-color:rgba(80,220,255,.48);background:linear-gradient(90deg,rgba(80,220,255,.08),#07111f);box-shadow:inset 2px 0 #50dcff}
+.content[data-page="training"] .performance-vod-bridge{border-color:rgba(112,151,212,.16);background:linear-gradient(180deg,#0a1730,#07111f)}
+.content[data-page="training"] .performance-vod-columns{gap:10px}
+.content[data-page="training"] .vod-training-evidence,.content[data-page="training"] .vod-training-drill{border-radius:8px;border-color:rgba(112,151,212,.14);background:#07111f}
+.content[data-page="training"] .performance-grid.lower{grid-template-columns:1fr 1fr}
+
+/* ───────────────────────────── SCOUTING WAR ROOM ────────────────────────── */
+.content[data-page="scouting"] .scouting-war-room{display:grid;gap:12px}
+.content[data-page="scouting"] .scout-command{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.58fr);gap:24px;align-items:center;padding:22px 24px;border-color:rgba(226,189,119,.18);background:radial-gradient(circle at 92% 8%,rgba(138,92,255,.12),transparent 30%),linear-gradient(115deg,#0c1933,#07111f)}
+.content[data-page="scouting"] .scout-command h2{font-size:clamp(34px,4vw,58px);line-height:.96;margin:6px 0 9px;letter-spacing:-.035em}
+.content[data-page="scouting"] .scout-command p{margin:0;max-width:780px;color:#93a4bc;font-size:12px;line-height:1.65}
+.content[data-page="scouting"] .scout-actions{display:grid;grid-template-columns:1fr;gap:7px}
+.content[data-page="scouting"] .scout-actions .select,.content[data-page="scouting"] .scout-actions .btn{min-height:40px}
+.content[data-page="scouting"] .scout-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.content[data-page="scouting"] .scout-kpis article{padding:12px;border:1px solid rgba(112,151,212,.15);border-radius:8px;background:linear-gradient(180deg,#0b1831,#07111f)}
+.content[data-page="scouting"] .scout-kpis span{font-size:8px;color:#7184a2;text-transform:uppercase;letter-spacing:.08em}
+.content[data-page="scouting"] .scout-kpis b{display:block;margin-top:5px;font-size:25px;line-height:1;color:#f1f6ff}
+.content[data-page="scouting"] .scout-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:12px}
+.content[data-page="scouting"] .scout-grid>.card,.content[data-page="scouting"] .sc-registry{border-color:rgba(112,151,212,.15);background:linear-gradient(180deg,#0a1730,#07111f)}
+.content[data-page="scouting"] .scout-player-list{display:grid;gap:7px}
+.content[data-page="scouting"] .scout-player-list article{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border:1px solid rgba(112,151,212,.13);border-radius:8px;background:#07111f}
+.content[data-page="scouting"] .scout-player-list b{font-size:11px}.content[data-page="scouting"] .scout-player-list span{display:block;margin-top:3px;font-size:8px;color:#778aa6}
+.content[data-page="scouting"] .scout-player-list strong{font-size:18px;color:#50dcff}.content[data-page="scouting"] .scout-player-list small{display:block;font-size:7px;color:#74859e;text-align:right}
+.content[data-page="scouting"] .scout-unknown{border-color:rgba(226,189,119,.18)!important;background:linear-gradient(180deg,rgba(226,189,119,.04),#07111f)!important}
+.content[data-page="scouting"] .unknown-list{display:grid;gap:6px}.content[data-page="scouting"] .unknown-list>div{display:flex;justify-content:space-between;gap:12px;padding:8px 9px;border-bottom:1px solid rgba(255,255,255,.045)}
+.content[data-page="scouting"] .unknown-list b{font-size:9px}.content[data-page="scouting"] .unknown-list span{font-size:8px;color:#e2bd77}
+.content[data-page="scouting"] .sc-registry{margin-top:0;padding:14px}
+.content[data-page="scouting"] .sc-reg-layout{grid-template-columns:minmax(220px,.48fr) minmax(0,1.52fr);gap:10px}
+.content[data-page="scouting"] .sc-reg-player{border-radius:8px;border-color:rgba(112,151,212,.13);background:#07111f}
+.content[data-page="scouting"] #scoutNotes{min-height:140px}
+
+/* ─────────────────────────────── REPORTS ────────────────────────────────── */
+.content[data-page="reports"] .reports-center{gap:12px}
+.content[data-page="reports"] .report-hero{min-height:190px;padding:24px 26px;border-color:rgba(226,189,119,.17);background:radial-gradient(circle at 92% 15%,rgba(82,217,152,.08),transparent 28%),linear-gradient(115deg,#0c1933,#07111f)}
+.content[data-page="reports"] .report-hero h2{font-size:clamp(34px,4vw,56px);line-height:1;margin:6px 0 10px;letter-spacing:-.035em}
+.content[data-page="reports"] .report-hero p{font-size:12px;line-height:1.65}
+.content[data-page="reports"] .report-metrics{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.content[data-page="reports"] .report-metric{border-radius:8px;border-color:rgba(112,151,212,.15);background:linear-gradient(180deg,#0b1831,#07111f);padding:12px}
+.content[data-page="reports"] .report-metric span{font-size:8px}.content[data-page="reports"] .report-metric b{font-size:26px}.content[data-page="reports"] .report-metric small{font-size:8px}
+.content[data-page="reports"] .reports-grid{gap:12px}
+.content[data-page="reports"] .reports-grid>.card,.content[data-page="reports"]>.card{border-color:rgba(112,151,212,.15);background:linear-gradient(180deg,#0a1730,#07111f)}
+.content[data-page="reports"] .report-pool-table,.content[data-page="reports"] .draft-report-list article{border-color:rgba(112,151,212,.13);background:#07111f}
+.content[data-page="reports"] .rpt-head{background:#06101d}.content[data-page="reports"] .rpt-row{min-height:48px}
+.content[data-page="reports"] .rpt-row small{font-size:7px;padding:4px 6px;background:rgba(20,122,255,.045)}
+.content[data-page="reports"] .report-bar i,.content[data-page="reports"] .draft-report-list i{height:6px}
+.content[data-page="reports"] .activity-list article{grid-template-columns:160px 185px minmax(0,1fr);padding:10px 0}
+.content[data-page="reports"] .activity-list time,.content[data-page="reports"] .activity-list b,.content[data-page="reports"] .activity-list p{font-size:9px}
+
+/* ───────────────────────────── MATCH CENTER ──────────────────────────────── */
+.match-center-v18{max-width:1780px;margin:0 auto;gap:12px}
+.match-center-v18 .mc-hero{min-height:190px;padding:22px 25px;border-color:rgba(226,189,119,.17);background:radial-gradient(circle at 88% 10%,rgba(138,92,255,.12),transparent 28%),linear-gradient(115deg,#0c1933,#07111f)}
+.match-center-v18 .mc-hero h2{font-size:clamp(32px,3.7vw,52px);line-height:1;margin:6px 0 9px;letter-spacing:-.035em}
+.match-center-v18 .mc-kpis{gap:8px}.match-center-v18 .mc-kpis>div{border-radius:8px;border-color:rgba(112,151,212,.15);background:linear-gradient(180deg,#0b1831,#07111f)}
+.match-center-v18 .mc-kpis b{font-size:27px}.match-center-v18 .mc-filters{padding:10px;border:1px solid rgba(112,151,212,.14);border-radius:9px;background:#07111f}
+.match-center-v18 .mc-layout{gap:12px}.match-center-v18 .mc-game{border-radius:8px;border-color:rgba(112,151,212,.14);background:#07111f;padding:11px}.match-center-v18 .mc-game:hover{border-color:rgba(80,220,255,.32);transform:translateY(-2px)}
+.match-center-v18 .mc-game.selected{border-color:rgba(80,220,255,.58);box-shadow:0 0 0 1px rgba(80,220,255,.12),0 14px 32px rgba(0,0,0,.2)}
+.match-center-v18 .mc-form{top:86px;border-color:rgba(112,151,212,.16);background:linear-gradient(180deg,#0a1730,#07111f)}
+.match-center-v18 .mc-objectives,.match-center-v18 .mc-draft-snapshot{border-color:rgba(112,151,212,.14);background:#07111f}
+
+@media(max-width:1250px){
+  .content[data-page="training"] .performance-grid{grid-template-columns:1fr}
+  .content[data-page="scouting"] .scout-command{grid-template-columns:1fr}.content[data-page="scouting"] .scout-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .content[data-page="reports"] .report-metrics{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:900px){
+  .content[data-page="training"] .performance-grid.lower,.content[data-page="training"] .performance-vod-columns{grid-template-columns:1fr}
+  .content[data-page="scouting"] .scout-kpis{grid-template-columns:repeat(3,1fr)}.content[data-page="scouting"] .scout-grid{grid-template-columns:1fr}.content[data-page="scouting"] .sc-reg-layout{grid-template-columns:1fr}
+  .content[data-page="reports"] .reports-grid{grid-template-columns:1fr}.content[data-page="reports"] .activity-list article{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .content[data-page="training"] .performance-hero{align-items:flex-start;flex-direction:column}.content[data-page="training"] .coach-score{min-width:110px;min-height:110px}
+  .content[data-page="training"] .performance-kpis{grid-template-columns:repeat(2,1fr)}
+  .content[data-page="scouting"] .scout-actions{grid-template-columns:1fr}.content[data-page="scouting"] .scout-kpis{grid-template-columns:repeat(2,1fr)}
+  .content[data-page="reports"] .report-hero{align-items:flex-start;flex-direction:column}.content[data-page="reports"] .report-metrics{grid-template-columns:repeat(2,1fr)}
+  .match-center-v18 .mc-hero{align-items:flex-start;flex-direction:column}.match-center-v18 .mc-filters{grid-template-columns:1fr!important}
+}
+
+@media(prefers-reduced-motion:reduce){.match-center-v18 .mc-game{transition:none}}

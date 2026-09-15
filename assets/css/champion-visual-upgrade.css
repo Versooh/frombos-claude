@@ -1,7 +1,90 @@
-/* FROMBOS champion visual upgrade v3 */
-.comp-lineup .champ-slot{display:grid!important;grid-template-columns:42px 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;min-height:54px}.comp-lineup .champ-slot .comp-portrait-wrap{grid-row:1/3;width:42px;height:42px;border-radius:9px;overflow:hidden;border:1px solid #2b456b;background:#09111f}.comp-portrait{width:100%;height:100%;object-fit:cover;display:block}.comp-lineup .champ-slot small,.comp-lineup .champ-slot b{grid-column:2;margin:0!important}
-.tb-champ span{overflow:hidden;background:#0b1526!important}.tb-champ-portrait{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.tb-champ{min-height:58px}.tb-champ span{width:34px!important;height:34px!important;border:1px solid #2a466c}.tb-champ.active span{border-color:#f0c97a}.tb-champ small{font-size:6.5px!important}
-@media(min-width:1320px){.draft-pro{grid-template-columns:minmax(0,1fr) 360px;align-items:start}.draft-command{grid-column:1/-1}.draft-arena{grid-column:1;grid-row:2;min-width:0}.champion-select{grid-column:2;grid-row:2;position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:hidden;display:flex;flex-direction:column}.champion-select-head{display:grid!important;gap:10px!important;align-items:stretch!important}.champion-select-head .input{max-width:none!important}.draft-champ-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-height:none!important;overflow:auto;flex:1;align-content:start;padding-right:5px}.draft-champ-card{min-height:104px}.draft-champ-card b{font-size:8px!important}.draft-champ-card small{font-size:5.5px!important}.draft-evidence{margin-top:8px}.draft-arena{grid-template-columns:minmax(205px,.9fr) minmax(265px,1fr) minmax(205px,.9fr)!important}.draft-team-panel{min-height:610px!important}}
-@media(min-width:1600px){.draft-pro{grid-template-columns:minmax(0,1fr) 410px}.draft-champ-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}.draft-arena{grid-template-columns:minmax(250px,1fr) minmax(310px,.88fr) minmax(250px,1fr)!important}}
-@media(max-width:1319px){.champion-select{order:-1}.draft-champ-grid{max-height:330px!important}.draft-champ-card{min-height:92px}}
-@media(max-width:700px){.comp-lineup .champ-slot{grid-template-columns:34px 1fr}.comp-lineup .champ-slot .comp-portrait-wrap{width:34px;height:34px}.tb-champ{min-height:54px}.tb-champ span{width:30px!important;height:30px!important}}
+/* FROMBOS Champion Visual System V20 */
+:root{
+  --fc-portrait-xs:30px;
+  --fc-portrait-sm:42px;
+  --fc-portrait-md:58px;
+  --fc-portrait-lg:92px;
+}
+.comp-lineup .champ-slot{
+  display:grid!important;
+  grid-template-columns:var(--fc-portrait-md) minmax(0,1fr)!important;
+  grid-template-rows:auto auto;
+  column-gap:10px;
+  align-items:center;
+  min-height:72px;
+  padding:8px;
+  overflow:hidden;
+}
+.comp-lineup .champ-slot>.comp-v20-portrait{
+  grid-row:1/3;
+  width:var(--fc-portrait-md)!important;
+  height:var(--fc-portrait-md)!important;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid rgba(91,142,216,.42);
+  background:linear-gradient(145deg,#13284d,#081224 70%);
+  box-shadow:0 9px 22px rgba(0,0,0,.26);
+  display:grid;
+  place-items:center;
+  color:#ccefff;
+  font-size:12px;
+  font-weight:900;
+}
+.comp-v20-portrait img,.pool-v20-portrait img,.series-v20-portrait img,.tb-champ-v20-portrait img{
+  width:100%;height:100%;object-fit:cover;object-position:center top;display:block;
+}
+.comp-lineup .champ-slot small,.comp-lineup .champ-slot b{grid-column:2;margin:0!important;min-width:0}
+.comp-lineup .champ-slot b{font-size:14px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-lineup .champ-slot>.comp-portrait,.comp-lineup .champ-slot>.comp-portrait-wrap{display:none!important}
+
+.pool-list .chip{display:inline-flex!important;align-items:center;gap:6px;padding:4px 7px 4px 4px!important}
+.pool-v20-portrait{width:var(--fc-portrait-xs);height:var(--fc-portrait-xs);border-radius:7px;overflow:hidden;border:1px solid rgba(78,130,203,.35);background:#0b1830;display:grid;place-items:center;color:#bfeaff;font-size:8px;font-weight:900;flex:0 0 auto}
+.pool-list .chip>.pool-mini-portrait{display:none!important}
+
+.series-v20-portraits{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}
+.series-v20-portrait{width:38px;height:38px;border-radius:8px;overflow:hidden;border:1px solid rgba(83,150,238,.32);background:#0b1830;display:grid;place-items:center;color:#c7eaff;font-size:9px;font-weight:900}
+
+.tb-champ-v20-portrait{width:36px;height:36px;border-radius:50%;overflow:hidden;border:1px solid #2a466c;background:#0b1526;display:grid;place-items:center;color:#70dfff;font-size:9px;font-weight:900}
+.tb-champ.active .tb-champ-v20-portrait{border-color:#f0c97a;box-shadow:0 0 0 1px rgba(240,201,122,.22)}
+.tb-champ{min-height:62px}.tb-champ small{font-size:11px!important}
+
+/* Draft portraits stay native to Draft Room; V20 improves scale/crop. */
+.dr-slot-art{width:48px!important;height:48px!important;border-radius:9px;overflow:hidden;flex:0 0 auto;background:#091424}
+.dr-slot.ban .dr-slot-art{width:36px!important;height:36px!important}
+.dr-slot-portrait,.draft-champ-portrait{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important;display:block}
+.draft-champ-art{aspect-ratio:3/4;overflow:hidden;border-radius:8px;background:#08111f}
+.draft-champ-card{min-height:108px}
+
+/* Champion intelligence: larger, consistent Wild Rift art. */
+.ci-art{overflow:hidden}.ci-portrait{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important;display:block}
+.ci-hero-portrait{min-width:var(--fc-portrait-lg);min-height:var(--fc-portrait-lg)}
+.ci-detail-portrait,.lab-portrait{object-fit:cover!important;object-position:center top!important}
+.matchup-pill-portrait{width:70px!important;height:70px!important;object-fit:cover!important;object-position:center top!important;border-radius:10px!important}
+
+/* Scouting and competitive observed cards follow the same portrait hierarchy. */
+.sc-reg-portrait{width:50px!important;height:50px!important;border-radius:10px!important;object-fit:cover!important;object-position:center top!important}
+.sc-reg-fav{width:50px;min-width:50px;display:grid;place-items:center}
+.os-champ-card{grid-template-columns:50px minmax(0,1fr) auto!important;min-height:62px}
+.os-champ-art{width:50px!important;height:50px!important;border-radius:10px!important}
+.os-portrait{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important}
+
+/* Keep the desktop Draft picker compact but readable. */
+@media(min-width:1320px){
+  .draft-pro{grid-template-columns:minmax(0,1fr) 380px;align-items:start}
+  .draft-command{grid-column:1/-1}.draft-arena{grid-column:1;grid-row:2;min-width:0}
+  .champion-select{grid-column:2;grid-row:2;position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:hidden;display:flex;flex-direction:column}
+  .champion-select-head{display:grid!important;gap:10px!important;align-items:stretch!important}.champion-select-head .input{max-width:none!important}
+  .draft-champ-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-height:none!important;overflow:auto;flex:1;align-content:start;padding-right:5px}
+  .draft-champ-card b{font-size:11px!important}.draft-champ-card small{font-size:9px!important}.draft-evidence{margin-top:8px}
+  .draft-arena{grid-template-columns:minmax(205px,.9fr) minmax(265px,1fr) minmax(205px,.9fr)!important}.draft-team-panel{min-height:610px!important}
+}
+@media(min-width:1600px){.draft-pro{grid-template-columns:minmax(0,1fr) 430px}.draft-champ-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}.draft-arena{grid-template-columns:minmax(250px,1fr) minmax(310px,.88fr) minmax(250px,1fr)!important}}
+@media(max-width:1319px){.champion-select{order:-1}.draft-champ-grid{max-height:350px!important}.draft-champ-card{min-height:102px}}
+@media(max-width:700px){
+  :root{--fc-portrait-md:48px}
+  .comp-lineup .champ-slot{grid-template-columns:48px minmax(0,1fr)!important;min-height:62px;padding:6px}
+  .tb-champ{min-height:56px}.tb-champ-v20-portrait{width:31px;height:31px}
+  .series-v20-portrait{width:34px;height:34px}
+  .sc-reg-portrait{width:44px!important;height:44px!important}.sc-reg-fav{width:44px;min-width:44px}
+  .os-champ-card{grid-template-columns:44px minmax(0,1fr) auto!important}.os-champ-art{width:44px!important;height:44px!important}
+}
