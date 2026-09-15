@@ -1,0 +1,52 @@
+name: Verify FROMBOS V24 Tactical Editorial
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [rebuild/frombos-v24-tactical-editorial]
+permissions:
+  contents: read
+jobs:
+  verify-v24:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate V24 JavaScript syntax
+        run: node --check assets/js/visual-v24-tactical-editorial.js
+      - name: Validate integration
+        run: |
+          test -f assets/css/visual-v24-tactical-editorial.css
+          test -f assets/js/visual-v24-tactical-editorial.js
+          grep -q 'visual-v24-tactical-editorial.css' index.html
+          grep -q 'visual-v24-tactical-editorial.js' index.html
+          grep -q 'visual-v24-tactical-editorial.css' sw.js
+          grep -q 'visual-v24-tactical-editorial.js' sw.js
+          grep -q 'v24-editorial' index.html
+      - name: Validate visual direction
+        run: |
+          grep -q -- '--v24-bg:#EEF1F6' assets/css/visual-v24-tactical-editorial.css
+          grep -q -- '--v24-paper:#FFFFFF' assets/css/visual-v24-tactical-editorial.css
+          grep -q -- '--v24-ink:#11151F' assets/css/visual-v24-tactical-editorial.css
+          grep -q -- '--v24-blue:#1D4ED8' assets/css/visual-v24-tactical-editorial.css
+          grep -q -- '--v24-gold:#9C6E17' assets/css/visual-v24-tactical-editorial.css
+          grep -q 'Newsreader' assets/css/visual-v24-tactical-editorial.css
+          grep -q 'IBM Plex Mono' assets/css/visual-v24-tactical-editorial.css
+          grep -q 'box-shadow:none' assets/css/visual-v24-tactical-editorial.css
+          grep -q 'white-space:nowrap' assets/css/visual-v24-tactical-editorial.css
+          grep -q 'text-overflow:ellipsis' assets/css/visual-v24-tactical-editorial.css
+      - name: Validate champion media and map safety
+        run: |
+          grep -q 'CHAMPION_REGISTRY' assets/js/visual-v24-tactical-editorial.js
+          grep -q -- '--v24-home-art' assets/js/visual-v24-tactical-editorial.js
+          grep -q -- '--v24-champion-splash' assets/js/visual-v24-tactical-editorial.js
+          grep -q "data-v24-exact-map\|v24ExactMap" assets/js/visual-v24-tactical-editorial.js
+          ! grep -q 'store\.state.*=' assets/js/visual-v24-tactical-editorial.js
+          ! grep -q 'fetch(' assets/js/visual-v24-tactical-editorial.js
+          ! grep -q 'MAP_URL.*=' assets/js/visual-v24-tactical-editorial.js
+      - name: Validate responsive and reduced motion
+        run: |
+          grep -q '@media(max-width:900px)' assets/css/visual-v24-tactical-editorial.css
+          grep -q '@media(max-width:700px)' assets/css/visual-v24-tactical-editorial.css
+          grep -q '@media(max-width:430px)' assets/css/visual-v24-tactical-editorial.css
+          grep -q 'prefers-reduced-motion' assets/css/visual-v24-tactical-editorial.css
