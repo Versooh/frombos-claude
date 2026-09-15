@@ -1,0 +1,21 @@
+/* FROMBOS V21 — unified motion system */
+:root{--fb-fast:140ms;--fb-ui:210ms;--fb-panel:320ms;--fb-hero:560ms;--fb-ease:cubic-bezier(.2,.8,.2,1)}
+.content{animation:fb-page-enter var(--fb-panel) var(--fb-ease) both}
+@keyframes fb-page-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card,.metric,.fb-module-card,.fb-pool-card{transition:transform var(--fb-ui) var(--fb-ease),box-shadow var(--fb-ui) var(--fb-ease),border-color var(--fb-ui) var(--fb-ease)}
+.card:hover,.metric:hover,.fb-module-card:hover,.fb-pool-card:hover{transform:translateY(-4px) scale(1.005);box-shadow:0 18px 44px rgba(25,63,104,.14)!important}
+.fb-module-card:hover{border-color:#9fc0ff}.fb-module-card:hover .fb-module-icon{box-shadow:0 0 24px rgba(23,107,255,.18)}.fb-module-card:hover .fb-module-arrow{transform:translateX(4px)}
+.fb-module-arrow,.fb-module-icon{transition:transform var(--fb-fast) var(--fb-ease),box-shadow var(--fb-ui) var(--fb-ease)}
+.fb-pool-card:hover{border-color:#8ec5ff}.fb-pool-card:hover .fb-pool-art img{transform:scale(1.04)}.fb-pool-art img{transition:transform var(--fb-ui) var(--fb-ease)}
+.fb-pool-open{opacity:.82;transition:opacity var(--fb-fast),transform var(--fb-fast)}.fb-pool-card:hover .fb-pool-open{opacity:1}
+.nav-item:before{content:"";position:absolute;left:10px;right:10px;bottom:2px;height:1px;background:rgba(255,255,255,.7);transform:scaleX(0);transform-origin:left;transition:transform var(--fb-ui) var(--fb-ease)}.nav-item.active:before{transform:scaleX(1)}
+.fb-champion-drawer{transition:transform var(--fb-panel) var(--fb-ease)}.fb-champion-drawer-backdrop{transition:opacity var(--fb-panel) var(--fb-ease)}
+.content[data-page="home"] .hero{animation:fb-hero-enter var(--fb-hero) var(--fb-ease) both}
+@keyframes fb-hero-enter{from{opacity:.1;transform:translateY(14px);filter:saturate(.82)}to{opacity:1;transform:none;filter:none}}
+.content[data-page="home"] .hero:after,.fb-pool-hero:after{animation:fb-sweep 7s ease-in-out infinite alternate}
+@keyframes fb-sweep{from{transform:translateX(-4px)}to{transform:translateX(5px)}}
+.fb-pool-favorite.is-on{animation:fb-star var(--fb-ui) var(--fb-ease)}@keyframes fb-star{0%{transform:scale(.86)}65%{transform:scale(1.12)}100%{transform:scale(1)}}
+.content[data-page="draft"] .dr-slot.current,.content[data-page="draft"] .draft-seq-row.current{animation:fb-draft-pulse 1.5s ease-in-out infinite}@keyframes fb-draft-pulse{0%,100%{box-shadow:0 0 0 rgba(23,107,255,0)}50%{box-shadow:0 0 0 4px rgba(23,107,255,.10)}}
+.tactical-marker,.vision-marker{animation:fb-pin-in var(--fb-ui) var(--fb-ease) both}@keyframes fb-pin-in{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.toast,.v20-toast{animation:fb-toast var(--fb-ui) var(--fb-ease) both}@keyframes fb-toast{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
