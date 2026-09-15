@@ -89,6 +89,23 @@ jobs:
           grep -q 'vod-player-stage' assets/css/visual-v20-analysis.css
           grep -q 'vod-timeline' assets/css/visual-v20-analysis.css
 
+      - name: V20 decision controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/lab-controls-v20.css
+          test -f assets/js/lab-controls-v20.js
+          grep -q 'lab-controls-v20.css?v=20.4' index.html
+          grep -q 'lab-controls-v20.js?v=20.4' index.html
+          grep -q "'./assets/css/lab-controls-v20.css'" sw.js
+          grep -q "'./assets/js/lab-controls-v20.js'" sw.js
+          grep -q 'comp-toolbar-v20' assets/js/lab-controls-v20.js
+          grep -q 'data-draft-filter' assets/js/lab-controls-v20.js
+          grep -q 'applyCompositionFilters' assets/js/lab-controls-v20.js
+          grep -q 'applyDraftFilters' assets/js/lab-controls-v20.js
+          grep -q 'draft-filterbar-v20' assets/css/lab-controls-v20.css
+          grep -q 'ci-card.is-selected' assets/css/lab-controls-v20.css
+
       - name: Wild Rift only guard
         shell: bash
         run: |
