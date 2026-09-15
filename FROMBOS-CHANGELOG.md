@@ -48,6 +48,14 @@
 - Updated the Composition Lab route to prefer cloud compositions when available.
 - Updated the PWA cache for the new cloud Composition module.
 
+### Series / Draft cloud foundation
+- Added `assets/js/core/cloud-series.js` for organization/season-scoped `series_plans` and `draft_sessions` persistence.
+- Boot now hydrates cloud series plans and draft sessions into Core before the application loads.
+- Draft session snapshots preserve actions, Fearless state, branches, game number, side, ruleset and sequence number.
+- Verified the live Supabase columns for `series_plans` and `draft_sessions` before integration; no duplicate schema was created.
+- Updated the PWA cache for the cloud Series/Draft module.
+- Current Draft Room remains UI/local-store driven; the cloud adapter is now the persistence boundary for the next integration pass.
+
 ### Product direction
 FROMBOS is now explicitly being built as a multi-tenant SaaS:
 
@@ -56,7 +64,7 @@ FROMBOS is now explicitly being built as a multi-tenant SaaS:
 Cloud is canonical for authenticated organization/team data; local Core remains an offline/cache layer during migration.
 
 ### Next
-- Connect Draft/Series to existing series/draft/session structures.
+- Finish Draft Room action-level autosave against `draft_sessions` and reconnect branches/Fearless to the cloud session identity.
 - Add organization member/role/invitation and multi-team administration.
 - Persist Tactical/VOD/Training to cloud and progressively retire local-only state.
 - Add cloud-aware backup/import plus dirty-state/conflict handling.
