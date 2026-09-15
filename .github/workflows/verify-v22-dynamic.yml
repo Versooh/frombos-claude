@@ -9,12 +9,14 @@ on:
       - 'assets/css/draft-decision-v22.css'
       - 'assets/css/composition-lab-v22.css'
       - 'assets/css/scouting-war-room-v22.css'
+      - 'assets/css/vod-tactical-intelligence-v22.css'
       - 'assets/js/experience-v22.js'
       - 'assets/js/champion-flow-v22.js'
       - 'assets/js/meta-lab-v22.js'
       - 'assets/js/draft-decision-v22.js'
       - 'assets/js/composition-lab-v22.js'
       - 'assets/js/scouting-war-room-v22.js'
+      - 'assets/js/vod-tactical-intelligence-v22.js'
       - 'index.html'
       - 'sw.js'
       - '.github/workflows/verify-v22-dynamic.yml'
@@ -32,37 +34,40 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in assets/css/experience-v22.css assets/css/champion-flow-v22.css assets/css/meta-lab-v22.css assets/css/draft-decision-v22.css assets/css/composition-lab-v22.css assets/css/scouting-war-room-v22.css assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js assets/js/composition-lab-v22.js assets/js/scouting-war-room-v22.js; do test -f "$file"; done
+          for file in assets/css/experience-v22.css assets/css/champion-flow-v22.css assets/css/meta-lab-v22.css assets/css/draft-decision-v22.css assets/css/composition-lab-v22.css assets/css/scouting-war-room-v22.css assets/css/vod-tactical-intelligence-v22.css assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js assets/js/composition-lab-v22.js assets/js/scouting-war-room-v22.js assets/js/vod-tactical-intelligence-v22.js; do test -f "$file"; done
           node --check assets/js/experience-v22.js
           node --check assets/js/champion-flow-v22.js
           node --check assets/js/meta-lab-v22.js
           node --check assets/js/draft-decision-v22.js
           node --check assets/js/composition-lab-v22.js
           node --check assets/js/scouting-war-room-v22.js
+          node --check assets/js/vod-tactical-intelligence-v22.js
           grep -Fq 'experience-v22.css?v=22.0' index.html
           grep -Fq 'champion-flow-v22.css?v=22.1' index.html
           grep -Fq 'meta-lab-v22.css?v=22.2' index.html
           grep -Fq 'draft-decision-v22.css?v=22.3' index.html
           grep -Fq 'composition-lab-v22.css?v=22.4' index.html
           grep -Fq 'scouting-war-room-v22.css?v=22.5' index.html
+          grep -Fq 'vod-tactical-intelligence-v22.css?v=22.6' index.html
           grep -Fq 'experience-v22.js?v=22.1' index.html
           grep -Fq 'champion-flow-v22.js?v=22.1' index.html
           grep -Fq 'meta-lab-v22.js?v=22.2' index.html
           grep -Fq 'draft-decision-v22.js?v=22.5' index.html
           grep -Fq 'composition-lab-v22.js?v=22.4' index.html
           grep -Fq 'scouting-war-room-v22.js?v=22.5' index.html
-          grep -Fq 'sw.js?v=22.5' index.html
-          for asset in experience-v22.css champion-flow-v22.css meta-lab-v22.css draft-decision-v22.css composition-lab-v22.css scouting-war-room-v22.css; do grep -Fq "'./assets/css/$asset'" sw.js; done
-          for asset in experience-v22.js champion-flow-v22.js meta-lab-v22.js draft-decision-v22.js composition-lab-v22.js scouting-war-room-v22.js; do grep -Fq "'./assets/js/$asset'" sw.js; done
-          grep -Fq 'v22-5-scouting-war-room' sw.js
+          grep -Fq 'vod-tactical-intelligence-v22.js?v=22.6' index.html
+          grep -Fq 'sw.js?v=22.6' index.html
+          for asset in experience-v22.css champion-flow-v22.css meta-lab-v22.css draft-decision-v22.css composition-lab-v22.css scouting-war-room-v22.css vod-tactical-intelligence-v22.css; do grep -Fq "'./assets/css/$asset'" sw.js; done
+          for asset in experience-v22.js champion-flow-v22.js meta-lab-v22.js draft-decision-v22.js composition-lab-v22.js scouting-war-room-v22.js vod-tactical-intelligence-v22.js; do grep -Fq "'./assets/js/$asset'" sw.js; done
+          grep -Fq 'v22-6-vod-tactical-intelligence' sw.js
       - name: Preserve evidence-first safety
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const jsFiles=['assets/js/experience-v22.js','assets/js/champion-flow-v22.js','assets/js/meta-lab-v22.js','assets/js/draft-decision-v22.js','assets/js/composition-lab-v22.js','assets/js/scouting-war-room-v22.js'];
-          const cssFiles=['assets/css/experience-v22.css','assets/css/champion-flow-v22.css','assets/css/meta-lab-v22.css','assets/css/draft-decision-v22.css','assets/css/composition-lab-v22.css','assets/css/scouting-war-room-v22.css'];
+          const jsFiles=['assets/js/experience-v22.js','assets/js/champion-flow-v22.js','assets/js/meta-lab-v22.js','assets/js/draft-decision-v22.js','assets/js/composition-lab-v22.js','assets/js/scouting-war-room-v22.js','assets/js/vod-tactical-intelligence-v22.js'];
+          const cssFiles=['assets/css/experience-v22.css','assets/css/champion-flow-v22.css','assets/css/meta-lab-v22.css','assets/css/draft-decision-v22.css','assets/css/composition-lab-v22.css','assets/css/scouting-war-room-v22.css','assets/css/vod-tactical-intelligence-v22.css'];
           const js=jsFiles.map(f=>fs.readFileSync(f,'utf8')).join('\n');
           const combined=js+'\n'+cssFiles.map(f=>fs.readFileSync(f,'utf8')).join('\n');
           const guarded=combined.replaceAll('NO WIN PROBABILITY','');
@@ -70,7 +75,7 @@ jobs:
           if(/fetch\s*\(|XMLHttpRequest|WebSocket|axios/i.test(js)) throw new Error('V22 experience must not acquire network data');
           if(/ddragon\.leagueoflegends|lol-game-data|CommunityDragon/i.test(combined)) throw new Error('League PC fallback detected');
           if(/prediction|probability/i.test(guarded)) throw new Error('Invented prediction language detected');
-          for(const token of ['CURATED','UNKNOWN','WILD RIFT','FROMBOS_STRUCTURAL','OBSERVED_COMPETITIVE']) if(!combined.includes(token)) throw new Error(`Missing evidence token: ${token}`);
+          for(const token of ['CURATED','UNKNOWN','WILD RIFT','FROMBOS_STRUCTURAL','OBSERVED_COMPETITIVE','USER_PRIVATE']) if(!combined.includes(token)) throw new Error(`Missing evidence token: ${token}`);
           NODE
       - name: Validate continuous champion flow
         shell: bash
@@ -109,6 +114,18 @@ jobs:
           grep -Fq "from './open-series-scouting.generated.js'" assets/js/scouting-war-room-v22.js
           grep -Fq "from './open-series-results.generated.js'" assets/js/scouting-war-room-v22.js
           if grep -Eq 'store\.update|store\.save|localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest|WebSocket' assets/js/scouting-war-room-v22.js; then echo 'Scouting V22 must remain read-only and offline over materialized evidence'; exit 1; fi
+      - name: Validate VOD Tactical Intelligence
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in 'VOD INTELLIGENCE LENS' 'VOD → TACTICAL EVIDENCE DOCK' 'USER_PRIVATE' 'FROMBOS_STRUCTURAL' 'NO AUTO-MARKERS' 'MAP UNCHANGED' 'Abrir pacote no Tactical Board' 'vodSession' 'vodNotes' 'tacticalHash'; do
+            grep -Fq "$token" assets/js/vod-tactical-intelligence-v22.js || { echo "Missing VOD tactical token: $token"; exit 1; }
+          done
+          grep -Fq "from './store.js'" assets/js/vod-tactical-intelligence-v22.js
+          if grep -Eq 'store\.update|store\.save|localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest|WebSocket|tbMapImage|MAP_URL\s*=' assets/js/vod-tactical-intelligence-v22.js; then echo 'V22.6 bridge must remain local, read-only and map-safe'; exit 1; fi
+          grep -Fq '@media(max-width:760px)' assets/css/vod-tactical-intelligence-v22.css
+          grep -Fq '@media(max-width:430px)' assets/css/vod-tactical-intelligence-v22.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/vod-tactical-intelligence-v22.css
       - name: Validate Draft Decision Layer
         shell: bash
         run: |
@@ -125,7 +142,7 @@ jobs:
         run: |
           set -euo pipefail
           grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg'" assets/js/tactical.js
-          if grep -Eq 'MAP_URL\s*=|tbMapImage.*setAttribute' assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js assets/js/composition-lab-v22.js assets/js/scouting-war-room-v22.js; then
+          if grep -Eq 'MAP_URL\s*=|tbMapImage.*setAttribute' assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js assets/js/draft-decision-v22.js assets/js/composition-lab-v22.js assets/js/scouting-war-room-v22.js assets/js/vod-tactical-intelligence-v22.js; then
             echo 'V22 may not alter Tactical map source'
             exit 1
           fi
@@ -148,5 +165,8 @@ jobs:
           grep -Fq '@media(max-width:760px)' assets/css/scouting-war-room-v22.css
           grep -Fq '@media(max-width:430px)' assets/css/scouting-war-room-v22.css
           grep -Fq 'prefers-reduced-motion:reduce' assets/css/scouting-war-room-v22.css
+          grep -Fq '@media(max-width:760px)' assets/css/vod-tactical-intelligence-v22.css
+          grep -Fq '@media(max-width:430px)' assets/css/vod-tactical-intelligence-v22.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/vod-tactical-intelligence-v22.css
           grep -Fq 'Decision Center' assets/js/experience-v22.js
           grep -Fq 'WILD RIFT · EVIDENCE FIRST' assets/js/experience-v22.js
