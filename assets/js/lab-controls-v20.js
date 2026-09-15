@@ -11,7 +11,14 @@ function compositionCards(grid){return qa('article.composition-card',grid);}
 
 function ensureCompositionActions(card){
   const button=q('[data-comp-draft]',card);
-  if(!button||button.parentElement?.classList.contains('comp-card-actions'))return;
+  const intel=q('.comp-intel',card);
+  if(!button||!intel)return;
+  const currentActions=button.closest('.comp-card-actions');
+  if(intel.parentElement!==card){
+    const anchor=currentActions||button;
+    card.insertBefore(intel,anchor);
+  }
+  if(currentActions)return;
   const actions=document.createElement('div');
   actions.className='comp-card-actions';
   button.before(actions);
