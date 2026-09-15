@@ -50,6 +50,8 @@ jobs:
           node --check assets/js/vod-performance-v15.js
           node --check assets/js/training-planner-v16.js
           node --check assets/js/team-operations-v17.js
+          node --check assets/js/match-center-v18.js
+          node --check assets/js/match-center-router.js
           node --check assets/js/champion-intelligence.js
           node --check assets/js/champion-registry.generated.js
           node --check assets/js/champion-visual-upgrade.js
@@ -90,6 +92,9 @@ jobs:
           test -f assets/js/training-planner-v16.js
           test -f assets/css/team-operations-v17.css
           test -f assets/js/team-operations-v17.js
+          test -f assets/css/match-center-v18.css
+          test -f assets/js/match-center-v18.js
+          test -f assets/js/match-center-router.js
           grep -q 'visual-v10.css' index.html
           grep -q 'i18n-ptbr.js' index.html
           grep -q 'tactical-v11.css' index.html
@@ -126,6 +131,14 @@ jobs:
           grep -q 'team-operations-v17.js' sw.js
           grep -q 'TEAM OPERATIONS V17' assets/js/team-operations-v17.js
           grep -q 'data-ops-week' assets/js/team-operations-v17.js
+          grep -q 'match-center-v18.css' index.html
+          grep -q 'match-center-v18.css' sw.js
+          grep -q 'match-center-router.js' index.html
+          grep -q 'match-center-router.js' sw.js
+          grep -q 'MATCH CENTER V18' assets/js/match-center-v18.js
+          grep -q 'known>=10' assets/js/match-center-v18.js
+          grep -q 'matches:{games' assets/js/store.js
+          grep -q 'data-route=.matches.' assets/js/match-center-router.js
           grep -q 'lang="pt-BR"' index.html
   deploy:
     if: github.event_name != 'pull_request'
