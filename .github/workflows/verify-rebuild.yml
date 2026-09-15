@@ -1,0 +1,58 @@
+name: Verify FROMBOS Rebuild
+
+on:
+  push:
+    branches:
+      - rebuild/frombos-v2
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify-static-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in assets/js/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+
+      - name: Required V20 files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/champion-visual.js
+          test -f assets/js/champion-enhancer.js
+          test -f assets/css/champions-v20.css
+          grep -q 'champions-v20.css' index.html
+          grep -q 'champion-enhancer.js' index.html
+          grep -q 'champion-enhancer.js' sw.js
+
+      - name: Wild Rift asset safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RniE 'ddragon\.leagueoflegends\.com|cdn/img/champion|lol-game-data' assets/js assets/css index.html
+          grep -q 'allowLeaguePCFallback:false' assets/js/champion-visual.js
+
+      - name: Duplicate portrait guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'data-champion-enhanced' assets/js/champion-enhancer.js
+          grep -q 'visuals.slice(1)' assets/js/champion-enhancer.js
