@@ -1,0 +1,88 @@
+import { createOrganization, getSession, listOrganizations, signIn, signOut, signUp, slugify } from './core/auth.js';
+
+const app = document.querySelector('#app');
+const esc = value => String(value ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+
+function authLayout(content) {
+  app.className = 'auth-shell';
+  app.innerHTML = `<div class="auth-wrap"><section class="auth-brand"><div class="auth-brand-mark">F</div><h1>FROMBOS</h1><p>Competitive Intelligence para organizações de Wild Rift. Um workspace para equipes, coaches, analysts, drafts, séries, scouting, VOD e evolução.</p><div class="auth-points"><div class="auth-point">◈ Organizações e múltiplos times</div><div class="auth-point">⚑ Draft Room + Fearless + planejamento de série</div><div class="auth-point">◎ Tactical Board + VOD Review + Training</div><div class="auth-point">⌁ Dados privados separados por organização</div></div></section><section class="auth-card">${content}</section></div>`;
+}
+
+function authScreen(mode = 'signin', message = '') {
+  const signup = mode === 'signup';
+  authLayout(`<div class="eyebrow">FROMBOS ACCOUNT</div><h2>${signup ? 'Criar acesso' : 'Entrar no FROMBOS'}</h2><p class="muted">${signup ? 'Crie sua conta. Depois você poderá criar ou entrar em uma organização.' : 'Acesse seu workspace e continue de onde parou.'}</p><div class="auth-tabs"><button class="auth-tab ${!signup?'active':''}" id="tabSignin">Entrar</button><button class="auth-tab ${signup?'active':''}" id="tabSignup">Criar conta</button></div><form class="auth-form" id="authForm"><label>E-mail<input class="input" id="authEmail" type="email" autocomplete="email" required></label><label>Senha<input class="input" id="authPassword" type="password" autocomplete="${signup?'new-password':'current-password'}" minlength="6" required></label><div class="auth-message ${message?'error':''}" id="authMessage">${esc(message)}</div><button class="btn primary" type="submit">${signup?'Criar conta':'Entrar'}</button></form>`);
+  document.querySelector('#tabSignin').onclick = () => authScreen('signin');
+  document.querySelector('#tabSignup').onclick = () => authScreen('signup');
+  document.querySelector('#authForm').onsubmit = async event => {
+    event.preventDefault();
+    const button = event.currentTarget.querySelector('button[type=submit]');
+    const msg = document.querySelector('#authMessage');
+    button.disabled = true;
+    msg.className = 'auth-message';
+    msg.textContent = 'Processando…';
+    try {
+      const email = document.querySelector('#authEmail').value.trim();
+      const password = document.querySelector('#authPassword').value;
+      if (signup) {
+        const result = await signUp(email, password);
+        if (!result.session) {
+          msg.className = 'auth-message ok';
+          msg.textContent = 'Conta criada. Confirme seu e-mail se o projeto exigir confirmação e depois entre.';
+          button.disabled = false;
+          return;
+        }
+      } else await signIn(email, password);
+      await boot();
+    } catch (error) {
+      msg.className = 'auth-message error';
+      msg.textContent = error.message || 'Não foi possível concluir o acesso.';
+      button.disabled = false;
+    }
+  };
+}
+
+function organizationScreen(organizations) {
+  const options = organizations.map(org => `<div class="org-option"><div><b>${esc(org.name)}</b><small>${esc(org.slug)} · ${esc(org.role)}</small></div><button class="btn" data-org="${esc(org.id)}">Entrar</button></div>`).join('');
+  authLayout(`<div class="eyebrow">ORGANIZATION WORKSPACE</div><h2>Escolha sua organização</h2><p class="muted">Cada organização possui seus próprios times, jogadores, drafts, scouting e dados privados.</p><div class="org-list">${options || '<div class="empty">Nenhuma organização encontrada.</div>'}</div><div class="auth-divider"></div><form class="auth-form" id="orgForm"><div class="section-title" style="margin:0"><h3>Criar organização</h3></div><label>Nome da organização<input class="input" id="orgName" placeholder="Ex.: UOL E-sports" required></label><label>Slug<input class="input" id="orgSlug" placeholder="uol-e-sports" required pattern="[a-z0-9-]+"></label><div class="auth-message" id="orgMessage"></div><button class="btn primary" type="submit">Criar organização</button></form><div class="auth-user"><span>Conta autenticada</span><button class="btn" id="logout">Sair</button></div>`);
+  document.querySelectorAll('[data-org]').forEach(button => button.onclick = () => selectOrganization(button.dataset.org, organizations.find(o => o.id === button.dataset.org)));
+  const name = document.querySelector('#orgName');
+  const slug = document.querySelector('#orgSlug');
+  name.oninput = () => { if (!slug.dataset.edited) slug.value = slugify(name.value); };
+  slug.oninput = () => { slug.dataset.edited = '1'; slug.value = slugify(slug.value); };
+  document.querySelector('#logout').onclick = async () => { await signOut(); location.reload(); };
+  document.querySelector('#orgForm').onsubmit = async event => {
+    event.preventDefault();
+    const msg = document.querySelector('#orgMessage');
+    try {
+      const id = await createOrganization(name.value, slug.value);
+      localStorage.setItem('frombos.active.organization', id);
+      await boot();
+    } catch (error) { msg.className = 'auth-message error'; msg.textContent = error.message || 'Não foi possível criar a organização.'; }
+  };
+}
+
+async function selectOrganization(id, org) {
+  localStorage.setItem('frombos.active.organization', id);
+  localStorage.setItem('frombos.active.organization.meta', JSON.stringify(org || { id }));
+  await boot();
+}
+
+async function boot() {
+  try {
+    const session = await getSession();
+    if (!session) { authScreen('signin'); return; }
+    const organizations = await listOrganizations();
+    const activeId = localStorage.getItem('frombos.active.organization');
+    const active = organizations.find(org => org.id === activeId) || organizations[0];
+    if (!active) { organizationScreen(organizations); return; }
+    localStorage.setItem('frombos.active.organization', active.id);
+    localStorage.setItem('frombos.active.organization.meta', JSON.stringify(active));
+    app.className = '';
+    await import('./app.js');
+  } catch (error) {
+    authLayout(`<div class="eyebrow">FROMBOS / CONNECTION</div><h2>Não foi possível iniciar</h2><p class="muted">${esc(error.message || 'Erro de conexão.')}</p><button class="btn" id="retry">Tentar novamente</button>`);
+    document.querySelector('#retry').onclick = boot;
+  }
+}
+
+boot();
