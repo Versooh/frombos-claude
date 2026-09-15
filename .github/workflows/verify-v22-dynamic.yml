@@ -5,8 +5,10 @@ on:
     paths:
       - 'assets/css/experience-v22.css'
       - 'assets/css/champion-flow-v22.css'
+      - 'assets/css/meta-lab-v22.css'
       - 'assets/js/experience-v22.js'
       - 'assets/js/champion-flow-v22.js'
+      - 'assets/js/meta-lab-v22.js'
       - 'index.html'
       - 'sw.js'
       - '.github/workflows/verify-v22-dynamic.yml'
@@ -24,28 +26,33 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in assets/css/experience-v22.css assets/css/champion-flow-v22.css assets/js/experience-v22.js assets/js/champion-flow-v22.js; do test -f "$file"; done
+          for file in assets/css/experience-v22.css assets/css/champion-flow-v22.css assets/css/meta-lab-v22.css assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js; do test -f "$file"; done
           node --check assets/js/experience-v22.js
           node --check assets/js/champion-flow-v22.js
+          node --check assets/js/meta-lab-v22.js
           grep -Fq 'experience-v22.css?v=22.0' index.html
           grep -Fq 'champion-flow-v22.css?v=22.1' index.html
+          grep -Fq 'meta-lab-v22.css?v=22.2' index.html
           grep -Fq 'experience-v22.js?v=22.1' index.html
           grep -Fq 'champion-flow-v22.js?v=22.1' index.html
-          grep -Fq 'sw.js?v=22.1' index.html
+          grep -Fq 'meta-lab-v22.js?v=22.2' index.html
+          grep -Fq 'sw.js?v=22.2' index.html
           grep -Fq "'./assets/css/experience-v22.css'" sw.js
           grep -Fq "'./assets/css/champion-flow-v22.css'" sw.js
+          grep -Fq "'./assets/css/meta-lab-v22.css'" sw.js
           grep -Fq "'./assets/js/experience-v22.js'" sw.js
           grep -Fq "'./assets/js/champion-flow-v22.js'" sw.js
-          grep -Fq 'v22-1-champion-flow' sw.js
+          grep -Fq "'./assets/js/meta-lab-v22.js'" sw.js
+          grep -Fq 'v22-2-meta-command' sw.js
       - name: Preserve evidence-first safety
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const files=['assets/js/experience-v22.js','assets/js/champion-flow-v22.js','assets/css/experience-v22.css','assets/css/champion-flow-v22.css'];
+          const files=['assets/js/experience-v22.js','assets/js/champion-flow-v22.js','assets/js/meta-lab-v22.js','assets/css/experience-v22.css','assets/css/champion-flow-v22.css','assets/css/meta-lab-v22.css'];
           const combined=files.map(f=>fs.readFileSync(f,'utf8')).join('\n');
-          const js=fs.readFileSync('assets/js/experience-v22.js','utf8')+'\n'+fs.readFileSync('assets/js/champion-flow-v22.js','utf8');
+          const js=['assets/js/experience-v22.js','assets/js/champion-flow-v22.js','assets/js/meta-lab-v22.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
           if(/store\.update|store\.save|localStorage|sessionStorage/.test(js)) throw new Error('V22 experience must not mutate competitive state');
           if(/fetch\s*\(|XMLHttpRequest|WebSocket|axios/i.test(js)) throw new Error('V22 experience must not acquire network data');
           if(/ddragon\.leagueoflegends|lol-game-data|CommunityDragon/i.test(combined)) throw new Error('League PC fallback detected');
@@ -61,12 +68,20 @@ jobs:
           done
           grep -Fq 'championContextRoutes' assets/js/experience-v22.js
           grep -Fq 'encodeURIComponent(champ)' assets/js/experience-v22.js
+      - name: Validate Meta Command Center
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in 'META COMMAND CENTER' 'Filtrar função' 'Win Rate' 'Pick Rate' 'Ban Rate' 'Comparar snapshots' 'META EVOLUTION · UNKNOWN'; do
+            grep -Fiq "$token" assets/js/meta-lab-v22.js || { echo "Missing meta command token: $token"; exit 1; }
+          done
+          grep -Fq 'meta-lens[hidden]' assets/css/meta-lab-v22.css
       - name: Preserve Tactical map ownership
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg'" assets/js/tactical.js
-          if grep -Eq 'MAP_URL\s*=|tbMapImage.*setAttribute' assets/js/experience-v22.js assets/js/champion-flow-v22.js; then
+          if grep -Eq 'MAP_URL\s*=|tbMapImage.*setAttribute' assets/js/experience-v22.js assets/js/champion-flow-v22.js assets/js/meta-lab-v22.js; then
             echo 'V22 may not alter Tactical map source'
             exit 1
           fi
@@ -79,5 +94,7 @@ jobs:
           grep -Fq 'prefers-reduced-motion:reduce' assets/css/experience-v22.css
           grep -Fq '@media(max-width:560px)' assets/css/champion-flow-v22.css
           grep -Fq 'prefers-reduced-motion:reduce' assets/css/champion-flow-v22.css
+          grep -Fq '@media(max-width:760px)' assets/css/meta-lab-v22.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/meta-lab-v22.css
           grep -Fq 'Decision Center' assets/js/experience-v22.js
           grep -Fq 'WILD RIFT · EVIDENCE FIRST' assets/js/experience-v22.js
