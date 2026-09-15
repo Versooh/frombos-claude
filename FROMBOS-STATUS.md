@@ -18,24 +18,29 @@ _Last updated: 2026-09-15_
 - `last_sequence_no` tracks the number of recorded draft actions.
 - Game switching, undo, reset, Fearless, ruleset changes and branches trigger the cloud save queue.
 - Existing Draft Room UI/flow was preserved while moving its state boundary from legacy Store → Core → Supabase.
-- PWA cache includes the cloud Series/Draft module.
+- Added Tactical Pro enhancement layer without replacing the validated Wild Rift map implementation.
+- Tactical Board now has an execution timeline with 15-second granularity and coach-defined tactical markers.
+- Added map grid toggle for spacing/route analysis.
+- Added point-to-point map measurement tool.
+- Added board framing/reset control.
+- Added non-destructive visual-layer hide/show control.
+- Added SVG snapshot export for sharing tactical boards without altering the source scenario.
+- Added Tactical Pro visual badge and responsive enhancement styling.
+- PWA cache includes Tactical Pro assets.
 
-## Product direction
-FROMBOS is a **multi-tenant SaaS product**:
-
-`Account → Organization → Teams → Seasons/Rosters → Competitive Workflow`
-
-Cloud is canonical for authenticated organization/team data. Local Core remains an offline/cache layer during migration.
+## Tactical Board direction
+The Tactical Board remains the tactical analysis surface, with scenarios, champion markers, wards, control wards, objectives, routes, zones, notes and coach plan. The new enhancement layer adds execution-oriented tooling without duplicating or replacing the underlying tactical state model.
 
 ## Current limitation
-Draft event/branch granularity is currently serialized into `draft_sessions.state_snapshot`; dedicated event/branch persistence can be added later without changing the Draft Room contract. Tactical, VOD and Training remain local-first.
+Tactical timeline markers and measurement overlays are currently session/UI enhancements and are not yet persisted as first-class cloud annotations. Tactical scenarios themselves remain local-first until the Tactical/VOD persistence migration.
 
 ## Next engineering priorities
-1. Add organization administration: members, roles, invitations and multi-team management.
-2. Add dedicated Draft event/branch persistence if collaborative draft editing requires it.
-3. Persist Tactical/VOD/Training to cloud and remove remaining local-only paths progressively.
-4. Add cloud-aware backup/import plus dirty-state/conflict handling.
-5. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
+1. Persist Tactical scenarios, timeline markers and annotations to Supabase with organization/season RLS.
+2. Connect Tactical Board timestamps to VOD Review so a tactical marker can open the corresponding video moment.
+3. Add organization administration: members, roles, invitations and multi-team management.
+4. Persist VOD/Training and connect annotation → drill workflows.
+5. Add cloud-aware backup/import plus dirty-state/conflict handling.
+6. Deploy the SaaS build and perform authenticated browser QA against a non-production test organization before promoting to `main`.
 
 ## Security rules
 - Never expose a Supabase service-role key in the browser.
