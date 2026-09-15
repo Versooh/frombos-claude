@@ -58,6 +58,24 @@ jobs:
           grep -q 'comp-v20-portrait comp-v19-portrait-wrap' assets/js/champion-visual-upgrade.js
           grep -q 'exactly one direct portrait per slot\|one canonical node' assets/js/champion-visual-upgrade.js
 
+      - name: V20 pro module layout ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-pro.css
+          test -f assets/js/layout-v20.js
+          grep -q 'visual-v20-pro.css?v=20.2' index.html
+          grep -q 'layout-v20.js?v=20.2' index.html
+          grep -q "'./assets/css/visual-v20-pro.css'" sw.js
+          grep -q "'./assets/js/layout-v20.js'" sw.js
+          grep -q "data.page=page" assets/js/layout-v20.js
+          grep -q 'composition-card' assets/js/layout-v20.js
+          grep -q 'PLANO DE JOGO' assets/js/layout-v20.js
+          grep -q 'CONDIÇÃO DE VITÓRIA' assets/js/layout-v20.js
+          grep -q 'data-page="comps"' assets/css/visual-v20-pro.css
+          grep -q 'data-page="champions"' assets/css/visual-v20-pro.css
+          grep -q 'data-page="draft"' assets/css/visual-v20-pro.css
+
       - name: Wild Rift only guard
         shell: bash
         run: |
