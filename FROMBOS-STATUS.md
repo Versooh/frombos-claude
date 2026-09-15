@@ -6,58 +6,39 @@ _Last updated: 2026-09-15_
 `rebuild/frombos-v2-next`
 
 ## Current HEAD
-`aa7872845beaffbf6f68cbfc3a2db60c28e16418`
+`fe154d5356034b9ed8dc5c09a39b17ba77d08307`
 
 ## Product phase
-**Phase 1 — Product Foundation** is the active reconstruction phase, with the existing branch already containing the foundation modules and a large amount of recovered/legacy functionality.
+**Phase 1 — Product Foundation**. P0 Core foundation is now underway.
 
-## Important current finding
-The repository contains many successive visual generations (V15 through V24 and multiple feature-specific layers). The next major engineering direction should be **consolidation**, not another independent visual overlay.
+## What was completed in this work
+- Audited the V2 entry point and module structure.
+- Confirmed `app.js` as the current shell/router composition point.
+- Confirmed `data.js` as the current static catalog/provenance registry.
+- Confirmed `store.js` as the current V2 local persistence boundary.
+- Added `assets/js/core/schema.js` with canonical entity/provenance contracts.
+- Added `assets/js/core/workspace.js` with canonical workspace state, import/export and legacy V2 migration.
+- Added `docs/CORE-MIGRATION-MAP.md` mapping existing modules into Core.
+- Preserved the old V2 store for compatibility; it has not been deleted or replaced yet.
 
-The target architecture is a FROMBOS Core in which navigation, state, design tokens, domain models and module contracts are centralized.
-
-## Existing work to preserve
-- Team and player pools
-- Composition workflows
-- Draft workflows
-- Tactical preparation
-- VOD Review
-- Training workflows
-- Competitive context
-- Source/provenance concepts
-- Import/export and persistence
-- PWA behavior
-- Responsive layouts
-- Exact-map safety rules
-
-## Current visual state
-V24 Tactical Editorial is the latest published visual layer in the repository history. It is explicitly presentation-only and includes safeguards against rewriting competitive data, draft state and map geometry.
-
-## Branch warning
-`rebuild/frombos-v2-next` is currently diverged from `rebuild/frombos-v2` (4 commits ahead and 36 behind at the time of the 2026-09-15 audit). Do not merge these branches blindly. Establish the intended base before attempting consolidation.
+## Current architecture finding
+The V2 foundation is intentionally small enough to consolidate safely. The main architectural gap is not the number of screens; it is that module state is still centered around the legacy V2 store and modules do not yet share canonical domain entities.
 
 ## Next engineering priorities
-1. Establish a single FROMBOS Core architecture.
-2. Define canonical application state and domain contracts.
-3. Consolidate navigation and design tokens.
-4. Map every current module to the Core architecture.
-5. Remove/retire redundant visual and feature layers only after behavior is covered by tests.
-6. Connect Draft ↔ Team ↔ Composition ↔ Scouting ↔ Tactical ↔ VOD ↔ Training.
-7. Strengthen persistence, import/export and offline/PWA behavior.
-8. Add browser QA for desktop and mobile before release.
+1. Build a Core Store adapter around `core/workspace.js`.
+2. Migrate Team and Composition first because they are low-risk producers of shared entities.
+3. Migrate Draft/Series next so drafts reference canonical team, champion and composition entities.
+4. Migrate Tactical and VOD annotations.
+5. Link VOD annotations → Training items.
+6. Implement Champion/Matchup/Build/Scouting/Competitive domains on the same evidence model.
+7. Add browser QA before retiring legacy state paths.
 
 ## Do not do yet
-- Do not modify `main` as an experimental workspace.
-- Do not replace the real Wild Rift tactical map with a generic map.
-- Do not fabricate competitive statistics.
-- Do not add another global CSS layer without documenting why consolidation cannot solve the problem.
-- Do not delete legacy modules until their required behavior is mapped and covered.
+- Do not modify `main` experimentally.
+- Do not delete `assets/js/store.js` yet.
+- Do not add another global CSS generation as a substitute for architecture work.
+- Do not fabricate current competitive statistics.
+- Do not replace validated Wild Rift map geometry.
 
-## Handoff
-The last worker must update this file with:
-- current branch
-- current HEAD
-- what changed
-- what remains
-- tests/QA performed
-- known risks
+## Handoff protocol
+The next worker must read `FROMBOS-CONTEXT.md`, this file, `FROMBOS-DECISIONS.md` and `docs/CORE-MIGRATION-MAP.md` before editing. Update this file and `FROMBOS-CHANGELOG.md` after meaningful changes, including tests and known risks.
