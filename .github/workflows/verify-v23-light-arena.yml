@@ -1,0 +1,85 @@
+name: Verify FROMBOS V23 Light Arena
+
+on:
+  pull_request:
+    paths:
+      - 'assets/css/visual-v23-light-arena.css'
+      - 'assets/js/visual-v23-light-arena.js'
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - '.github/workflows/verify-v23-light-arena.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-light-arena-v23:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate V23 assets and integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v23-light-arena.css
+          test -f assets/js/visual-v23-light-arena.js
+          node --check assets/js/visual-v23-light-arena.js
+          grep -Fq 'visual-v23-light-arena.css?v=23.0' index.html
+          grep -Fq 'visual-v23-light-arena.js?v=23.0' index.html
+          grep -Fq 'sw.js?v=23.0' index.html
+          grep -Fq "'./assets/css/visual-v23-light-arena.css'" sw.js
+          grep -Fq "'./assets/js/visual-v23-light-arena.js'" sw.js
+          grep -Fq 'v23-light-arena' sw.js
+      - name: Validate all-light ownership contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in 'body.v23-light .sidebar' 'body.v23-light .topbar' 'body.v23-light .draft-team-panel' 'body.v23-light .tb-panel' 'body.v23-light .ci-detail' '.v23-mobile-dock'; do
+            grep -Fq "$token" assets/css/visual-v23-light-arena.css || { echo "Missing light ownership token: $token"; exit 1; }
+          done
+          grep -Fq '"background_color": "#f5f8fc"' manifest.webmanifest
+          grep -Fq '"theme_color": "#f5f8fc"' manifest.webmanifest
+          grep -Fq '<meta name="theme-color" content="#f5f8fc">' index.html
+      - name: Validate function color language
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in "draft:['#176bff'" "series:['#7b5cff'" "scouting:['#f59d45'" "tactical:['#1ab6a3'" "vod:['#d94fc7'" "training:['#2eaf6d'" "reports:['#d5a437'"; do
+            grep -Fq "$token" assets/js/visual-v23-light-arena.js || { echo "Missing function tone: $token"; exit 1; }
+          done
+          grep -Fq 'data-tool="ward"' assets/css/visual-v23-light-arena.css
+          grep -Fq 'data-tool="objective"' assets/css/visual-v23-light-arena.css
+          grep -Fq 'data-tool="danger"' assets/css/visual-v23-light-arena.css
+      - name: Preserve presentation-only behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -Eq "from './store\.js'|store\.update|store\.save|localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest|WebSocket" assets/js/visual-v23-light-arena.js; then
+            echo 'V23 visual controller must remain presentation-only/offline'
+            exit 1
+          fi
+          if grep -Eq 'MAP_URL\s*=|tbMapImage\.setAttribute' assets/js/visual-v23-light-arena.js; then
+            echo 'V23 visual layer may not alter Tactical map ownership'
+            exit 1
+          fi
+      - name: Validate CSS structure and responsive motion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/visual-v23-light-arena.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('CSS brace structure OK')
+          PY
+          grep -Fq '@media (max-width:820px)' assets/css/visual-v23-light-arena.css
+          grep -Fq '@media (max-width:520px)' assets/css/visual-v23-light-arena.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/visual-v23-light-arena.css

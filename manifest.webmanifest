@@ -1,10 +1,10 @@
 {
-  "name": "FROMBOS — Inteligência Competitiva",
-  "short_name": "FROMBOS",
+  "name": "FROMBOS RIFT — Inteligência Competitiva",
+  "short_name": "FROMBOS RIFT",
   "start_url": "./#/home",
   "display": "standalone",
-  "background_color": "#06081f",
-  "theme_color": "#06081f",
+  "background_color": "#f5f8fc",
+  "theme_color": "#f5f8fc",
   "description": "Plataforma de inteligência competitiva para equipes, treinadores e analistas de Wild Rift.",
   "lang": "pt-BR",
   "icons": []
