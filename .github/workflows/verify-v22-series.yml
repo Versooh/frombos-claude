@@ -1,0 +1,65 @@
+name: Verify FROMBOS V22 Series Command
+
+on:
+  pull_request:
+    paths:
+      - 'assets/css/series-command-v22.css'
+      - 'assets/js/series-command-v22.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v22-series.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-series-v22:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Series Command assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/series-command-v22.js
+          test -f assets/css/series-command-v22.css
+          node --check assets/js/series-command-v22.js
+          grep -Fq 'series-command-v22.css?v=22.7' index.html
+          grep -Fq 'series-command-v22.js?v=22.7' index.html
+          grep -Fq 'sw.js?v=22.7' index.html
+          grep -Fq "'./assets/css/series-command-v22.css'" sw.js
+          grep -Fq "'./assets/js/series-command-v22.js'" sw.js
+          grep -Fq 'v22-7-series-command-center' sw.js
+      - name: Validate Series Intelligence contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in 'SERIES COMMAND CENTER' 'FEARLESS DEPTH MAP' 'NEXT GAME PLAN' 'BETWEEN-GAME EVIDENCE STACK' 'UNKNOWN STAYS UNKNOWN' 'USER_PRIVATE' 'OBSERVED_COMPETITIVE' 'FROMBOS_STRUCTURAL' 'WILD RIFT ONLY'; do
+            grep -Fq "$token" assets/js/series-command-v22.js || { echo "Missing series token: $token"; exit 1; }
+          done
+          grep -Fq "from './store.js'" assets/js/series-command-v22.js
+          grep -Fq "from './open-series-scouting.generated.js'" assets/js/series-command-v22.js
+      - name: Preserve read-only and evidence-first behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -Eq 'store\.update|store\.save|localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest|WebSocket|\.click\(\)' assets/js/series-command-v22.js; then
+            echo 'V22.7 Series Command must remain read-only/offline'
+            exit 1
+          fi
+          if grep -Eqi 'prediction|probability' assets/js/series-command-v22.js assets/css/series-command-v22.css; then
+            echo 'Series Command may not introduce forecast language'
+            exit 1
+          fi
+          if grep -Eq 'tbMapImage|MAP_URL\s*=' assets/js/series-command-v22.js; then
+            echo 'Series Command may not alter Tactical map ownership'
+            exit 1
+          fi
+      - name: Validate responsive motion guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq '@media(max-width:760px)' assets/css/series-command-v22.css
+          grep -Fq '@media(max-width:430px)' assets/css/series-command-v22.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/series-command-v22.css
