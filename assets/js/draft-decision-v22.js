@@ -1,13 +1,16 @@
-// FROMBOS V22.4 — Draft Decision Layer.
-// Reads the active draft DOM, reference composition and FROMBOS structural heuristics only.
-// No state mutation and no automatic pick/ban.
+// FROMBOS V22.5 — Draft Decision Layer.
+// Reads active Draft DOM, reference composition, observed opponent signals and structural heuristics only.
+// No competitive state mutation and no automatic pick/ban.
 import { analyzeComposition, scoreCandidate, threatRead, structuralLabel } from './structural-intelligence.js';
 import { portraitHTML } from './champion-intelligence.js';
 import { ROLES } from './data.js';
 import { store } from './store.js';
+import { OPEN_SERIES_PLAYERS } from './open-series-scouting.generated.js';
 
 const route=()=>location.hash.replace('#/','').split('?')[0]||'home';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
+const same=(a,b)=>norm(a)===norm(b);
 
 function slotNames(selector){return [...document.querySelectorAll(selector)].map(x=>x.textContent.trim()).filter(x=>x&&x!=='—');}
 function picks(side){return slotNames(`.draft-team-panel.${side} .dr-slot.pick.filled .dr-slot-copy b`);}
@@ -35,6 +38,18 @@ function threatPanel(enemy){
   return `<article class="v22-draft-threat"><header><span>ENEMY READ</span><b>FROMBOS_STRUCTURAL</b></header>${enemy.length?`<div class="v22-draft-picked">${enemy.map(c=>`<span title="${esc(c)}">${portraitHTML(c,'v22-draft-mini')}</span>`).join('')}</div>`:''}${t.threats.length?`<div class="v22-threat-list">${t.threats.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:'<p>Ainda não há sinais suficientes para classificar uma ameaça de composição.</p>'}</article>`;
 }
 
+function opponentName(){
+  const workspace=store.state.team?.opponent||'';
+  if(workspace&&norm(workspace)!=='adversario')return workspace;
+  return store.state.scouting?.selectedTeam||workspace||'ADVERSÁRIO';
+}
+function opponentPrep(){
+  const team=opponentName();
+  const players=OPEN_SERIES_PLAYERS.filter(p=>same(p.team,team)&&p.favorite).sort((a,b)=>a.rank-b.rank);
+  const signals=players.slice(0,5);
+  return `<section class="v22-opponent-prep"><header><div><span>OPPONENT PREP · OBSERVED_COMPETITIVE</span><b>${esc(team)}</b></div><button type="button" data-v22-open-scouting>Abrir Scouting</button></header>${signals.length?`<div class="v22-opponent-signals">${signals.map(p=>`<article class="v22-opponent-signal"><div>${portraitHTML(p.favorite,'v22-opponent-img')}</div><div><b>${esc(p.favorite)}</b><small>${esc(p.name)} · OBSERVED FAVORITE</small></div></article>`).join('')}</div>`:'<p class="v22-opponent-note">Nenhum campo favorito observado materializado para esta equipe no snapshot atual.</p>'}<div class="v22-opponent-unknowns"><span>BAN TENDENCY · UNKNOWN</span><span>FIRST PHASE · UNKNOWN</span><span>SIDE BIAS · UNKNOWN</span><span>FEARLESS DEPTH · UNKNOWN</span></div><p class="v22-opponent-note">Favorito observado não é champion pool completo nem prioridade de ban. Use estes sinais como contexto para investigação, não como comando automático.</p></section>`;
+}
+
 function referenceStatus(champion,blue,red,banned,stageInfo){
   if(blue.includes(champion))return'BLUE PICK';
   if(red.includes(champion))return'RED PICK';
@@ -56,9 +71,10 @@ function html(){
   return `<section class="v22-draft-decision v22-reveal">
     <header class="v22-draft-decision-head"><div><span>DRAFT DECISION LAYER</span><h2>Leia a composição enquanto ela nasce.</h2><p>Análise estrutural local: engage, frontline, peel, dano, range, scaling e ameaças. Não é previsão de vitória.</p></div><div class="v22-draft-stage"><small>ESTÁGIO ATUAL</small><b>${esc(s.text||'DRAFT CONCLUÍDO')}</b><span>FROMBOS_STRUCTURAL</span></div></header>
     <div class="v22-draft-read-grid">${sideCard('blue','LADO AZUL',blue)}${sideCard('red','LADO VERMELHO',red)}${threatPanel(enemy)}</div>
+    ${opponentPrep()}
     ${referencePlan(blue,red,s)}
     <div class="v22-draft-next"><div class="v22-draft-next-head"><div><span>PRÓXIMA DECISÃO</span><h3>${s.pick?`Candidatos para ${s.side==='blue'?'Azul':'Vermelho'}`:'Ban phase / leitura de scouting'}</h3></div><div class="v22-draft-evidence-row"><span>STRUCTURAL</span><span>${available(true).length?'PLAYER POOL':'AVAILABLE ROSTER'}</span><span>NO WIN PROBABILITY</span></div></div>${candidateCards(current,s)}</div>
-    <footer><b>Como usar:</b> clique em um candidato ou campeão AVAILABLE da referência para localizá-lo na grade. A escolha continua manual e o motor de Draft existente permanece responsável por confirmar o pick.</footer>
+    <footer><b>Como usar:</b> Scouting informa o contexto observado; a engine estrutural cobre lacunas. Clique em candidato ou campeão AVAILABLE para localizá-lo na grade. A escolha continua manual.</footer>
   </section>`;
 }
 
@@ -69,6 +85,7 @@ function focusChampion(name){
 function bind(root){
   root.querySelectorAll('[data-v22-draft-candidate]').forEach(btn=>btn.addEventListener('click',()=>focusChampion(btn.dataset.v22DraftCandidate)));
   root.querySelectorAll('[data-v22-reference-champ]').forEach(btn=>btn.addEventListener('click',()=>focusChampion(btn.dataset.v22ReferenceChamp)));
+  root.querySelector('[data-v22-open-scouting]')?.addEventListener('click',()=>{location.hash='#/scouting';});
 }
 
 function apply(){
