@@ -47,8 +47,7 @@ function upgradeChampionCards(){
 function upgradeChampionHero(){
   const name=selectedChampion();if(!name)return;const a=asset(name);if(!a)return;
   document.querySelectorAll('.ci-detail-portrait,.lab-portrait').forEach(img=>a.portrait&&setSrc(img,a.portrait,name,true));
-  document.querySelectorAll('.ci-hero').forEach(hero=>{if(a.splash){hero.style.setProperty('--v24-champion-splash',`url("${String(a.splash).replace(/"/g,'%22')}")`);hero.dataset.v24Champion=name;}});
-  document.querySelectorAll('.lab-hero').forEach(hero=>{if(a.splash){hero.style.setProperty('--v24-champion-splash',`url("${String(a.splash).replace(/"/g,'%22')}")`;}});
+  document.querySelectorAll('.ci-hero,.lab-hero').forEach(hero=>{if(a.splash){hero.style.setProperty('--v24-champion-splash',`url("${String(a.splash).replace(/"/g,'%22')}")`);hero.dataset.v24Champion=name;}});
 }
 function normalizeEmptyDraftSlots(){
   document.querySelectorAll('.dr-slot-copy,.draft-slot-copy').forEach(copy=>{
