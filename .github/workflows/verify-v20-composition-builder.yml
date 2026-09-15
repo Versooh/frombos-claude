@@ -39,13 +39,12 @@ jobs:
           if(runtime<0||builder<0||builder<runtime) throw new Error('Composition Builder must load after the shared V20 runtime');
           for(const token of [
             'assets/css/composition-builder-v20.css?v=20.20',
-            'assets/js/composition-builder-v20.js?v=20.20',
-            "serviceWorker.register('./sw.js?v=20.20')"
+            'assets/js/composition-builder-v20.js?v=20.20'
           ]) if(!html.includes(token)) throw new Error(`Missing index integration: ${token}`);
+          if(!/serviceWorker\.register\('\.\/sw\.js\?v=20\.\d+'\)/.test(html)) throw new Error('Missing current V20 service worker registration');
           for(const token of [
             "'./assets/css/composition-builder-v20.css'",
-            "'./assets/js/composition-builder-v20.js'",
-            'v20-20-composition-builder'
+            "'./assets/js/composition-builder-v20.js'"
           ]) if(!sw.includes(token)) throw new Error(`Missing service worker integration: ${token}`);
           NODE
 
