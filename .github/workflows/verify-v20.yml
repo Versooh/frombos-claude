@@ -76,6 +76,19 @@ jobs:
           grep -q 'data-page="champions"' assets/css/visual-v20-pro.css
           grep -q 'data-page="draft"' assets/css/visual-v20-pro.css
 
+      - name: V20 analysis workspace layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/visual-v20-analysis.css
+          grep -q 'visual-v20-analysis.css?v=20.3' index.html
+          grep -q "'./assets/css/visual-v20-analysis.css'" sw.js
+          grep -q 'data-page="tactical"' assets/css/visual-v20-analysis.css
+          grep -q 'data-page="vod"' assets/css/visual-v20-analysis.css
+          grep -q 'tb-viewport' assets/css/visual-v20-analysis.css
+          grep -q 'vod-player-stage' assets/css/visual-v20-analysis.css
+          grep -q 'vod-timeline' assets/css/visual-v20-analysis.css
+
       - name: Wild Rift only guard
         shell: bash
         run: |
