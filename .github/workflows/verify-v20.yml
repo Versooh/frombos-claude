@@ -139,6 +139,24 @@ jobs:
           grep -q 'meta-intelligence' assets/css/visual-v20-system.css
           grep -q 'source-row' assets/css/visual-v20-system.css
 
+      - name: V20 system intelligence controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/system-controls-v20.js
+          test -f assets/css/system-controls-v20.css
+          grep -q 'system-controls-v20.js?v=20.7' index.html
+          grep -q 'system-controls-v20.css?v=20.7' index.html
+          grep -q "'./assets/js/system-controls-v20.js'" sw.js
+          grep -q "'./assets/css/system-controls-v20.css'" sw.js
+          grep -q 'team-quick-v20' assets/js/system-controls-v20.js
+          grep -q 'competitive-tools-v20' assets/js/system-controls-v20.js
+          grep -q 'meta-filterbar-v20' assets/js/system-controls-v20.js
+          grep -q 'data-evidence-legend-v20' assets/js/system-controls-v20.js
+          grep -q 'applyCompetitiveFilter' assets/js/system-controls-v20.js
+          grep -q 'applyMetaFilter' assets/js/system-controls-v20.js
+          grep -q 'applyDataFilter' assets/js/system-controls-v20.js
+
       - name: Wild Rift only guard
         shell: bash
         run: |
