@@ -73,6 +73,8 @@ jobs:
           node --check assets/js/reports-router.js
           node --check assets/js/visual-polish.js
           node --check assets/js/i18n-ptbr.js
+          node --check assets/js/i18n-v19.js
+          node --check assets/js/ui-stabilization-v19.js
       - name: Validate integration assets
         run: |
           test -f assets/css/visual-v10.css
@@ -95,8 +97,26 @@ jobs:
           test -f assets/css/match-center-v18.css
           test -f assets/js/match-center-v18.js
           test -f assets/js/match-center-router.js
+          test -f assets/css/ui-stabilization-v19.css
+          test -f assets/js/ui-stabilization-v19.js
+          test -f assets/js/i18n-v19.js
           grep -q 'visual-v10.css' index.html
-          grep -q 'i18n-ptbr.js' index.html
+          grep -q 'i18n-v19.js' index.html
+          ! grep -q 'i18n-ptbr.js' index.html
+          grep -q 'ui-stabilization-v19.css' index.html
+          grep -q 'ui-stabilization-v19.js' index.html
+          grep -q 'ui-stabilization-v19.css' sw.js
+          grep -q 'ui-stabilization-v19.js' sw.js
+          grep -q 'i18n-v19.js' sw.js
+          grep -q 'replaceSafe' assets/js/i18n-v19.js
+          grep -q "\['BAN','BANIMENTO'\]" assets/js/i18n-v19.js
+          ! grep -q "\['Pick','Captura'\]" assets/js/i18n-v19.js
+          grep -q 'BANIMENTO(?:IMENTO)' assets/js/ui-stabilization-v19.js
+          grep -q 'white-space:nowrap' assets/css/ui-stabilization-v19.css
+          grep -q 'font-size:13px' assets/css/ui-stabilization-v19.css
+          grep -q 'teamSaveV19' assets/js/ui-stabilization-v19.js
+          grep -q 'scRegSearchV19' assets/js/ui-stabilization-v19.js
+          grep -q 'ci-evidence-icon-v19' assets/js/ui-stabilization-v19.js
           grep -q 'tactical-v11.css' index.html
           grep -q 'tactical-v11.js' index.html
           grep -q 'tactical-v12.css' index.html
