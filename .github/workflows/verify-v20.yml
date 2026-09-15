@@ -95,16 +95,38 @@ jobs:
           set -euo pipefail
           test -f assets/css/lab-controls-v20.css
           test -f assets/js/lab-controls-v20.js
-          grep -q 'lab-controls-v20.css?v=20.4' index.html
-          grep -q 'lab-controls-v20.js?v=20.4' index.html
+          grep -q 'lab-controls-v20.css?v=20.8' index.html
+          grep -q 'lab-controls-v20.js?v=20.8' index.html
           grep -q "'./assets/css/lab-controls-v20.css'" sw.js
           grep -q "'./assets/js/lab-controls-v20.js'" sw.js
           grep -q 'comp-toolbar-v20' assets/js/lab-controls-v20.js
+          grep -q 'comp-pool-toggle-v20' assets/js/lab-controls-v20.js
+          grep -q 'compositionPoolFit' assets/js/lab-controls-v20.js
+          grep -q 'draft-reference-v20' assets/js/lab-controls-v20.js
+          grep -q 'data-ci-filter' assets/js/lab-controls-v20.js
           grep -q 'data-draft-filter' assets/js/lab-controls-v20.js
           grep -q 'applyCompositionFilters' assets/js/lab-controls-v20.js
+          grep -q 'applyChampionFilter' assets/js/lab-controls-v20.js
           grep -q 'applyDraftFilters' assets/js/lab-controls-v20.js
-          grep -q 'draft-filterbar-v20' assets/css/lab-controls-v20.css
+          grep -q 'draft-reference-v20' assets/css/lab-controls-v20.css
           grep -q 'ci-card.is-selected' assets/css/lab-controls-v20.css
+
+      - name: V20 analysis controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/analysis-controls-v20.js
+          test -f assets/css/analysis-controls-v20.css
+          grep -q 'analysis-controls-v20.js?v=20.9' index.html
+          grep -q 'analysis-controls-v20.css?v=20.9' index.html
+          grep -q "'./assets/js/analysis-controls-v20.js'" sw.js
+          grep -q "'./assets/css/analysis-controls-v20.css'" sw.js
+          grep -q 'tacticalStats' assets/js/analysis-controls-v20.js
+          grep -q 'applyLayerPreset' assets/js/analysis-controls-v20.js
+          grep -q 'vodStats' assets/js/analysis-controls-v20.js
+          grep -q "VOD_CORRECTION_DRILL" assets/js/analysis-controls-v20.js
+          grep -q 'analysis-context-v20' assets/css/analysis-controls-v20.css
+          grep -q 'vod-category-quick-v20' assets/css/analysis-controls-v20.css
 
       - name: V20 operations workspace
         shell: bash
