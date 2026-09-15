@@ -2,7 +2,7 @@ const KEY='frombos.v2.workspace';
 const initialState={
   meta:{version:2,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},
   team:{name:'UOL E-SPORTS',opponent:'ADVERSÁRIO',format:'MD5',players:{BARON:{name:'',pool:[]},JUNGLE:{name:'',pool:[]},MID:{name:'',pool:[]},DUO:{name:'',pool:[]},SUPPORT:{name:'',pool:[]}}},
-  favorites:[],customComps:[],
+  favorites:[],customComps:[],championProfiles:{},
   training:{goals:[],sessions:[],focus:['Macro','Mecânica','Visão','Comunicação','Objetivos']},
   draft:{game:1,fearless:false,fearlessMode:'off',tournament:'Scrim / Treino',format:'MD5',ruleset:'ALTERNATING_5BAN_5PICK',actions:[],games:{1:{actions:[]}},branches:[],activeBranchId:null,branchOrigin:null,referenceComp:null},
   tactical:{activeScenario:null,scenarios:[],strokes:[]},
