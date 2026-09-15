@@ -75,6 +75,14 @@
 - Added responsive Tactical Pro controls and PWA caching for the enhancement layer.
 - Preserved the existing validated Wild Rift map and underlying scenario/marker model; the enhancement layer does not replace tactical state.
 
+### Tactical cloud + VOD integration
+- Added Supabase-backed Tactical Scenario/Event persistence and boot hydration.
+- Added `assets/js/core/tactical-cloud-bridge.js` as the UI boundary for tactical cloud writes.
+- Added `assets/js/tactical-cloud-ui.js` to persist scenario/map/coach-plan changes without rewriting the validated board implementation.
+- VOD Review timestamp notes now create tactical cloud events when a Tactical scenario is active, preserving separate map and VOD timestamps.
+- Bumped the service-worker cache and included the tactical cloud integration modules.
+- Deliberately avoided storing transient pointer movements as individual tactical events.
+
 ### Product direction
 FROMBOS is explicitly being built as a multi-tenant SaaS:
 
@@ -83,9 +91,9 @@ FROMBOS is explicitly being built as a multi-tenant SaaS:
 Cloud is canonical for authenticated organization/team data; local Core remains an offline/cache layer during migration.
 
 ### Next
-- Persist Tactical scenarios, timeline markers and annotations to Supabase.
-- Connect Tactical timeline markers directly to VOD Review timestamps.
+- Finish the Playback Coach UI: Plan × Execution, event timeline, and native-video seeking.
+- Load cloud tactical events into the Tactical/VOD playback surface.
+- Convert qualifying mistakes into deduplicated Training Items.
 - Add organization member/role/invitation and multi-team administration.
-- Persist VOD/Training and connect annotation → drill workflows.
 - Add cloud-aware backup/import plus dirty-state/conflict handling.
 - Run authenticated browser QA against a non-production organization before promoting to `main`.
