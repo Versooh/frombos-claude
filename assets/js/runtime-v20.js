@@ -36,7 +36,9 @@ function attachObserver(){
   if(!target)return;
   observer?.disconnect();
   observer=new MutationObserver(()=>{mutationBatches++;request('mutation');});
-  observer.observe(target,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden','disabled','aria-pressed','aria-current']});
+  // Structural changes only. Interactive state is scheduled by click/change/input,
+  // avoiding feedback from aria/class attributes written by subscriber layers.
+  observer.observe(target,{subtree:true,childList:true});
 }
 function appEvent(event){
   if(event.target instanceof Element&&event.target.closest('#app'))request(event.type);
@@ -45,6 +47,7 @@ function stats(){return{route:route(),subscribers:subscribers.size,frames:frameC
 
 window.addEventListener('hashchange',()=>request('hashchange'));
 window.addEventListener('load',()=>{attachObserver();request('load');});
+document.addEventListener('click',appEvent,true);
 document.addEventListener('change',appEvent,true);
 document.addEventListener('input',appEvent,true);
 
