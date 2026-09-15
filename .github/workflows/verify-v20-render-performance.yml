@@ -1,4 +1,4 @@
-name: Verify FROMBOS V20 Render Performance
+name: Verify FROMBOS V20 Performance
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  render-performance:
+  performance:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,7 +33,7 @@ jobs:
           grep -q "'./assets/css/render-performance-v20.css'" sw.js
           grep -q "'./assets/js/render-performance-v20.js'" sw.js
 
-      - name: Validate runtime order
+      - name: Validate V20.18 runtime order
         shell: bash
         run: |
           set -euo pipefail
@@ -71,4 +71,34 @@ jobs:
           if(forbiddenDom.some(pattern=>pattern.test(js))) throw new Error('V20.18 must preserve complete DOM nodes');
           const forbiddenSources=/IntersectionObserver|virtualiz|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i;
           if(forbiddenSources.test(js)||forbiddenSources.test(css)) throw new Error('V20.18 contains forbidden virtualization or League PC source');
+          NODE
+
+      - name: Validate V20.19 Tactical Map Delivery
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/tactical-map-delivery-v20.js
+          test -f assets/css/tactical-map-delivery-v20.css
+          node --check assets/js/tactical-map-delivery-v20.js
+          grep -q 'tactical-map-delivery-v20.js?v=20.19' index.html
+          grep -q 'tactical-map-delivery-v20.css?v=20.19' index.html
+          grep -q "'./assets/js/tactical-map-delivery-v20.js'" sw.js
+          grep -q "'./assets/css/tactical-map-delivery-v20.css'" sw.js
+          grep -q "MAP_URL='./assets/img/wild-rift-map.jpg'" assets/js/tactical-map-delivery-v20.js
+          grep -q 'runtime?.subscribe' assets/js/tactical-map-delivery-v20.js
+          grep -q "addEventListener('pointerenter'" assets/js/tactical-map-delivery-v20.js
+          grep -q 'saveData' assets/js/tactical-map-delivery-v20.js
+          grep -q "image.fetchPriority='high'" assets/js/tactical-map-delivery-v20.js
+          grep -q 'map-delivery-v20' assets/css/tactical-map-delivery-v20.css
+
+      - name: Preserve exact map ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/tactical-map-delivery-v20.js','utf8');
+          if(/setAttribute\s*\(\s*['"]href['"]/.test(js)) throw new Error('V20.19 must never mutate Tactical map href');
+          if(/puu\.sh|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon/i.test(js)) throw new Error('V20.19 must only prewarm the exact local Wild Rift map');
+          if(!js.includes("getAttribute('href')")) throw new Error('V20.19 must inspect, not replace, Tactical map source');
           NODE
