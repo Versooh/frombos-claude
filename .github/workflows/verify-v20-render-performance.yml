@@ -1,0 +1,67 @@
+name: Verify FROMBOS V20 Render Performance
+
+on:
+  push:
+    branches: [rebuild/frombos-v20]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  render-performance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate V20.18 assets and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/render-performance-v20.css
+          test -f assets/js/render-performance-v20.js
+          node --check assets/js/render-performance-v20.js
+          grep -q 'render-performance-v20.css?v=20.18' index.html
+          grep -q 'render-performance-v20.js?v=20.18' index.html
+          grep -q "'./assets/css/render-performance-v20.css'" sw.js
+          grep -q "'./assets/js/render-performance-v20.js'" sw.js
+
+      - name: Validate runtime order
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('index.html','utf8');
+          const runtime=html.indexOf('assets/js/runtime-v20.js?v=20.17');
+          const performance=html.indexOf('assets/js/render-performance-v20.js?v=20.18');
+          if(runtime<0||performance<0||performance<runtime) throw new Error('render performance must load after shared runtime');
+          NODE
+          grep -q 'runtime?.subscribe' assets/js/render-performance-v20.js
+
+      - name: Validate safe rendering hints
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'content-visibility:auto' assets/css/render-performance-v20.css
+          grep -q 'contain-intrinsic-size' assets/css/render-performance-v20.css
+          grep -q 'contain:paint' assets/css/render-performance-v20.css
+          grep -q "img.loading='lazy'" assets/js/render-performance-v20.js
+          grep -q "img.loading='eager'" assets/js/render-performance-v20.js
+          grep -q "img.decoding='async'" assets/js/render-performance-v20.js
+          grep -q "img.fetchPriority='low'" assets/js/render-performance-v20.js
+          grep -q "img.fetchPriority='high'" assets/js/render-performance-v20.js
+
+      - name: Preserve complete DOM and Wild Rift-only policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -qE '\.remove\(|removeChild\(|replaceChildren\(|innerHTML[[:space:]]*=[[:space:]]*["'"']' assets/js/render-performance-v20.js
+          ! grep -qE 'IntersectionObserver|virtualiz|ddragon\.leagueoflegends\.com|lol-game-data|CommunityDragon' assets/js/render-performance-v20.js assets/css/render-performance-v20.css
