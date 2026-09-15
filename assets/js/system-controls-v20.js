@@ -5,6 +5,7 @@ const route=()=>location.hash.replace('#/','').split('?')[0]||'home';
 const q=(selector,root=document)=>root.querySelector(selector);
 const qa=(selector,root=document)=>[...root.querySelectorAll(selector)];
 const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const setText=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value;};
 
 function makeRouteButton(label,target,className='btn'){
   const b=document.createElement('button');b.type='button';b.className=className;b.textContent=label;b.dataset.systemGo=target;b.onclick=()=>location.hash=`#/${target}`;return b;
@@ -21,9 +22,18 @@ function teamControls(){
   }
   const rows=qa('.role-row',content);const configured=rows.filter(row=>{const name=q('[data-player]',row)?.value?.trim();const pool=qa('.pool-list .chip',row).length;return name||pool;}).length;
   let summary=q('.team-summary-v20',content);
-  if(!summary){summary=document.createElement('div');summary.className='team-summary-v20';q('.team-progress-v19',content)?.after(summary)??q('.section-title',content)?.before(summary);}
-  const unique=new Set(qa('.pool-list .chip',content).map(chip=>normalize(chip.textContent.replace(/×/g,''))).filter(Boolean));
-  summary.innerHTML=`<span><b>${configured}/5</b> posições</span><span><b>${unique.size}</b> campeões únicos no pool</span><span><b>${qa('.pool-list .chip',content).length}</b> entradas de pool</span>`;
+  if(!summary){
+    summary=document.createElement('div');summary.className='team-summary-v20';
+    const progress=q('.team-progress-v19',content);const section=q('.section-title',content);
+    if(progress)progress.after(summary);else section?.before(summary);
+  }
+  const poolEntries=qa('.pool-list .chip',content);
+  const unique=new Set(poolEntries.map(chip=>normalize(chip.textContent.replace(/×/g,''))).filter(Boolean));
+  const signature=`${configured}|${unique.size}|${poolEntries.length}`;
+  if(summary.dataset.signature!==signature){
+    summary.dataset.signature=signature;
+    summary.innerHTML=`<span><b>${configured}/5</b> posições</span><span><b>${unique.size}</b> campeões únicos no pool</span><span><b>${poolEntries.length}</b> entradas de pool</span>`;
+  }
 }
 
 function competitiveControls(){
@@ -42,7 +52,7 @@ function applyCompetitiveFilter(){
   const root=q('.competitive-center');const tools=root&&q('.competitive-tools-v20',root);if(!root||!tools)return;
   const term=normalize(q('#competitiveSearchV20',tools)?.value||'');const rows=qa('.ct-row[data-scout-team]',root);let visible=0;
   rows.forEach(row=>{const show=!term||normalize(row.textContent).includes(term);row.hidden=!show;if(show)visible++;});
-  const count=q('#competitiveCountV20',tools);if(count)count.textContent=`${visible} de ${rows.length} equipes`;
+  setText(q('#competitiveCountV20',tools),`${visible} de ${rows.length} equipes`);
 }
 
 const META_FILTERS=[['all','Todas'],['official','Oficial'],['observed','Observado'],['curated','Curado'],['competitive','Competitivo']];
@@ -85,7 +95,7 @@ function applyDataFilter(){
   const term=normalize(q('#dataSearchV20',controls)?.value||'');const type=controls.dataset.type||'all';const rows=qa('.source-row',card).slice(1);let visible=0;
   rows.forEach(row=>{const matchesTerm=!term||normalize(row.textContent).includes(term);const matchesType=type==='all'||sourceType(row)===type;const show=matchesTerm&&matchesType;row.hidden=!show;if(show)visible++;});
   qa('[data-data-type]',controls).forEach(button=>button.setAttribute('aria-pressed',button.dataset.dataType===type?'true':'false'));
-  const count=q('#dataCountV20',controls);if(count)count.textContent=`${visible} de ${rows.length} fontes`;
+  setText(q('#dataCountV20',controls),`${visible} de ${rows.length} fontes`);
 }
 
 function apply(){teamControls();competitiveControls();metaControls();dataControls();}
