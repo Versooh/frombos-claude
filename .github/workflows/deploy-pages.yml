@@ -46,6 +46,7 @@ jobs:
           node --check assets/js/tactical-v12.js
           node --check assets/js/tactical-share-restore.js
           node --check assets/js/vod-review.js
+          node --check assets/js/vod-v14.js
           node --check assets/js/champion-intelligence.js
           node --check assets/js/champion-registry.generated.js
           node --check assets/js/champion-visual-upgrade.js
@@ -77,6 +78,9 @@ jobs:
           test -f assets/js/tactical-v12.js
           test -f assets/css/draft-v13.css
           test -f assets/js/draft-v13.js
+          test -f assets/css/vod-review.css
+          test -f assets/js/vod-review.js
+          test -f assets/js/vod-v14.js
           grep -q 'visual-v10.css' index.html
           grep -q 'i18n-ptbr.js' index.html
           grep -q 'tactical-v11.css' index.html
@@ -88,6 +92,13 @@ jobs:
           grep -q 'draft-v13.css' sw.js
           grep -q 'draft-v13.js' sw.js
           grep -q 'fearlessMode' assets/js/draft-room.js
+          grep -q 'VOD REVIEW V14' assets/js/vod-review.js
+          grep -q 'vod-v14.js' index.html
+          grep -q 'vod-v14.js' sw.js
+          grep -q 'vod-review.css?v=14' index.html
+          grep -q 'activeSessionId' assets/js/store.js
+          grep -q 'captureSnapshot' assets/js/vod-review.js
+          grep -q 'vod-session-strip' assets/css/vod-review.css
           grep -q 'lang="pt-BR"' index.html
   deploy:
     if: github.event_name != 'pull_request'

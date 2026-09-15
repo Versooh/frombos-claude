@@ -6,7 +6,7 @@ const initialState={
   training:{goals:[],sessions:[],focus:['Macro','Mecânica','Visão','Comunicação','Objetivos']},
   draft:{game:1,fearless:false,fearlessMode:'off',tournament:'Scrim / Treino',format:'MD5',ruleset:'ALTERNATING_5BAN_5PICK',actions:[],games:{1:{actions:[]}},branches:[],activeBranchId:null,branchOrigin:null,referenceComp:null},
   tactical:{activeScenario:null,scenarios:[],strokes:[]},
-  vod:{reviews:[]},
+  vod:{reviews:[],sessions:[],activeSessionId:null},
   settings:{theme:'dark',reducedMotion:false}
 };
 function deepMerge(base,next){if(Array.isArray(base)||Array.isArray(next))return next??base;if(!base||typeof base!=='object'||!next||typeof next!=='object')return next??base;const out={...base};for(const key of Object.keys(next))out[key]=key in base?deepMerge(base[key],next[key]):next[key];return out;}
