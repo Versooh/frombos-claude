@@ -1,10 +1,17 @@
 // FROMBOS V24.1 — Screen Polish controller
-// Presentation only: no store writes, no competitive state mutation, no network fetches.
+// Presentation only: no store writes, no competitive state mutation, no API/network data fetches.
 import { CHAMPION_REGISTRY } from './champion-registry.generated.js';
 
 const route=()=>location.hash.replace('#/','').split('?')[0]||'home';
 const clean=v=>String(v??'').trim();
 const asset=name=>CHAMPION_REGISTRY?.[name]||Object.values(CHAMPION_REGISTRY||{}).find(x=>x?.name===name)||null;
+
+function ensureStyles(){
+  if(document.querySelector('link[data-v241-screen-polish]'))return;
+  const link=document.createElement('link');
+  link.rel='stylesheet';link.href='assets/css/screen-polish-v24-1.css?v=24.1';link.dataset.v241ScreenPolish='1';
+  document.head.appendChild(link);
+}
 
 function selectedChampion(){
   const q=new URLSearchParams(location.hash.split('?')[1]||'');
@@ -86,7 +93,7 @@ function responsiveDensity(){
 }
 
 function apply(){
-  applyRoot();markCurrentNav();improveChampionMedia();markDraftState();improveDossierSemantics();improveTacticalPresentation();responsiveDensity();
+  ensureStyles();applyRoot();markCurrentNav();improveChampionMedia();markDraftState();improveDossierSemantics();improveTacticalPresentation();responsiveDensity();
 }
 
 let raf=0;
