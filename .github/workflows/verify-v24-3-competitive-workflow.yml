@@ -1,0 +1,130 @@
+name: Verify FROMBOS V24.3 Competitive Workflow
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/css/competitive-workflow-v24-3.css'
+      - 'assets/js/competitive-workflow-v24-3.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-2-workflow-polish.yml'
+      - '.github/workflows/verify-v24-3-competitive-workflow.yml'
+  push:
+    paths:
+      - 'assets/css/competitive-workflow-v24-3.css'
+      - 'assets/js/competitive-workflow-v24-3.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-2-workflow-polish.yml'
+      - '.github/workflows/verify-v24-3-competitive-workflow.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v24-3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate assets and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/competitive-workflow-v24-3.css
+          test -f assets/js/competitive-workflow-v24-3.js
+          node --check assets/js/competitive-workflow-v24-3.js
+          grep -Fq 'competitive-workflow-v24-3.css?v=24.3' index.html
+          grep -Fq 'competitive-workflow-v24-3.js?v=24.3' index.html
+          grep -Fq "serviceWorker.register('./sw.js?v=24.3')" index.html
+
+      - name: Preserve read-only handoff contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/competitive-workflow-v24-3.js','utf8');
+          const forbidden=[
+            /store\.update/,/store\.save/,/localStorage/,/sessionStorage/,
+            /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
+            /MAP_URL\s*=/,/tbMapImage/,/\.click\s*\(/,
+            /draft\.actions\.push/,
+            /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(js)) throw new Error(`Forbidden V24.3 mutation/network token: ${pattern}`);
+          for(const token of ['Champion Pool','Scouting','Draft','VOD Review','Tactical Board','Training','NO AUTO-PICK','USER_PRIVATE','OBSERVED','Preparar atividade','Adicionar à semana','FROMBOS_V24_3_COMPETITIVE_WORKFLOW']) {
+            if(!js.includes(token)) throw new Error(`Missing workflow contract token: ${token}`);
+          }
+          if(!js.includes("import { store } from './store.js'")) throw new Error('V24.3 must read current local workspace context');
+          if(!js.includes("import { OPEN_SERIES_PLAYERS } from './open-series-scouting.generated.js'")) throw new Error('V24.3 scouting handoff must use materialized Wild Rift scouting evidence');
+          NODE
+
+      - name: Validate no invented competitive metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const combined=fs.readFileSync('assets/js/competitive-workflow-v24-3.js','utf8')+'\n'+fs.readFileSync('assets/css/competitive-workflow-v24-3.css','utf8');
+          if(/win\s*rate|pick\s*rate|ban\s*rate|prediction|probability|scoreCandidate|threatRead/i.test(combined)) throw new Error('V24.3 may not create ranking, forecast or rate language');
+          NODE
+
+      - name: Validate explicit coach confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Preparar atividade apenas preenche o formulário' assets/js/competitive-workflow-v24-3.js
+          grep -Fq 'nada é salvo até você confirmar “Adicionar à semana”' assets/js/competitive-workflow-v24-3.js
+          grep -Fq "if(type)type.value='VOD'" assets/js/competitive-workflow-v24-3.js
+          grep -Fq 'if(title)title.value=' assets/js/competitive-workflow-v24-3.js
+          if grep -Eq 'training\.planner\.(items|goals).*push|store\.update|draft\.actions\.push|data-champ.*\.click|\.click\(\)' assets/js/competitive-workflow-v24-3.js; then
+            echo 'V24.3 may prefill/focus UI only; it may not save training or execute Draft actions automatically'
+            exit 1
+          fi
+
+      - name: Preserve exact tactical map contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg';" assets/js/tactical.js
+          if grep -Eq 'wild-rift-map|tbMapImage|MAP_URL|marker|coordinate|stroke' assets/js/competitive-workflow-v24-3.js; then
+            echo 'V24.3 handoff may not alter or author tactical map geometry'
+            exit 1
+          fi
+
+      - name: Validate PWA integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'v24-3-competitive-workflow' sw.js
+          grep -Fq "'./assets/css/competitive-workflow-v24-3.css'" sw.js
+          grep -Fq "'./assets/js/competitive-workflow-v24-3.js'" sw.js
+          grep -Fq 'v24-2-workflow-polish' sw.js
+          grep -Fq 'v23-light-arena' sw.js
+
+      - name: Validate responsive and reduced motion
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in '.v243-flowbar' '.v243-handoff' '.v243-training-intake' '.v243-intake-list' '.v243-locate-focus' '@media(max-width:1280px)' '@media(max-width:920px)' '@media(max-width:560px)' 'prefers-reduced-motion:reduce'; do
+            grep -Fq "$token" assets/css/competitive-workflow-v24-3.css || { echo "Missing V24.3 CSS token: $token"; exit 1; }
+          done
+          grep -Fq 'min-height:44px!important' assets/css/competitive-workflow-v24-3.css
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/competitive-workflow-v24-3.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('V24.3 CSS brace structure OK')
+          PY
