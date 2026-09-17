@@ -1,0 +1,77 @@
+name: Verify FROMBOS V24.1 Screen Polish
+
+on:
+  pull_request:
+    paths:
+      - 'assets/css/screen-polish-v24-1.css'
+      - 'assets/js/screen-polish-v24-1.js'
+      - 'assets/js/visual-v24-tactical-editorial.js'
+      - '.github/workflows/verify-v24-1-screen-polish.yml'
+  push:
+    paths:
+      - 'assets/css/screen-polish-v24-1.css'
+      - 'assets/js/screen-polish-v24-1.js'
+      - 'assets/js/visual-v24-tactical-editorial.js'
+      - '.github/workflows/verify-v24-1-screen-polish.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-v24-1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript and integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/screen-polish-v24-1.css
+          test -f assets/js/screen-polish-v24-1.js
+          node --check assets/js/screen-polish-v24-1.js
+          node --check assets/js/visual-v24-tactical-editorial.js
+          grep -Fq "import './screen-polish-v24-1.js';" assets/js/visual-v24-tactical-editorial.js
+          grep -Fq "screen-polish-v24-1.css?v=24.1" assets/js/screen-polish-v24-1.js
+      - name: Validate visual ownership by screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in '.champion-intelligence' '.ci-hero' '.draft-arena' '.draft-champ-grid' '.v22-comp-workspace' '.v22-scout-workspace' '.tactical-grid' '.tb-board-card'; do
+            grep -Fq "$token" assets/css/screen-polish-v24-1.css || { echo "Missing screen polish token: $token"; exit 1; }
+          done
+          grep -Fq 'background:#fff!important' assets/css/screen-polish-v24-1.css
+          grep -Fq 'white-space:nowrap!important' assets/css/screen-polish-v24-1.css
+          grep -Fq 'text-overflow:ellipsis!important' assets/css/screen-polish-v24-1.css
+      - name: Validate champion media and map preservation
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "CHAMPION_REGISTRY" assets/js/screen-polish-v24-1.js
+          grep -Fq -- '--v24-champion-splash' assets/js/screen-polish-v24-1.js
+          grep -Fq "exact-map-preserved" assets/js/screen-polish-v24-1.js
+          if grep -Eq 'MAP_URL\s*=|tbMapImage\.setAttribute|store\.update|store\.save|localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest|WebSocket' assets/js/screen-polish-v24-1.js; then
+            echo 'V24.1 must remain presentation-only and may not mutate tactical/data state'
+            exit 1
+          fi
+      - name: Validate CSS structure and responsive states
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/screen-polish-v24-1.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('CSS brace structure OK')
+          PY
+          grep -Fq '@media(max-width:1380px)' assets/css/screen-polish-v24-1.css
+          grep -Fq '@media(max-width:1120px)' assets/css/screen-polish-v24-1.css
+          grep -Fq '@media(max-width:820px)' assets/css/screen-polish-v24-1.css
+          grep -Fq '@media(max-width:520px)' assets/css/screen-polish-v24-1.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/screen-polish-v24-1.css
