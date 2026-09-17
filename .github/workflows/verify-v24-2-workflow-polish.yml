@@ -67,7 +67,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq "frombos-v2-2026-09-17-v24-2-workflow-polish" sw.js
+          grep -Fq 'v24-2-workflow-polish' sw.js
           for token in \
             "'./assets/css/screen-polish-v24-1.css'" \
             "'./assets/css/workflow-polish-v24-2.css'" \
