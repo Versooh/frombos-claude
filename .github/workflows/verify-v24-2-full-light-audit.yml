@@ -1,0 +1,79 @@
+name: Verify FROMBOS V24.2 Full Light Audit
+
+on:
+  pull_request:
+    paths:
+      - 'assets/css/full-light-audit-v24-2.css'
+      - 'assets/js/full-light-audit-v24-2.js'
+      - 'assets/js/screen-polish-v24-1.js'
+      - '.github/workflows/verify-v24-2-full-light-audit.yml'
+  push:
+    paths:
+      - 'assets/css/full-light-audit-v24-2.css'
+      - 'assets/js/full-light-audit-v24-2.js'
+      - 'assets/js/screen-polish-v24-1.js'
+      - '.github/workflows/verify-v24-2-full-light-audit.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-v24-2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript and integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/full-light-audit-v24-2.css
+          test -f assets/js/full-light-audit-v24-2.js
+          node --check assets/js/full-light-audit-v24-2.js
+          node --check assets/js/screen-polish-v24-1.js
+          grep -Fq "import './full-light-audit-v24-2.js';" assets/js/screen-polish-v24-1.js
+          grep -Fq 'full-light-audit-v24-2.css?v=24.2' assets/js/full-light-audit-v24-2.js
+      - name: Validate light ownership coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in '.vod-pro' '.performance-center' '.training-planner-v16' '.v22-meta-command' '.v22-series-command' '.reports-center' '.match-center-v18' '.team-ops-v17' '.source-row'; do
+            grep -Fq "$token" assets/css/full-light-audit-v24-2.css || { echo "Missing light ownership selector: $token"; exit 1; }
+          done
+          grep -Fq -- '--v242-bg:#EEF1F6' assets/css/full-light-audit-v24-2.css
+          grep -Fq 'background:#fff!important' assets/css/full-light-audit-v24-2.css
+      - name: Keep VOD media surface intentional
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'video-only-dark' assets/js/full-light-audit-v24-2.js
+          grep -Fq '.vod-player-stage' assets/css/full-light-audit-v24-2.css
+          grep -Fq 'background:#05070A!important' assets/css/full-light-audit-v24-2.css
+      - name: Preserve presentation-only behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -Eq "from './store\.js'|store\.update|store\.save|localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest|WebSocket|MAP_URL\s*=|tbMapImage\.setAttribute" assets/js/full-light-audit-v24-2.js; then
+            echo 'V24.2 audit must remain presentation-only'
+            exit 1
+          fi
+      - name: Validate CSS structure and responsive coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/full-light-audit-v24-2.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('CSS brace structure OK')
+          PY
+          grep -Fq '@media(max-width:1180px)' assets/css/full-light-audit-v24-2.css
+          grep -Fq '@media(max-width:820px)' assets/css/full-light-audit-v24-2.css
+          grep -Fq '@media(max-width:520px)' assets/css/full-light-audit-v24-2.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/full-light-audit-v24-2.css

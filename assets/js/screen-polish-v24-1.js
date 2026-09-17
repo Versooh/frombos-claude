@@ -1,6 +1,7 @@
 // FROMBOS V24.1 — Screen Polish controller
 // Presentation only: no store writes, no competitive state mutation, no API/network data fetches.
 import { CHAMPION_REGISTRY } from './champion-registry.generated.js';
+import './full-light-audit-v24-2.js';
 
 const route=()=>location.hash.replace('#/','').split('?')[0]||'home';
 const clean=v=>String(v??'').trim();
