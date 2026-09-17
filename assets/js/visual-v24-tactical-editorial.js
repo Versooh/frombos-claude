@@ -1,6 +1,7 @@
 // FROMBOS V24 — Tactical Editorial presentation controller
 // Visual only. Does not mutate store, evidence, draft state, tactical geometry or competitive data.
 import { CHAMPION_REGISTRY } from './champion-registry.generated.js';
+import './screen-polish-v24-1.js';
 
 const route=()=>location.hash.replace('#/','').split('?')[0]||'home';
 const preferredHome=['Jinx','Ahri','Kai\'Sa','Akali','Irelia','Riven','Yasuo'];
