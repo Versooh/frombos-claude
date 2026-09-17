@@ -1,0 +1,88 @@
+/* FROMBOS V24.2 — WORKFLOW POLISH
+   Presentation-only UX layer. Competitive data, evidence, draft state and tactical geometry are untouched. */
+
+:root{
+  --v242-bar:#f9fafc;
+  --v242-line:#d8dde6;
+  --v242-ink:#11151f;
+  --v242-muted:#667085;
+  --v242-blue:#1d4ed8;
+  --v242-focus:#275fd6;
+}
+
+.v242-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+body.v24-2-workflow .v242-workflow-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:42px;margin:-2px 0 14px;padding:7px 9px 7px 12px;background:var(--v242-bar);border:1px solid var(--v242-line);border-radius:6px;color:var(--v242-ink)}
+body.v24-2-workflow .v242-workflow-context{display:flex;align-items:baseline;gap:9px;min-width:0}
+body.v24-2-workflow .v242-workflow-kicker{color:#9c6e17;font:700 8px/1 "IBM Plex Mono",monospace;letter-spacing:.07em}
+body.v24-2-workflow .v242-workflow-context b{font:750 12px/1.2 "IBM Plex Sans",Inter,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.v24-2-workflow .v242-workflow-context small{color:var(--v242-muted);font:700 8px/1 "IBM Plex Mono",monospace;letter-spacing:.06em}
+body.v24-2-workflow .v242-workflow-actions{display:flex;gap:6px;flex:0 0 auto}
+body.v24-2-workflow :is(.v242-focus-btn,.v242-top-btn){min-height:30px;padding:0 10px;border:1px solid #c4ccd8;border-radius:5px;background:#fff;color:#394457;font:750 10px/1 "IBM Plex Sans",Inter,sans-serif;cursor:pointer}
+body.v24-2-workflow .v242-focus-btn[aria-pressed="true"]{background:#152039;color:#fff;border-color:#152039}
+body.v24-2-workflow :is(.v242-focus-btn,.v242-top-btn):focus-visible{outline:2px solid var(--v242-focus);outline-offset:2px}
+
+/* Dense screens: keep context controls within reach without covering content. */
+body.v24-2-workflow .v242-sticky-context{position:relative;z-index:3}
+@media(min-width:1121px){
+  body.v24-2-workflow[data-v242-route="draft"] .draft-command,
+  body.v24-2-workflow[data-v242-route="tactical"] .tactical-topline,
+  body.v24-2-workflow[data-v242-route="vod"] .vod-command{position:sticky!important;top:68px!important;z-index:8!important;box-shadow:0 1px 0 rgba(17,21,31,.04)!important}
+}
+
+/* Focus mode: maximize competitive surface without mutating application state. */
+body.v24-2-workflow.v242-focus .sidebar{display:none!important}
+body.v24-2-workflow.v242-focus .app-shell{grid-template-columns:minmax(0,1fr)!important}
+body.v24-2-workflow.v242-focus .topbar{display:none!important}
+body.v24-2-workflow.v242-focus .content{max-width:none!important;padding:12px 16px 50px!important}
+body.v24-2-workflow.v242-focus .v242-workflow-bar{position:sticky;top:0;z-index:50;margin:0 0 10px;border-radius:0 0 6px 6px;background:rgba(249,250,252,.98);backdrop-filter:blur(8px)}
+body.v24-2-workflow.v242-focus .page-head{padding-top:6px!important}
+body.v24-2-workflow.v242-focus[data-v242-route="draft"] .draft-command,
+body.v24-2-workflow.v242-focus[data-v242-route="tactical"] .tactical-topline,
+body.v24-2-workflow.v242-focus[data-v242-route="vod"] .vod-command{top:43px!important}
+body.v24-2-workflow.v242-focus[data-v242-route="draft"] .draft-arena{grid-template-columns:minmax(250px,.82fr) minmax(460px,1.36fr) minmax(250px,.82fr)!important}
+body.v24-2-workflow.v242-focus[data-v242-route="tactical"] .tactical-grid{grid-template-columns:minmax(210px,.7fr) minmax(620px,2.15fr) minmax(250px,.8fr)!important}
+body.v24-2-workflow.v242-focus[data-v242-route="vod"] .vod-layout{grid-template-columns:minmax(0,1.55fr) minmax(300px,.65fr)!important}
+
+/* Accessible keyboard focus across dense card grids. */
+body.v24-2-workflow .v242-focusable:focus-visible,
+body.v24-2-workflow :is(.ci-card,.draft-champ-card,.tb-tool,.v23-function-link):focus-visible{outline:2px solid var(--v242-focus)!important;outline-offset:2px!important;box-shadow:0 0 0 3px rgba(39,95,214,.12)!important}
+body.v24-2-workflow :is(button,a,[role="button"],input,select,textarea):focus-visible{outline-color:var(--v242-focus)}
+
+/* Horizontal control rows become usable on narrow screens instead of squeezing. */
+body.v24-2-workflow .v242-scroll-row{scrollbar-width:thin;overscroll-behavior-inline:contain}
+body.v24-2-workflow .v242-scroll-row::-webkit-scrollbar{height:5px}
+body.v24-2-workflow .v242-scroll-row::-webkit-scrollbar-thumb{background:#c3cad5;border-radius:999px}
+
+/* Small visual hierarchy refinements around selection and evidence. */
+body.v24-2-workflow :is(.ci-card[aria-current="true"],.draft-champ-card[aria-pressed="true"],.nav-item[aria-current="page"]){position:relative}
+body.v24-2-workflow .ci-card[aria-current="true"]:after{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--v24-accent,#1d4ed8);pointer-events:none}
+body.v24-2-workflow .draft-champ-card:not(:disabled):active{transform:translateY(1px)!important}
+body.v24-2-workflow [data-status="UNKNOWN"]{border-style:dashed!important}
+
+@media(max-width:1120px){
+  body.v24-2-workflow .v242-workflow-bar{margin-bottom:10px}
+  body.v24-2-workflow.v242-focus[data-v242-route="draft"] .draft-arena,
+  body.v24-2-workflow.v242-focus[data-v242-route="tactical"] .tactical-grid,
+  body.v24-2-workflow.v242-focus[data-v242-route="vod"] .vod-layout{grid-template-columns:1fr!important}
+}
+
+@media(max-width:820px){
+  body.v24-2-workflow .v242-workflow-bar{position:sticky;top:0;z-index:22;border-radius:0;margin:-10px -14px 10px;padding:8px 12px;background:rgba(249,250,252,.97);backdrop-filter:blur(8px)}
+  body.v24-2-workflow .v242-workflow-context small{display:none}
+  body.v24-2-workflow .v242-scroll-row{overflow-x:auto!important;overflow-y:hidden!important;display:flex!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch;padding-bottom:3px!important}
+  body.v24-2-workflow .v242-scroll-row>*{flex:0 0 auto!important}
+  body.v24-2-workflow :is(.btn,.nav-item,.draft-champ-card,.tb-tool,.v242-focus-btn,.v242-top-btn){min-height:44px!important}
+  body.v24-2-workflow.v242-focus .content{padding:8px 12px 44px!important}
+}
+
+@media(max-width:520px){
+  body.v24-2-workflow .v242-workflow-bar{gap:8px}
+  body.v24-2-workflow .v242-workflow-kicker{display:none}
+  body.v24-2-workflow .v242-workflow-context b{font-size:11px}
+  body.v24-2-workflow :is(.v242-focus-btn,.v242-top-btn){padding-inline:9px;font-size:9px}
+  body.v24-2-workflow.v242-focus .page-head h1{font-size:30px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.v24-2-workflow *,body.v24-2-workflow *:before,body.v24-2-workflow *:after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
