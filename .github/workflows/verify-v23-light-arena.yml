@@ -39,9 +39,9 @@ jobs:
           for token in 'body.v23-light .sidebar' 'body.v23-light .topbar' 'body.v23-light .draft-team-panel' 'body.v23-light .tb-panel' 'body.v23-light .ci-detail' '.v23-mobile-dock'; do
             grep -Fq "$token" assets/css/visual-v23-light-arena.css || { echo "Missing light ownership token: $token"; exit 1; }
           done
-          grep -Fq '"background_color": "#f5f8fc"' manifest.webmanifest
-          grep -Fq '"theme_color": "#f5f8fc"' manifest.webmanifest
-          grep -Fq '<meta name="theme-color" content="#f5f8fc">' index.html
+          grep -Eiq '"background_color": "#(f5f8fc|EEF1F6)"' manifest.webmanifest
+          grep -Eiq '"theme_color": "#(f5f8fc|EEF1F6)"' manifest.webmanifest
+          grep -Eiq '<meta name="theme-color" content="#(f5f8fc|EEF1F6)">' index.html
       - name: Validate function color language
         shell: bash
         run: |

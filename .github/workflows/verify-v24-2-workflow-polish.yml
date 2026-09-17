@@ -1,0 +1,109 @@
+name: Verify FROMBOS V24.2 Workflow Polish
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/css/workflow-polish-v24-2.css'
+      - 'assets/js/workflow-polish-v24-2.js'
+      - 'assets/css/screen-polish-v24-1.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-2-workflow-polish.yml'
+  push:
+    paths:
+      - 'assets/css/workflow-polish-v24-2.css'
+      - 'assets/js/workflow-polish-v24-2.js'
+      - 'assets/css/screen-polish-v24-1.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-2-workflow-polish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v24-2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate assets and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/workflow-polish-v24-2.css
+          test -f assets/js/workflow-polish-v24-2.js
+          test -f assets/css/screen-polish-v24-1.css
+          node --check assets/js/workflow-polish-v24-2.js
+          grep -Fq 'screen-polish-v24-1.css?v=24.1' index.html
+          grep -Fq 'data-v241-screen-polish="1"' index.html
+          grep -Fq 'workflow-polish-v24-2.css?v=24.2' index.html
+          grep -Fq 'workflow-polish-v24-2.js?v=24.2' index.html
+          grep -Fq "serviceWorker.register('./sw.js?v=24.2')" index.html
+
+      - name: Validate presentation-only safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/workflow-polish-v24-2.js','utf8');
+          const forbidden=[
+            /store\.update/,/store\.save/,/localStorage/,/sessionStorage/,
+            /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
+            /MAP_URL\s*=/,/tbMapImage\.setAttribute/,/draft\.actions\.push/,
+            /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(js)) throw new Error(`Forbidden V24.2 mutation/network token: ${pattern}`);
+          for(const token of ['Modo foco','Shift+F','aria-live','v242-focus','FROMBOS_V24_2_WORKFLOW_POLISH']) if(!js.includes(token)) throw new Error(`Missing workflow feature: ${token}`);
+          NODE
+
+      - name: Validate PWA cache ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'v24-2-workflow-polish' sw.js
+          for token in \
+            "'./assets/css/screen-polish-v24-1.css'" \
+            "'./assets/css/workflow-polish-v24-2.css'" \
+            "'./assets/js/screen-polish-v24-1.js'" \
+            "'./assets/js/workflow-polish-v24-2.js'"; do
+            grep -Fq "$token" sw.js || { echo "Missing V24 cache asset: $token"; exit 1; }
+          done
+
+      - name: Validate focus, mobile and reduced motion
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in '.v242-workflow-bar' '.v242-focus' '.v242-focusable:focus-visible' '.v242-scroll-row' '@media(max-width:1120px)' '@media(max-width:820px)' '@media(max-width:520px)' 'prefers-reduced-motion:reduce'; do
+            grep -Fq "$token" assets/css/workflow-polish-v24-2.css || { echo "Missing V24.2 CSS token: $token"; exit 1; }
+          done
+          grep -Fq 'min-height:44px!important' assets/css/workflow-polish-v24-2.css
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/workflow-polish-v24-2.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('V24.2 CSS brace structure OK')
+          PY
+
+      - name: Preserve exact tactical map contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg';" assets/js/tactical.js
+          grep -Fq 'exact-map-preserved' assets/js/screen-polish-v24-1.js
+          if grep -Eq 'wild-rift-map|tbMapImage|MAP_URL' assets/js/workflow-polish-v24-2.js; then
+            echo 'V24.2 workflow layer must not touch tactical map source or geometry'
+            exit 1
+          fi
