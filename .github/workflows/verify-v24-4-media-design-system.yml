@@ -1,0 +1,82 @@
+name: Verify FROMBOS V24.4 Media Design System
+
+on:
+  pull_request:
+    paths:
+      - 'assets/css/media-design-system-v24-4.css'
+      - 'assets/js/media-design-system-v24-4.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-4-media-design-system.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/css/media-design-system-v24-4.css'
+      - 'assets/js/media-design-system-v24-4.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-4-media-design-system.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-media-design-v24-4:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate assets and integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/media-design-system-v24-4.css
+          test -f assets/js/media-design-system-v24-4.js
+          node --check assets/js/media-design-system-v24-4.js
+          grep -Fq 'media-design-system-v24-4.css?v=24.4' index.html
+          grep -Fq 'media-design-system-v24-4.js?v=24.4' index.html
+          grep -Fq 'sw.js?v=24.4' index.html
+          grep -Fq "'./assets/css/media-design-system-v24-4.css'" sw.js
+          grep -Fq "'./assets/js/media-design-system-v24-4.js'" sw.js
+          grep -Fq 'v24-4-media-design-system' sw.js
+      - name: Validate official media and icon contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in 'CHAMPION_REGISTRY' 'v244-hero-media' 'v244-detail-media' 'v244-fn-icon' 'v244-map-focus' 'requestFullscreen'; do
+            grep -Fq "$token" assets/js/media-design-system-v24-4.js || { echo "Missing V24.4 token: $token"; exit 1; }
+          done
+          for token in '.v244-hero-media' '.v244-detail-media' '.draft-champ-grid' '.tb-board-card' '.v23-mobile-dock'; do
+            grep -Fq "$token" assets/css/media-design-system-v24-4.css || { echo "Missing V24.4 CSS token: $token"; exit 1; }
+          done
+      - name: Preserve competitive and tactical ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -Eq "from './store\.js'|store\.update|store\.save|localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest|WebSocket" assets/js/media-design-system-v24-4.js; then
+            echo 'V24.4 controller must stay presentation-only and offline'
+            exit 1
+          fi
+          if grep -Eq 'MAP_URL\s*=|tbMapImage\.setAttribute|setAttribute\([^)]*href' assets/js/media-design-system-v24-4.js; then
+            echo 'V24.4 may not alter Tactical map source or geometry ownership'
+            exit 1
+          fi
+      - name: Validate CSS structure and responsive design
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/media-design-system-v24-4.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('CSS brace structure OK')
+          PY
+          grep -Fq '@media(max-width:820px)' assets/css/media-design-system-v24-4.css
+          grep -Fq '@media(max-width:520px)' assets/css/media-design-system-v24-4.css
+          grep -Fq 'prefers-reduced-motion:reduce' assets/css/media-design-system-v24-4.css
