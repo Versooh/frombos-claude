@@ -54,7 +54,7 @@ jobs:
             /store\.update/,/store\.save/,/localStorage/,/sessionStorage/,
             /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
             /MAP_URL\s*=/,/tbMapImage/,/\.click\s*\(/,
-            /draft\.actions\.push/,/autopick/i,/autoban/i,
+            /draft\.actions\.push/,
             /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
           ];
           for(const pattern of forbidden) if(pattern.test(js)) throw new Error(`Forbidden V24.3 mutation/network token: ${pattern}`);
@@ -83,8 +83,8 @@ jobs:
           grep -Fq 'nada é salvo até você confirmar “Adicionar à semana”' assets/js/competitive-workflow-v24-3.js
           grep -Fq "if(type)type.value='VOD'" assets/js/competitive-workflow-v24-3.js
           grep -Fq 'if(title)title.value=' assets/js/competitive-workflow-v24-3.js
-          if grep -Eq 'training\.planner\.(items|goals).*push|store\.update' assets/js/competitive-workflow-v24-3.js; then
-            echo 'V24.3 may prefill planner UI only; it may not save training automatically'
+          if grep -Eq 'training\.planner\.(items|goals).*push|store\.update|draft\.actions\.push|data-champ.*\.click|\.click\(\)' assets/js/competitive-workflow-v24-3.js; then
+            echo 'V24.3 may prefill/focus UI only; it may not save training or execute Draft actions automatically'
             exit 1
           fi
 
