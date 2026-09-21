@@ -1,0 +1,148 @@
+name: Verify FROMBOS V24.6 Command Center
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/command-center-v24-6.js'
+      - 'assets/css/command-center-v24-6.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-3-competitive-workflow.yml'
+      - '.github/workflows/verify-v24-4-media-design-system.yml'
+      - '.github/workflows/verify-v24-5-series-fearless-bridge.yml'
+      - '.github/workflows/verify-v24-6-command-center.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/command-center-v24-6.js'
+      - 'assets/css/command-center-v24-6.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-6-command-center.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v24-6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate assets and native Home integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/js/command-center-v24-6.js
+          test -f assets/css/command-center-v24-6.css
+          node --check assets/js/command-center-v24-6.js
+          node --check assets/js/app.js
+          grep -Fq "import { commandCenterHTML, bindCommandCenter } from './command-center-v24-6.js';" assets/js/app.js
+          grep -Fq "function renderHome(){shell(commandCenterHTML())" assets/js/app.js
+          grep -Fq "bindCommandCenter();" assets/js/app.js
+          if grep -Fq 'Visão. Leitura. Execução.' assets/js/app.js; then
+            echo 'Legacy landing-page Home must not remain in native renderHome'
+            exit 1
+          fi
+
+      - name: Validate Command Center product surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            'CENTRAL DE COMANDO · WILD RIFT' \
+            'O PRÓXIMO GG COMEÇA NO DRAFT.' \
+            'PRÓXIMA SÉRIE' \
+            'DRAFT SNAPSHOT' \
+            'CHAMPION POOL' \
+            'SCOUTING RADAR' \
+            'COMPOSITION LAB' \
+            'Tactical Board' \
+            'VOD Review' \
+            'USER_PRIVATE' \
+            'OBSERVED' \
+            'UNKNOWN'; do
+            grep -Fq "$token" assets/js/command-center-v24-6.js || { echo "Missing Command Center token: $token"; exit 1; }
+          done
+          grep -Fq "import { CHAMPION_REGISTRY } from './champion-registry.generated.js';" assets/js/command-center-v24-6.js
+          grep -Fq "import { OPEN_SERIES_PLAYERS } from './open-series-scouting.generated.js';" assets/js/command-center-v24-6.js
+
+      - name: Preserve read-only and evidence contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/command-center-v24-6.js','utf8');
+          const forbidden=[
+            /store\.update/,/store\.save/,/localStorage/,/sessionStorage/,
+            /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
+            /draft\.actions\.push/,/\.click\s*\(/,
+            /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(js)) throw new Error('Forbidden V24.6 token: '+pattern);
+          for(const field of ['winRate','kda','avgGold','totalK','totalD','totalA','wins','losses']) {
+            if(js.includes('.'+field)) throw new Error('V24.6 Home may not promote observed performance metric: '+field);
+          }
+          NODE
+
+      - name: Validate no invented competitive metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const combined=fs.readFileSync('assets/js/command-center-v24-6.js','utf8')+'\n'+fs.readFileSync('assets/css/command-center-v24-6.css','utf8');
+          if(/win\s*rate|pick\s*rate|ban\s*rate|probability|forecast|scoreCandidate|threatRead/i.test(combined)) throw new Error('V24.6 may not invent rates, rankings, forecasts or probabilities');
+          NODE
+
+      - name: Validate responsive interactive design
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            '.v246-command-center' '.v246-hero' '.v246-quick-grid' '.v246-series-track' \
+            '.v246-draft-stage' '.v246-role-grid' '.v246-scout' '.v246-comp-grid' '.v246-work-grid' \
+            '@media(max-width:1320px)' '@media(max-width:980px)' '@media(max-width:760px)' '@media(max-width:460px)' \
+            'prefers-reduced-motion:reduce'; do
+            grep -Fq "$token" assets/css/command-center-v24-6.css || { echo "Missing V24.6 CSS token: $token"; exit 1; }
+          done
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/command-center-v24-6.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('V24.6 CSS brace structure OK')
+          PY
+
+      - name: Validate PWA integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'command-center-v24-6.css?v=24.6' index.html
+          grep -Fq "serviceWorker.register('./sw.js?v=24.6')" index.html
+          grep -Fq 'v24-6-command-center' sw.js
+          grep -Fq "'./assets/css/command-center-v24-6.css'" sw.js
+          grep -Fq "'./assets/js/command-center-v24-6.js'" sw.js
+
+      - name: Preserve exact Tactical Board ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg';" assets/js/tactical.js
+          if grep -Eq 'tbMapImage|MAP_URL|marker|coordinate|stroke' assets/js/command-center-v24-6.js; then
+            echo 'Command Center may not mutate Tactical map source or geometry'
+            exit 1
+          fi
