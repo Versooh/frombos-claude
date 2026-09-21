@@ -1,0 +1,215 @@
+name: Verify FROMBOS V26 Product Experience
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/product-experience-v26.js'
+      - 'assets/js/competitive-prestige-v25.js'
+      - 'assets/js/screen-polish-v25-1.js'
+      - 'assets/css/product-experience-v26.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v26-product-experience.yml'
+      - '.github/workflows/verify-v25-competitive-prestige.yml'
+      - '.github/workflows/verify-v25-1-screen-polish.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/product-experience-v26.js'
+      - 'assets/css/product-experience-v26.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v26-product-experience.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v26:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate syntax and V26 integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/product-experience-v26.css
+          test -f assets/js/product-experience-v26.js
+          node --check assets/js/app.js
+          node --check assets/js/product-experience-v26.js
+          node --check assets/js/competitive-prestige-v25.js
+          node --check assets/js/screen-polish-v25-1.js
+          grep -Fq 'product-experience-v26.css?v=26.0' index.html
+          grep -Fq 'product-experience-v26.js?v=26.0' index.html
+          grep -Fq 'data-v26-product="1"' index.html
+          grep -Fq '<body class="v26-product v25-prestige v23-light v24-editorial">' index.html
+          grep -Fq "serviceWorker.register('./sw.js?v=26.0')" index.html
+          grep -Fq "'./assets/css/product-experience-v26.css'" sw.js
+          grep -Fq "'./assets/js/product-experience-v26.js'" sw.js
+          grep -Fq 'v26-product-experience' sw.js
+
+      - name: Validate final cascade ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('index.html').read_text()
+          modules=html.index('competitive-modules-v25.css?v=25.0')
+          prestige=html.index('competitive-prestige-v25.css?v=25.0')
+          polish=html.index('screen-polish-v25-1.css?v=25.1')
+          v26=html.index('product-experience-v26.css?v=26.0')
+          if not modules < prestige < polish < v26:
+              raise SystemExit('V26 must be the final visual CSS owner')
+          j25=html.index('competitive-prestige-v25.js?v=25.0')
+          j251=html.index('screen-polish-v25-1.js?v=25.1')
+          j26=html.index('product-experience-v26.js?v=26.0')
+          if not j25 < j251 < j26:
+              raise SystemExit('V26 runtime must load after V25/V25.1 runtimes')
+          PY
+          grep -Fq "product-experience-v26.css" assets/js/competitive-prestige-v25.js
+          grep -Fq "product-experience-v26.css" assets/js/screen-polish-v25-1.js
+          grep -Fq 'keepV26Last' assets/js/product-experience-v26.js
+
+      - name: Validate unified product shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            'V26_ICON_PATHS' \
+            'v26CommandPaletteHTML' \
+            'v26CommandResultsHTML' \
+            'v26-command-layer' \
+            'v26-primary-nav' \
+            'v26-route-progress' \
+            'v26-page-hero' \
+            'v26-page-art-secondary' \
+            'v26-page-signature'; do
+            grep -Fq "$token" assets/js/app.js || { echo "Missing V26 shell token: $token"; exit 1; }
+          done
+          grep -Fq "e.ctrlKey||e.metaKey" assets/js/app.js
+          grep -Fq "e.key.toLowerCase()==='k'" assets/js/app.js
+          grep -Fq '#/champions?champion=' assets/js/app.js
+
+      - name: Validate secondary screens are no longer generic
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            'v26-team-command' 'v26-roster-grid' 'v26-roster-card' \
+            'v26-series-command' 'v26-series-board' 'v26-series-ledger' \
+            'v26-data-manifest' 'v26-source-grid' 'v26-source-card' \
+            'v26-settings-grid' 'v26-settings-card'; do
+            grep -Fq "$token" assets/js/app.js || { echo "Missing V26 screen token: $token"; exit 1; }
+            grep -Fq ".$token" assets/css/product-experience-v26.css || { echo "Missing V26 style token: $token"; exit 1; }
+          done
+          grep -Fq "const used=[...new Set(games.flatMap(g=>g.picks.map(x=>x.champ)).filter(Boolean))]" assets/js/app.js
+          grep -Fq "DATA_SOURCES.map" assets/js/app.js
+
+      - name: Validate major module visual coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            '.v246-hero' '.draft-team-panel' '.draft-champ-grid' \
+            '.v251-comp-card' '.v22-comp-workspace' \
+            '.fb-pool-grid' '.champion-intelligence' \
+            '.v22-scout-workspace' '.performance-hero' \
+            '.report-hero' '.tactical-grid' '.vod-layout' '.lab-hero'; do
+            grep -Fq "$token" assets/css/product-experience-v26.css || { echo "Missing V26 module polish: $token"; exit 1; }
+          done
+
+      - name: Validate V26 runtime is presentation-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/product-experience-v26.js','utf8');
+          const forbidden=[
+            /store\.update/,/store\.save/,/localStorage/,/sessionStorage/,
+            /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
+            /draft\.actions\.push/,/\.click\s*\(/,
+            /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(js)) throw new Error('Forbidden V26 runtime token: '+pattern);
+          for(const token of ['keepV26Last','markRoute','annotateSurfaces','bindPointerLight','FROMBOS_V26_PRODUCT_EXPERIENCE']) {
+            if(!js.includes(token)) throw new Error('Missing V26 runtime contract: '+token);
+          }
+          NODE
+
+      - name: Validate no invented competitive metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const app=fs.readFileSync('assets/js/app.js','utf8');
+          const css=fs.readFileSync('assets/css/product-experience-v26.css','utf8');
+          const combined=app+'\n'+css;
+          const forbidden=[
+            /\bwinRate\b/,/\bpickRate\b/,/\bbanRate\b/,
+            /\bscoreCandidate\b/,/\bthreatRead\b/,/\bforecast\b/,
+            /predictedWinner/i,/winProbability/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(combined)) throw new Error('V26 may not invent competitive metrics: '+pattern);
+          NODE
+
+      - name: Preserve explicit coach control
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'sem qualquer auto-pick ou auto-ban' assets/js/app.js
+          if grep -Eq 'draft\.actions\.push|data-champ.*\.click|auto.?pick|auto.?ban' assets/js/product-experience-v26.js; then
+            echo 'V26 presentation runtime may not execute Draft actions'
+            exit 1
+          fi
+
+      - name: Preserve exact Tactical Board
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg';" assets/js/tactical.js
+          if grep -Eq 'MAP_URL\s*=|tbMapImage\.setAttribute|marker\.|coordinate|stroke|wild-rift-map' assets/js/product-experience-v26.js; then
+            echo 'V26 runtime may not mutate Tactical map source or geometry'
+            exit 1
+          fi
+
+      - name: Validate responsive and reduced motion
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            '@media(max-width:1500px)' \
+            '@media(max-width:1180px)' \
+            '@media(max-width:900px)' \
+            '@media(max-width:680px)' \
+            '@media(max-width:430px)' \
+            'prefers-reduced-motion:reduce'; do
+            grep -Fq "$token" assets/css/product-experience-v26.css || { echo "Missing V26 responsive token: $token"; exit 1; }
+          done
+
+      - name: Validate CSS structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/product-experience-v26.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('V26 CSS closing brace underflow')
+          if depth: raise SystemExit(f'V26 CSS brace imbalance: {depth}')
+          print('V26 CSS brace structure OK')
+          PY
