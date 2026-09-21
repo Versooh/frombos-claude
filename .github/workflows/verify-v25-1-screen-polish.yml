@@ -51,7 +51,7 @@ jobs:
           grep -Fq 'screen-polish-v25-1.css?v=25.1' index.html
           grep -Fq 'screen-polish-v25-1.js?v=25.1' index.html
           grep -Fq 'data-v251-screen-polish="1"' index.html
-          grep -Fq "serviceWorker.register('./sw.js?v=25.1')" index.html
+          grep -Eq "serviceWorker\.register\('./sw\.js\?v=(25\.1|26\.0)'\)" index.html
           grep -Fq "'./assets/css/screen-polish-v25-1.css'" sw.js
           grep -Fq "'./assets/js/screen-polish-v25-1.js'" sw.js
           grep -Fq 'v25-1-screen-polish' sw.js
@@ -66,11 +66,19 @@ jobs:
           modules=html.index('competitive-modules-v25.css?v=25.0')
           prestige=html.index('competitive-prestige-v25.css?v=25.0')
           polish=html.index('screen-polish-v25-1.css?v=25.1')
-          if not modules < prestige < polish:
+          v26=html.find('product-experience-v26.css?v=26.0')
+          if v26 >= 0:
+              if not modules < prestige < polish < v26:
+                  raise SystemExit('V26 must load after V25.1')
+          elif not modules < prestige < polish:
               raise SystemExit('V25.1 must load after V25 prestige')
           js_v25=html.index('competitive-prestige-v25.js?v=25.0')
           js_v251=html.index('screen-polish-v25-1.js?v=25.1')
-          if not js_v25 < js_v251:
+          js_v26=html.find('product-experience-v26.js?v=26.0')
+          if js_v26 >= 0:
+              if not js_v25 < js_v251 < js_v26:
+                  raise SystemExit('V26 runtime must load after V25.1 runtime')
+          elif not js_v25 < js_v251:
               raise SystemExit('V25.1 runtime must load after V25 runtime')
           PY
           grep -Fq "if(polish)return;" assets/js/competitive-prestige-v25.js

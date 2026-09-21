@@ -17,6 +17,8 @@ function hero(routeName){
   return assets().find(x=>x?.splash)||assets().find(x=>x?.portrait)||null;
 }
 function keepStyleLast(){
+  const v26=[...document.querySelectorAll('link[rel="stylesheet"]')].find(x=>x.href.includes('product-experience-v26.css'));
+  if(v26)return;
   const polish=[...document.querySelectorAll('link[rel="stylesheet"]')].find(x=>x.href.includes('screen-polish-v25-1.css'));
   if(polish)return;
   const link=[...document.querySelectorAll('link[rel="stylesheet"]')].find(x=>x.href.includes('competitive-prestige-v25.css'));

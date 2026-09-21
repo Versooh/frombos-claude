@@ -35,8 +35,8 @@ jobs:
           import fs from 'node:fs';
           const html=fs.readFileSync('index.html','utf8');
           const sw=fs.readFileSync('sw.js','utf8');
-          if(!/serviceWorker\.register\('\.\/sw\.js\?v=(?:21\.2|22\.\d+|23\.\d+|24\.\d+|25\.\d+)'\)/.test(html)) throw new Error('Missing compatible V21/V22/V23/V24 service worker registration');
-          if(!/(?:v21-2-runeterra-modules|v22-\d+-|v23-|v24-|v25-)/.test(sw)) throw new Error('Missing compatible V21/V22/V23/V24 cache generation');
+          if(!/serviceWorker\.register\('\.\/sw\.js\?v=(?:21\.2|22\.\d+|23\.\d+|24\.\d+|25\.\d+|26\.\d+)'\)/.test(html)) throw new Error('Missing compatible V21/V22/V23/V24 service worker registration');
+          if(!/(?:v21-2-runeterra-modules|v22-\d+-|v23-|v24-|v25-|v26-)/.test(sw)) throw new Error('Missing compatible V21/V22/V23/V24 cache generation');
           NODE
 
       - name: Ensure V21 remains ordered above the V20 runtime layers
