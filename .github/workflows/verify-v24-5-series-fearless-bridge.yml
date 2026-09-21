@@ -44,7 +44,7 @@ jobs:
           node --check assets/js/series-fearless-bridge-v24-5.js
           grep -Fq 'series-fearless-bridge-v24-5.css?v=24.5' index.html
           grep -Fq 'series-fearless-bridge-v24-5.js?v=24.5' index.html
-          grep -Eq "serviceWorker\.register\('./sw\.js\?v=(24\.6|25\.0)'\)" index.html
+          grep -Eq "serviceWorker\.register\('./sw\.js\?v=(24\.6|25\.(0|1))'\)" index.html
           grep -Fq "'./assets/css/series-fearless-bridge-v24-5.css'" sw.js
           grep -Fq "'./assets/js/series-fearless-bridge-v24-5.js'" sw.js
           grep -Fq 'v24-5-series-fearless-bridge' sw.js
