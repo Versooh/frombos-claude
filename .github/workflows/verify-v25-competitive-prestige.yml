@@ -6,8 +6,10 @@ on:
     paths:
       - 'assets/js/app.js'
       - 'assets/js/competitive-prestige-v25.js'
+      - 'assets/js/screen-polish-v25-1.js'
       - 'assets/css/competitive-prestige-v25.css'
       - 'assets/css/competitive-modules-v25.css'
+      - 'assets/css/screen-polish-v25-1.css'
       - 'index.html'
       - 'manifest.webmanifest'
       - 'sw.js'
@@ -94,7 +96,7 @@ jobs:
           grep -Fq '<meta name="theme-color" content="#050B14">' index.html
           grep -Fq '"background_color": "#050B14"' manifest.webmanifest
           grep -Fq '"theme_color": "#050B14"' manifest.webmanifest
-          grep -Fq "serviceWorker.register('./sw.js?v=25.0')" index.html
+          grep -Eq "serviceWorker\.register\('./sw\.js\?v=25\.(0|1)'\)" index.html
           grep -Fq 'v25-competitive-prestige' sw.js
           grep -Fq "'./assets/css/competitive-prestige-v25.css'" sw.js
           grep -Fq "'./assets/css/competitive-modules-v25.css'" sw.js
@@ -105,7 +107,11 @@ jobs:
           old=html.index('command-center-v24-6.css?v=24.6')
           modules=html.index('competitive-modules-v25.css?v=25.0')
           prestige=html.index('competitive-prestige-v25.css?v=25.0')
-          if not old < modules < prestige:
+          polish=html.find('screen-polish-v25-1.css?v=25.1')
+          if polish >= 0:
+              if not old < modules < prestige < polish:
+                  raise SystemExit('V25.1 polish must own the final cascade after V25')
+          elif not old < modules < prestige:
               raise SystemExit('V25 CSS must own the final cascade after V24.6')
           PY
 
