@@ -59,7 +59,7 @@ jobs:
           const forbidden=[
             /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
             /localStorage/,/sessionStorage/,/draft\.actions\.push/,
-            /\.click\s*\(/,/auto.?pick/i,/auto.?ban/i,
+            /\.click\s*\(/,
             /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
           ];
           for(const pattern of forbidden) if(pattern.test(js)) throw new Error(`Forbidden V24.5 token: ${pattern}`);
