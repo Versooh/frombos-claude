@@ -1,0 +1,112 @@
+name: Verify FROMBOS V24.5 Series Fearless Bridge
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/css/series-fearless-bridge-v24-5.css'
+      - 'assets/js/series-fearless-bridge-v24-5.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-3-competitive-workflow.yml'
+      - '.github/workflows/verify-v24-4-media-design-system.yml'
+      - '.github/workflows/verify-v24-5-series-fearless-bridge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/css/series-fearless-bridge-v24-5.css'
+      - 'assets/js/series-fearless-bridge-v24-5.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v24-3-competitive-workflow.yml'
+      - '.github/workflows/verify-v24-4-media-design-system.yml'
+      - '.github/workflows/verify-v24-5-series-fearless-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v24-5:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate assets and integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/series-fearless-bridge-v24-5.css
+          test -f assets/js/series-fearless-bridge-v24-5.js
+          node --check assets/js/series-fearless-bridge-v24-5.js
+          grep -Fq 'series-fearless-bridge-v24-5.css?v=24.5' index.html
+          grep -Fq 'series-fearless-bridge-v24-5.js?v=24.5' index.html
+          grep -Fq "serviceWorker.register('./sw.js?v=24.5')" index.html
+          grep -Fq "'./assets/css/series-fearless-bridge-v24-5.css'" sw.js
+          grep -Fq "'./assets/js/series-fearless-bridge-v24-5.js'" sw.js
+          grep -Fq 'v24-5-series-fearless-bridge' sw.js
+
+      - name: Validate explicit coach-controlled state transition
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/series-fearless-bridge-v24-5.js','utf8');
+          const forbidden=[
+            /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
+            /localStorage/,/sessionStorage/,/draft\.actions\.push/,
+            /\.click\s*\(/,
+            /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(js)) throw new Error(`Forbidden V24.5 token: ${pattern}`);
+          const writes=[...js.matchAll(/store\.update/g)].length;
+          if(writes!==1) throw new Error(`Expected exactly one explicit store.update bridge, found ${writes}`);
+          for(const token of ['window.confirm','activateGame','SERIES & FEARLESS STATE BRIDGE','NO AUTO-PICK / AUTO-BAN','USER_PRIVATE','FROMBOS_V24_5_SERIES_FEARLESS_BRIDGE']) {
+            if(!js.includes(token)) throw new Error(`Missing V24.5 contract token: ${token}`);
+          }
+          NODE
+
+      - name: Validate no invented competitive metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const combined=fs.readFileSync('assets/js/series-fearless-bridge-v24-5.js','utf8')+'\n'+fs.readFileSync('assets/css/series-fearless-bridge-v24-5.css','utf8');
+          if(/win\s*rate|pick\s*rate|ban\s*rate|prediction|probability|forecast|scoreCandidate|threatRead/i.test(combined)) throw new Error('V24.5 may not create rankings, forecasts, rates or probabilities');
+          NODE
+
+      - name: Preserve exact Tactical Board ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg';" assets/js/tactical.js
+          if grep -Eq 'wild-rift-map|tbMapImage|MAP_URL|marker|coordinate|stroke' assets/js/series-fearless-bridge-v24-5.js; then
+            echo 'V24.5 may not alter Tactical map source or geometry'
+            exit 1
+          fi
+
+      - name: Validate responsive presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in '.v245-draft-bridge' '.v245-series-bridge' '.v245-game-strip' '.v245-ledger-split' '.v245-reference' '@media(max-width:1180px)' '@media(max-width:820px)' '@media(max-width:520px)' 'prefers-reduced-motion:reduce'; do
+            grep -Fq "$token" assets/css/series-fearless-bridge-v24-5.css || { echo "Missing V24.5 CSS token: $token"; exit 1; }
+          done
+          grep -Fq 'min-height:44px!important' assets/css/series-fearless-bridge-v24-5.css
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/series-fearless-bridge-v24-5.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('CSS closing brace underflow')
+          if depth: raise SystemExit(f'CSS brace imbalance: {depth}')
+          print('V24.5 CSS brace structure OK')
+          PY
