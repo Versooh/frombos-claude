@@ -1,0 +1,163 @@
+name: Verify FROMBOS V25.1 Screen Polish
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/competitive-prestige-v25.js'
+      - 'assets/js/screen-polish-v25-1.js'
+      - 'assets/css/screen-polish-v25-1.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v25-1-screen-polish.yml'
+      - '.github/workflows/verify-v25-competitive-prestige.yml'
+      - '.github/workflows/verify-v24-3-competitive-workflow.yml'
+      - '.github/workflows/verify-v24-5-series-fearless-bridge.yml'
+      - '.github/workflows/verify-v24-6-command-center.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/competitive-prestige-v25.js'
+      - 'assets/js/screen-polish-v25-1.js'
+      - 'assets/css/screen-polish-v25-1.css'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/verify-v25-1-screen-polish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v25-1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate assets and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/css/screen-polish-v25-1.css
+          test -f assets/js/screen-polish-v25-1.js
+          node --check assets/js/screen-polish-v25-1.js
+          node --check assets/js/competitive-prestige-v25.js
+          node --check assets/js/app.js
+          grep -Fq 'screen-polish-v25-1.css?v=25.1' index.html
+          grep -Fq 'screen-polish-v25-1.js?v=25.1' index.html
+          grep -Fq 'data-v251-screen-polish="1"' index.html
+          grep -Fq "serviceWorker.register('./sw.js?v=25.1')" index.html
+          grep -Fq "'./assets/css/screen-polish-v25-1.css'" sw.js
+          grep -Fq "'./assets/js/screen-polish-v25-1.js'" sw.js
+          grep -Fq 'v25-1-screen-polish' sw.js
+
+      - name: Validate final cascade ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('index.html').read_text()
+          modules=html.index('competitive-modules-v25.css?v=25.0')
+          prestige=html.index('competitive-prestige-v25.css?v=25.0')
+          polish=html.index('screen-polish-v25-1.css?v=25.1')
+          if not modules < prestige < polish:
+              raise SystemExit('V25.1 must load after V25 prestige')
+          js_v25=html.index('competitive-prestige-v25.js?v=25.0')
+          js_v251=html.index('screen-polish-v25-1.js?v=25.1')
+          if not js_v25 < js_v251:
+              raise SystemExit('V25.1 runtime must load after V25 runtime')
+          PY
+          grep -Fq "if(polish)return;" assets/js/competitive-prestige-v25.js
+          grep -Fq 'keepPolishLast' assets/js/screen-polish-v25-1.js
+
+      - name: Validate screen-by-screen coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            '01 — HOME / CENTRAL DE COMANDO' \
+            '02 — DRAFT ROOM' \
+            '03 — COMPOSIÇÕES' \
+            '04 — CHAMPION POOL / CHAMPION INTELLIGENCE' \
+            '05 — SCOUTING' \
+            '06 — TREINOS' \
+            '07 — RELATÓRIOS' \
+            '08 — TACTICAL BOARD' \
+            '09 — VOD REVIEW' \
+            '10 — MATCHUPS / BUILDS / SECONDARY INTELLIGENCE' \
+            '.v246-hero' '.draft-arena' '.v251-comp-card' '.fb-pool-grid' \
+            '.champion-intelligence' '.v22-scout-workspace' '.performance-center' \
+            '.reports-center' '.tactical-grid' '.vod-layout' '.intel-lab'; do
+            grep -Fq "$token" assets/css/screen-polish-v25-1.css || { echo "Missing V25.1 screen token: $token"; exit 1; }
+          done
+
+      - name: Validate visual lineup composition cards
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "portraitHTML } from './champion-intelligence.js'" assets/js/app.js
+          grep -Fq 'v251-comp-card' assets/js/app.js
+          grep -Fq 'v251-comp-slot-art' assets/js/app.js
+          grep -Fq "portraitHTML(champ,'v251-comp-slot-img')" assets/js/app.js
+          grep -Fq 'aspect-ratio:3/4.25!important' assets/css/screen-polish-v25-1.css
+          grep -Fq 'object-position:center 13%!important' assets/css/screen-polish-v25-1.css
+
+      - name: Validate presentation-only runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/screen-polish-v25-1.js','utf8');
+          const forbidden=[
+            /store\.update/,/store\.save/,/localStorage/,/sessionStorage/,
+            /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
+            /draft\.actions\.push/,/\.click\s*\(/,
+            /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(js)) throw new Error('Forbidden V25.1 runtime token: '+pattern);
+          for(const token of ['keepPolishLast','annotate','v251-screen-polish','FROMBOS_V25_1_SCREEN_POLISH']) {
+            if(!js.includes(token)) throw new Error('Missing V25.1 runtime token: '+token);
+          }
+          NODE
+
+      - name: Preserve exact Tactical Board
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg';" assets/js/tactical.js
+          if grep -Eq 'MAP_URL\s*=|tbMapImage\.setAttribute|marker\.|coordinate|stroke' assets/js/screen-polish-v25-1.js; then
+            echo 'V25.1 may not mutate Tactical map source or geometry'
+            exit 1
+          fi
+
+      - name: Validate responsive and reduced motion
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in '@media(max-width:1380px)' '@media(max-width:1120px)' '@media(max-width:900px)' '@media(max-width:680px)' '@media(max-width:430px)' 'prefers-reduced-motion:reduce'; do
+            grep -Fq "$token" assets/css/screen-polish-v25-1.css || { echo "Missing V25.1 responsive token: $token"; exit 1; }
+          done
+
+      - name: Validate CSS structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          css=Path('assets/css/screen-polish-v25-1.css').read_text()
+          depth=0
+          for ch in css:
+              if ch=='{': depth+=1
+              elif ch=='}':
+                  depth-=1
+                  if depth<0: raise SystemExit('V25.1 CSS closing brace underflow')
+          if depth: raise SystemExit(f'V25.1 CSS brace imbalance: {depth}')
+          print('V25.1 CSS brace structure OK')
+          PY
