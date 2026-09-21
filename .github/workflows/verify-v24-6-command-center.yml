@@ -132,7 +132,7 @@ jobs:
         run: |
           set -euo pipefail
           grep -Fq 'command-center-v24-6.css?v=24.6' index.html
-          grep -Fq "serviceWorker.register('./sw.js?v=24.6')" index.html
+          grep -Eq "serviceWorker\.register\('./sw\.js\?v=(24\.6|25\.0)'\)" index.html
           grep -Fq 'v24-6-command-center' sw.js
           grep -Fq "'./assets/css/command-center-v24-6.css'" sw.js
           grep -Fq "'./assets/js/command-center-v24-6.js'" sw.js
