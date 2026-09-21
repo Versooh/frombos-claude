@@ -6,14 +6,74 @@ import { vodReviewHTML, bindVodReview } from './vod-review.js';
 import { championIntelligenceHTML, bindChampionIntelligence, matchupLabHTML, buildLabHTML } from './champion-intelligence.js';
 import { performanceCenterHTML, bindPerformanceCenter } from './performance-center.js';
 import { commandCenterHTML, bindCommandCenter } from './command-center-v24-6.js';
+import { CHAMPION_REGISTRY } from './champion-registry.generated.js';
 
 const app=document.querySelector('#app');
 let currentRoute=location.hash.replace('#/','').split('?')[0]||'home';
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const navGroups=[...new Set(MODULES.map(m=>m.group))];
+const V25_PRIMARY=['home','draft','comps','champions','scouting','training','reports'];
+const V25_HERO_CHAMPIONS={
+  team:['Jinx','Ahri'],comps:['Orianna','Yasuo'],draft:['Yasuo','Ahri'],series:['Ahri','Jinx'],
+  tactical:['Twisted Fate','Lee Sin'],vod:['Jinx',"Kai'Sa"],champions:['Ahri','Akali'],
+  matchups:['Akali','Galio'],builds:['Ahri','Jinx'],scouting:['Lee Sin','Ahri'],
+  training:['Irelia','Yasuo'],reports:['Orianna','Ahri'],competitive:['Yasuo','Ahri'],
+  data:['Twisted Fate','Orianna'],settings:['Ahri','Jinx'],meta:['Ahri','Yasuo']
+};
+const v25Asset=name=>CHAMPION_REGISTRY?.[name]||Object.values(CHAMPION_REGISTRY||{}).find(x=>x?.name===name)||null;
+const v25HeroAsset=route=>{
+  for(const name of V25_HERO_CHAMPIONS[route]||['Jinx','Ahri']){
+    const a=v25Asset(name); if(a?.splash||a?.portrait)return a;
+  }
+  return Object.values(CHAMPION_REGISTRY||{}).find(x=>x?.splash)||null;
+};
 const download=(name,text,type='application/json')=>{const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),300);};
-function shell(content){const nav=navGroups.map(group=>`<div class="nav-group"><div class="nav-group-title">${group}</div>${MODULES.filter(m=>m.group===group).map(m=>`<button class="nav-item ${m.id===currentRoute?'active':''}" data-route="${m.id}"><span>${m.icon}</span><span>${m.label}</span></button>`).join('')}</div>`).join('');const mod=MODULES.find(m=>m.id===currentRoute)||MODULES[0];app.innerHTML=`<div class="app-shell"><aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-mark">F</div><div><strong>FROMBOS</strong><small>Competitive Intelligence</small></div></div>${nav}<div class="footer-note">FROMBOS V2 · competitive workspace<br>Wild Rift only · evidence first.</div></aside><main class="main"><header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="btn mobile-toggle" id="menuToggle">☰</button><div class="crumb">FROMBOS / ${mod.label}</div></div><div class="top-actions"><span class="badge green">LOCAL WORKSPACE</span><button class="btn" id="quickExport">Backup</button></div></header><div class="content">${content}</div></main></div>`;document.querySelectorAll('[data-route]').forEach(el=>el.onclick=()=>location.hash=`#/${el.dataset.route}`);document.querySelector('#menuToggle')?.addEventListener('click',()=>document.querySelector('#sidebar')?.classList.toggle('open'));document.querySelector('#quickExport')?.addEventListener('click',()=>download(`FROMBOS-WORKSPACE-${new Date().toISOString().slice(0,10)}.json`,store.exportJSON()));}
-function pageHead(kicker,title,desc,actions=''){return `<div class="page-head"><div><div class="eyebrow">${kicker}</div><h1>${title}</h1><p>${desc}</p></div><div>${actions}</div></div>`;}
+function shell(content){
+  const nav=navGroups.map(group=>`<div class="nav-group"><div class="nav-group-title">${group}</div>${MODULES.filter(m=>m.group===group).map(m=>`<button class="nav-item ${m.id===currentRoute?'active':''}" data-route="${m.id}"><span>${m.icon}</span><span>${m.label}</span></button>`).join('')}</div>`).join('');
+  const mod=MODULES.find(m=>m.id===currentRoute)||MODULES[0];
+  const primary=V25_PRIMARY.map(id=>{const m=MODULES.find(x=>x.id===id);return m?`<button class="v25-nav-link ${id===currentRoute?'active':''}" data-route="${id}"><span>${m.label}</span></button>`:'';}).join('');
+  app.innerHTML=`<div class="app-shell v25-shell" data-v25-route="${currentRoute}">
+    <header class="topbar v25-topbar">
+      <div class="brand v25-brand" data-route="home" role="button" tabindex="0" aria-label="Abrir Central de Comando">
+        <div class="brand-mark">F</div><div><strong>FROMBOS</strong><small>COACH · WILD RIFT</small></div>
+      </div>
+      <nav class="v25-primary-nav" aria-label="Navegação principal">${primary}</nav>
+      <div class="top-actions v25-top-actions">
+        <button class="v25-search-trigger" type="button" data-v25-search aria-label="Buscar"><span>⌕</span><small>Buscar</small></button>
+        <div class="v25-team-chip"><span>TIME</span><b>${escapeHTML(store.state.team?.name||'FROMBOS')}</b></div>
+        <button class="btn v25-backup" id="quickExport">Backup</button>
+        <button class="btn mobile-toggle v25-menu-toggle" id="menuToggle" aria-controls="sidebar" aria-expanded="false">Mais</button>
+      </div>
+    </header>
+    <aside class="sidebar v25-drawer" id="sidebar" aria-label="Todos os módulos">
+      <div class="v25-drawer-head"><div><span>FROMBOS</span><b>Todos os módulos</b></div><button type="button" id="drawerClose" aria-label="Fechar">×</button></div>
+      ${nav}
+      <div class="footer-note">WILD RIFT ONLY · EVIDENCE FIRST<br>FROMBOS COMPETITIVE OS</div>
+    </aside>
+    <main class="main v25-main">
+      <div class="v25-subbar"><div><span>FROMBOS /</span><b>${mod.label}</b></div><div class="v25-subbar-status"><span>LOCAL WORKSPACE</span><span>${store.state.draft?.format||'MD5'}</span><span>G${Number(store.state.draft?.game)||1}</span></div></div>
+      <div class="content v25-content" data-page="${currentRoute}">${content}</div>
+    </main>
+  </div>`;
+  document.querySelectorAll('[data-route]').forEach(el=>el.onclick=()=>location.hash=`#/${el.dataset.route}`);
+  const drawer=document.querySelector('#sidebar'),toggle=document.querySelector('#menuToggle');
+  const closeDrawer=()=>{drawer?.classList.remove('open');toggle?.setAttribute('aria-expanded','false');document.body.classList.remove('v25-drawer-open');};
+  toggle?.addEventListener('click',()=>{const open=!drawer?.classList.contains('open');drawer?.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));document.body.classList.toggle('v25-drawer-open',open);});
+  document.querySelector('#drawerClose')?.addEventListener('click',closeDrawer);
+  document.querySelector('.v25-brand')?.addEventListener('click',()=>location.hash='#/home');
+  document.querySelector('.v25-brand')?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();location.hash='#/home';}});
+  document.querySelector('[data-v25-search]')?.addEventListener('click',()=>{const global=document.querySelector('[data-v21-global-search], .v21-global-search input, .v21-search input');if(global){global.focus();return;}document.dispatchEvent(new CustomEvent('frombos:open-search'));});
+  document.querySelector('#quickExport')?.addEventListener('click',()=>download(`FROMBOS-WORKSPACE-${new Date().toISOString().slice(0,10)}.json`,store.exportJSON()));
+}
+function pageHead(kicker,title,desc,actions=''){
+  const a=v25HeroAsset(currentRoute);const art=a?.splash||a?.portrait||'';
+  const style=art?` style="--v25-page-art:url('&quot;${escapeHTML(art)}&quot;')"`:'';
+  return `<section class="page-head v25-page-hero" data-v25-page="${currentRoute}"${style}>
+    <div class="v25-page-copy"><div class="eyebrow">${kicker}</div><h1>${title}</h1><p>${desc}</p><div class="v25-page-actions">${actions}</div></div>
+    <div class="v25-page-art" aria-hidden="true"></div>
+    <div class="v25-page-ornament"><span>PLAY</span><span>ANALYZE</span><span>EVOLVE</span></div>
+  </section>`;
+}
 function goBindings(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=`#/${b.dataset.go}`);}
 function renderHome(){shell(commandCenterHTML());document.querySelector('.content')?.setAttribute('data-page','home');bindCommandCenter();}
 function renderTeam(){const rows=ROLES.map(r=>{const p=store.state.team.players[r.id];return `<div class="role-row"><div class="role-label">${r.label}</div><input class="input" data-player="${r.id}" value="${escapeHTML(p.name)}" placeholder="Nome do jogador"><div><div class="pool-list">${p.pool.map(c=>`<span class="chip">${escapeHTML(c)} <button data-remove-pool="${r.id}" data-champ="${escapeHTML(c)}" style="all:unset;cursor:pointer">×</button></span>`).join('')}</div><div style="display:flex;gap:7px;margin-top:7px"><select class="select" data-pool-select="${r.id}"><option value="">Adicionar campeão...</option>${CHAMPIONS.filter(c=>!p.pool.includes(c)).map(c=>`<option>${escapeHTML(c)}</option>`).join('')}</select><button class="btn" data-add-pool="${r.id}">Adicionar</button></div></div></div>`}).join('');shell(`${pageHead('TEAM WORKSPACE','Meu time & pools','Champion pools alimentam Draft, Fearless e Composições.')}<div class="card"><div class="form-row"><label>Time<input class="input" id="teamName" value="${escapeHTML(store.state.team.name)}"></label><label>Próximo adversário<input class="input" id="opponent" value="${escapeHTML(store.state.team.opponent)}"></label></div><div class="section-title"><h2>Roster competitivo</h2><span class="badge blue">USER_PRIVATE</span></div>${rows}</div>`);document.querySelector('#teamName').onchange=e=>store.update(s=>s.team.name=e.target.value);document.querySelector('#opponent').onchange=e=>store.update(s=>s.team.opponent=e.target.value);document.querySelectorAll('[data-player]').forEach(i=>i.onchange=e=>store.update(s=>s.team.players[e.target.dataset.player].name=e.target.value));document.querySelectorAll('[data-add-pool]').forEach(b=>b.onclick=()=>{const role=b.dataset.addPool,sel=document.querySelector(`[data-pool-select="${role}"]`);if(!sel.value)return;store.update(s=>s.team.players[role].pool.push(sel.value));renderTeam();});document.querySelectorAll('[data-remove-pool]').forEach(b=>b.onclick=()=>{store.update(s=>s.team.players[b.dataset.removePool].pool=s.team.players[b.dataset.removePool].pool.filter(x=>x!==b.dataset.champ));renderTeam();});}
