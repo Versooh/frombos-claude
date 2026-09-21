@@ -67,7 +67,7 @@ function shell(content){
 }
 function pageHead(kicker,title,desc,actions=''){
   const a=v25HeroAsset(currentRoute);const art=a?.splash||a?.portrait||'';
-  const style=art?` style="--v25-page-art:url('&quot;${escapeHTML(art)}&quot;')"`:'';
+  const style=art?` style="--v25-page-art:url('${escapeHTML(art)}')"`:'';
   return `<section class="page-head v25-page-hero" data-v25-page="${currentRoute}"${style}>
     <div class="v25-page-copy"><div class="eyebrow">${kicker}</div><h1>${title}</h1><p>${desc}</p><div class="v25-page-actions">${actions}</div></div>
     <div class="v25-page-art" aria-hidden="true"></div>
