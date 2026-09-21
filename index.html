@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#EEF1F6">
+  <meta name="theme-color" content="#050B14">
   <meta name="description" content="FROMBOS RIFT — Plataforma de Inteligência Competitiva para Wild Rift">
   <title>FROMBOS RIFT — Inteligência Competitiva para Wild Rift</title>
   <link rel="manifest" href="manifest.webmanifest">
@@ -71,11 +71,13 @@
   <link rel="stylesheet" href="assets/css/media-design-system-v24-4.css?v=24.4">
   <link rel="stylesheet" href="assets/css/series-fearless-bridge-v24-5.css?v=24.5">
   <link rel="stylesheet" href="assets/css/command-center-v24-6.css?v=24.6">
+  <link rel="stylesheet" href="assets/css/competitive-modules-v25.css?v=25.0">
+  <link rel="stylesheet" href="assets/css/competitive-prestige-v25.css?v=25.0" data-v25-prestige="1">
 </head>
-<body class="v23-light v24-editorial">
+<body class="v25-prestige v24-editorial">
   <div id="app"></div>
   <noscript>O FROMBOS RIFT precisa de JavaScript habilitado.</noscript>
-  <script type="module" src="assets/js/app.js?v=20"></script>
+  <script type="module" src="assets/js/app.js?v=25.0"></script>
   <script type="module" src="assets/js/runtime-v20.js?v=20.17"></script>
   <script type="module" src="assets/js/render-performance-v20.js?v=20.18"></script>
   <script type="module" src="assets/js/tactical-map-delivery-v20.js?v=20.19"></script>
@@ -122,6 +124,7 @@
   <script type="module" src="assets/js/competitive-workflow-v24-3.js?v=24.3"></script>
   <script type="module" src="assets/js/media-design-system-v24-4.js?v=24.4"></script>
   <script type="module" src="assets/js/series-fearless-bridge-v24-5.js?v=24.5"></script>
+  <script type="module" src="assets/js/competitive-prestige-v25.js?v=25.0"></script>
   <script type="module" src="assets/js/build-item-upgrade.js?v=7"></script>
   <script type="module" src="assets/js/tactical-ux-v8.js?v=8"></script>
   <script type="module" src="assets/js/tactical-v11.js?v=11"></script>
@@ -131,9 +134,9 @@
   <script type="module" src="assets/js/composition-intelligence-ui.js?v=9.1"></script>
   <script type="module" src="assets/js/ui-stabilization-v19.js?v=19"></script>
   <script src="assets/js/i18n-v19.js?v=19" defer></script>
-  <!-- CI compatibility markers: sw.js?v=22.6 / sw.js?v=22.7 / sw.js?v=23.0 / sw.js?v=24.2 / sw.js?v=24.3 / sw.js?v=24.4 / sw.js?v=24.5 / sw.js?v=24.6 -->
+  <!-- CI compatibility markers: sw.js?v=22.6 / sw.js?v=22.7 / sw.js?v=23.0 / sw.js?v=24.2 / sw.js?v=24.3 / sw.js?v=24.4 / sw.js?v=24.5 / sw.js?v=24.6 / sw.js?v=25.0 -->
   <script>
-    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=24.6').catch(console.warn));
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=25.0').catch(console.warn));
   </script>
 </body>
 </html>
