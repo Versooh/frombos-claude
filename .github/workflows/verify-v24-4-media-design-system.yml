@@ -35,7 +35,7 @@ jobs:
           node --check assets/js/media-design-system-v24-4.js
           grep -Fq 'media-design-system-v24-4.css?v=24.4' index.html
           grep -Fq 'media-design-system-v24-4.js?v=24.4' index.html
-          grep -Eq 'sw\\.js\\?v=24\\.(4|5)' index.html
+          grep -Eq 'sw\.js\?v=24\.(4|5)' index.html
           grep -Fq "'./assets/css/media-design-system-v24-4.css'" sw.js
           grep -Fq "'./assets/js/media-design-system-v24-4.js'" sw.js
           grep -Fq 'v24-4-media-design-system' sw.js
