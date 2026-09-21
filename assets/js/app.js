@@ -152,7 +152,38 @@ function pageHead(kicker,title,desc,actions=''){
 }
 function goBindings(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=`#/${b.dataset.go}`);}
 function renderHome(){shell(commandCenterHTML());document.querySelector('.content')?.setAttribute('data-page','home');bindCommandCenter();}
-function renderTeam(){const rows=ROLES.map(r=>{const p=store.state.team.players[r.id];return `<div class="role-row"><div class="role-label">${r.label}</div><input class="input" data-player="${r.id}" value="${escapeHTML(p.name)}" placeholder="Nome do jogador"><div><div class="pool-list">${p.pool.map(c=>`<span class="chip">${escapeHTML(c)} <button data-remove-pool="${r.id}" data-champ="${escapeHTML(c)}" style="all:unset;cursor:pointer">×</button></span>`).join('')}</div><div style="display:flex;gap:7px;margin-top:7px"><select class="select" data-pool-select="${r.id}"><option value="">Adicionar campeão...</option>${CHAMPIONS.filter(c=>!p.pool.includes(c)).map(c=>`<option>${escapeHTML(c)}</option>`).join('')}</select><button class="btn" data-add-pool="${r.id}">Adicionar</button></div></div></div>`}).join('');shell(`${pageHead('TEAM WORKSPACE','Meu time & pools','Champion pools alimentam Draft, Fearless e Composições.')}<div class="card"><div class="form-row"><label>Time<input class="input" id="teamName" value="${escapeHTML(store.state.team.name)}"></label><label>Próximo adversário<input class="input" id="opponent" value="${escapeHTML(store.state.team.opponent)}"></label></div><div class="section-title"><h2>Roster competitivo</h2><span class="badge blue">USER_PRIVATE</span></div>${rows}</div>`);document.querySelector('#teamName').onchange=e=>store.update(s=>s.team.name=e.target.value);document.querySelector('#opponent').onchange=e=>store.update(s=>s.team.opponent=e.target.value);document.querySelectorAll('[data-player]').forEach(i=>i.onchange=e=>store.update(s=>s.team.players[e.target.dataset.player].name=e.target.value));document.querySelectorAll('[data-add-pool]').forEach(b=>b.onclick=()=>{const role=b.dataset.addPool,sel=document.querySelector(`[data-pool-select="${role}"]`);if(!sel.value)return;store.update(s=>s.team.players[role].pool.push(sel.value));renderTeam();});document.querySelectorAll('[data-remove-pool]').forEach(b=>b.onclick=()=>{store.update(s=>s.team.players[b.dataset.removePool].pool=s.team.players[b.dataset.removePool].pool.filter(x=>x!==b.dataset.champ));renderTeam();});}
+function renderTeam(){
+  const players=store.state.team.players||{};
+  const configured=ROLES.filter(r=>players[r.id]?.name||(players[r.id]?.pool||[]).length).length;
+  const unique=[...new Set(ROLES.flatMap(r=>players[r.id]?.pool||[]))];
+  const rows=ROLES.map((r,index)=>{
+    const p=players[r.id]||{name:'',pool:[]},pool=p.pool||[],lead=pool[0]||'';
+    return `<article class="v26-roster-card" data-role="${r.id}">
+      <header><div><span>${String(index+1).padStart(2,'0')}</span><small>${escapeHTML(r.label)}</small></div><b>${escapeHTML(p.name||'Jogador não configurado')}</b></header>
+      <div class="v26-roster-visual">
+        <div class="v26-roster-lead">${lead?portraitHTML(lead,'v26-roster-lead-img'):'<span class="v26-roster-empty-mark">+</span>'}<em>${lead?escapeHTML(lead):'SEM PICK DE CONFORTO'}</em></div>
+        <div class="v26-roster-pool">${pool.slice(0,5).map(ch=>`<button type="button" class="v26-roster-champ" data-remove-pool="${r.id}" data-champ="${escapeHTML(ch)}" title="Remover ${escapeHTML(ch)}">${portraitHTML(ch,'v26-roster-champ-img')}<span>${escapeHTML(ch)}</span><i>×</i></button>`).join('')||'<div class="v26-roster-pool-empty">Adicione campeões ao pool</div>'}</div>
+      </div>
+      <div class="v26-roster-controls">
+        <label><span>JOGADOR</span><input class="input" data-player="${r.id}" value="${escapeHTML(p.name)}" placeholder="Nome do jogador"></label>
+        <label><span>ADICIONAR AO POOL</span><div><select class="select" data-pool-select="${r.id}"><option value="">Selecionar campeão...</option>${CHAMPIONS.filter(ch=>!pool.includes(ch)).map(ch=>`<option>${escapeHTML(ch)}</option>`).join('')}</select><button class="btn" data-add-pool="${r.id}">Adicionar</button></div></label>
+      </div>
+      <footer><span>${pool.length} no pool</span><span>${lead?'USER_PRIVATE':'POOL VAZIO'}</span></footer>
+    </article>`;
+  }).join('');
+  shell(`${pageHead('TEAM LAB','Meu time & pools','Configure o elenco como uma ferramenta de preparação: jogador, profundidade e campeões de confiança alimentam Draft, Fearless e Composições.')}
+    <section class="v26-team-command">
+      <div><span>WORKSPACE DO TIME</span><h2>${escapeHTML(store.state.team.name||'Meu time')}</h2><p>${escapeHTML(store.state.team.opponent||'ADVERSÁRIO')} é o adversário ativo no workspace.</p></div>
+      <div class="v26-team-stats"><article><small>FUNÇÕES</small><b>${configured}/5</b><span>configuradas</span></article><article><small>POOL ÚNICO</small><b>${unique.length}</b><span>campeões</span></article><article><small>FORMATO</small><b>${escapeHTML(store.state.draft?.format||'MD5')}</b><span>série atual</span></article></div>
+      <div class="v26-team-command-inputs"><label><span>NOME DO TIME</span><input class="input" id="teamName" value="${escapeHTML(store.state.team.name)}"></label><label><span>PRÓXIMO ADVERSÁRIO</span><input class="input" id="opponent" value="${escapeHTML(store.state.team.opponent)}"></label></div>
+    </section>
+    <div class="v26-roster-grid">${rows}</div>`);
+  document.querySelector('#teamName').onchange=e=>store.update(s=>s.team.name=e.target.value);
+  document.querySelector('#opponent').onchange=e=>store.update(s=>s.team.opponent=e.target.value);
+  document.querySelectorAll('[data-player]').forEach(i=>i.onchange=e=>store.update(s=>s.team.players[e.target.dataset.player].name=e.target.value));
+  document.querySelectorAll('[data-add-pool]').forEach(b=>b.onclick=()=>{const role=b.dataset.addPool,sel=document.querySelector(`[data-pool-select="${role}"]`);if(!sel.value)return;store.update(s=>s.team.players[role].pool.push(sel.value));renderTeam();});
+  document.querySelectorAll('[data-remove-pool]').forEach(b=>b.onclick=()=>{store.update(s=>s.team.players[b.dataset.removePool].pool=s.team.players[b.dataset.removePool].pool.filter(x=>x!==b.dataset.champ));renderTeam();});
+}
 function compCard(c){return `<article class="card v251-comp-card"><div class="v251-comp-card-head"><div><div class="eyebrow">${escapeHTML(c.archetype)}</div><h3>${escapeHTML(c.name)}</h3></div><span class="badge gold">${escapeHTML(c.origin)}</span></div><div class="comp-lineup">${ROLES.map(r=>{const champ=c.lineup[r.id]||'';return `<div class="champ-slot"><div class="v251-comp-slot-art">${champ?portraitHTML(champ,'v251-comp-slot-img'):'<span class="portrait-fallback">—</span>'}</div><small>${r.label}</small><b>${escapeHTML(champ||'—')}</b></div>`;}).join('')}</div><div class="v251-comp-copy"><p>${escapeHTML(c.plan)}</p><p class="muted"><b>Condição de vitória:</b> ${escapeHTML(c.winCondition||'Não documentada.')}</p></div><button class="btn info" data-comp-draft="${c.id}">Levar ao Draft</button></article>`;}
 function renderComps(){const all=[...RECOVERED_COMPOSITIONS,...store.state.customComps];shell(`${pageHead('COMPOSITION LAB','Composições','Hipóteses estruturadas de treino, sem transformar uma partida em win rate.')}<div class="grid cols-2">${all.map(compCard).join('')}</div>`);document.querySelectorAll('[data-comp-draft]').forEach(b=>b.onclick=()=>{const c=all.find(x=>x.id===b.dataset.compDraft);store.update(s=>{s.draft.referenceComp={id:c.id,name:c.name,lineup:{...c.lineup}};});location.hash='#/draft';});}
 function renderDraft(){shell(`${pageHead('DRAFT ROOM PRO','Tournament Draft','Bans e picks alternados, portraits oficiais, série persistente, Fearless global, champion pool e branches.',`<span class="badge ${store.state.draft.fearless?'red':'blue'}">FEARLESS ${store.state.draft.fearless?'ON':'OFF'}</span>`)}${draftRoomHTML()}`);bindDraftRoom(renderDraft);}
@@ -161,10 +192,61 @@ function renderVod(){shell(`${pageHead('VOD REVIEW PRO','Revisão de VOD','Pause
 function renderChampions(){shell(`${pageHead('CHAMPION INTELLIGENCE','Champions','Roster visual e página central de conhecimento por campeão, sem misturar LoL PC.')} ${championIntelligenceHTML()}`);bindChampionIntelligence(renderChampions);}
 function renderMatchups(){shell(`${pageHead('MATCHUP LAB','Confrontos','Observed data, leitura estrutural e impacto da composição permanecem separados.')} ${matchupLabHTML()}`);}
 function renderBuilds(){shell(`${pageHead('BUILD INTELLIGENCE','Builds contextuais','Uma build deve responder à ameaça e ao plano do jogo — não ser apenas uma receita fixa.')} ${buildLabHTML()}`);}
-function renderSeries(){const d=store.state.draft;const games=[1,2,3,4,5].map(g=>{const acts=d.games?.[g]?.actions||[];const picks=acts.filter(x=>x.type==='pick');return `<article class="card"><div class="eyebrow">GAME ${g}</div><h3>${acts.length?`${acts.length}/20 ações registradas`:'Sem estado'}</h3><p class="muted">${picks.length?`Picks: ${picks.map(x=>escapeHTML(x.champ)).join(' · ')}`:'Nenhum pick registrado.'}</p><button class="btn" data-open-game="${g}">Abrir G${g}</button></article>`}).join('');shell(`${pageHead('SERIES INTELLIGENCE','Fearless / Série','O pick de hoje altera a profundidade disponível nos próximos jogos.')}<div class="grid cols-3">${games}</div>`);document.querySelectorAll('[data-open-game]').forEach(b=>b.onclick=()=>{store.update(s=>{s.draft.game=+b.dataset.openGame;s.draft.actions=(s.draft.games[s.draft.game]?.actions||[]).map(x=>({...x}));});location.hash='#/draft';});}
+function renderSeries(){
+  const d=store.state.draft||{},limit=d.format==='MD3'?3:5,current=Number(d.game)||1;
+  const games=Array.from({length:limit},(_,i)=>{
+    const game=i+1,acts=d.games?.[game]?.actions||[],picks=acts.filter(x=>x.type==='pick'),bans=acts.filter(x=>x.type==='ban');
+    return {game,acts,picks,bans,complete:acts.length>=20};
+  });
+  const used=[...new Set(games.flatMap(g=>g.picks.map(x=>x.champ)).filter(Boolean))];
+  const cards=games.map(g=>{
+    const blue=g.picks.filter(x=>x.side==='blue').map(x=>x.champ),red=g.picks.filter(x=>x.side==='red').map(x=>x.champ);
+    const state=g.complete?'COMPLETO':g.acts.length?'EM CURSO':'SEM ESTADO';
+    return `<article class="v26-series-game ${g.game===current?'active':''}" data-state="${g.complete?'complete':g.acts.length?'active':'empty'}">
+      <header><span>GAME ${g.game}</span><b>${state}</b><em>${g.acts.length}/20</em></header>
+      <div class="v26-series-sides">
+        <section><small>BLUE SIDE</small><div>${Array.from({length:5},(_,i)=>blue[i]?portraitHTML(blue[i],'v26-series-pick-img'):'<i>—</i>').join('')}</div></section>
+        <strong>VS</strong>
+        <section><small>RED SIDE</small><div>${Array.from({length:5},(_,i)=>red[i]?portraitHTML(red[i],'v26-series-pick-img'):'<i>—</i>').join('')}</div></section>
+      </div>
+      <div class="v26-series-game-meta"><span>${g.picks.length} picks</span><span>${g.bans.length} bans</span><span>${g.complete?'estado completo':'workspace local'}</span></div>
+      <button class="btn ${g.game===current?'primary':''}" data-open-game="${g.game}">${g.game===current?'Continuar G'+g.game:'Abrir G'+g.game} ${v26Icon('arrow')}</button>
+    </article>`;
+  }).join('');
+  shell(`${pageHead('SERIES COMMAND','Fearless / Série','Cada jogo preserva seu próprio estado. Campeões já utilizados podem ser acompanhados entre partidas sem qualquer auto-pick ou auto-ban.')}
+    <section class="v26-series-command">
+      <div class="v26-series-command-copy"><span>SÉRIE ATIVA</span><h2>${escapeHTML(store.state.team?.name||'MEU TIME')} <i>vs</i> ${escapeHTML(store.state.team?.opponent||'ADVERSÁRIO')}</h2><p>G${current} · ${escapeHTML(d.format||'MD5')} · Fearless ${escapeHTML((d.fearlessMode||'off').toUpperCase())}</p></div>
+      <div class="v26-series-command-stats"><article><small>JOGOS COM ESTADO</small><b>${games.filter(g=>g.acts.length).length}/${limit}</b></article><article><small>CAMPEÕES USADOS</small><b>${used.length}</b></article><article><small>REFERÊNCIA</small><b>${escapeHTML(d.referenceComp?.name||'UNKNOWN')}</b></article></div>
+    </section>
+    <div class="v26-series-board">${cards}</div>
+    <section class="v26-series-ledger"><div><span>FEARLESS LEDGER</span><h3>Campeões já utilizados na série</h3><p>O ledger é derivado apenas dos picks registrados no workspace.</p></div><div class="v26-series-used">${used.length?used.map(ch=>`<article>${portraitHTML(ch,'v26-series-used-img')}<span>${escapeHTML(ch)}</span></article>`).join(''):'<div class="v26-series-empty">Nenhum campeão utilizado ainda.</div>'}</div></section>`);
+  document.querySelectorAll('[data-open-game]').forEach(b=>b.onclick=()=>{store.update(s=>{s.draft.game=+b.dataset.openGame;s.draft.actions=(s.draft.games[s.draft.game]?.actions||[]).map(x=>({...x}));});location.hash='#/draft';});
+}
 function renderTraining(){shell(`${pageHead('PERFORMANCE CENTER','Treinos & Coach Mode','Treine preparação de objetivo, visão, decisão e transforme padrões de VOD em drills.')} ${performanceCenterHTML()}`);bindPerformanceCenter(renderTraining);}
-function renderData(){shell(`${pageHead('DATA CENTER','Provenance & fontes','Dados oficiais, observados, curados e cálculo estrutural permanecem separados. Ausência de evidência = UNKNOWN.')}<div class="card"><div class="source-row"><b>Fonte</b><b>Tipo</b><b>Status</b><b>Domínios</b></div>${DATA_SOURCES.map(s=>`<div class="source-row"><div><b>${s.name}</b></div><div><span class="badge blue">${s.type}</span></div><div>${s.status}</div><div class="muted">${s.domains.join(' · ')}</div></div>`).join('')}</div>`);}
-function renderSettings(){shell(`${pageHead('SISTEMA','Configurações & backup','Exporte ou restaure o workspace local.')}<div class="grid cols-2"><div class="card"><h3>Backup</h3><button class="btn primary" id="exportAll">Exportar workspace</button></div><div class="card"><h3>Restaurar</h3><input type="file" class="input" id="importFile" accept="application/json"></div><div class="card"><h3>Reset local</h3><button class="btn" id="resetAll">Resetar</button></div></div>`);document.querySelector('#exportAll').onclick=()=>download('FROMBOS-WORKSPACE.json',store.exportJSON());document.querySelector('#importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{store.importJSON(await f.text());renderSettings();}catch(err){alert('Arquivo inválido: '+err.message);}};document.querySelector('#resetAll').onclick=()=>{if(confirm('Resetar o workspace V2 local?')){store.reset();renderSettings();}};}
+function renderData(){
+  const cards=DATA_SOURCES.map((s,index)=>`<article class="v26-source-card" data-source-type="${escapeHTML(s.type)}">
+    <header><span>${String(index+1).padStart(2,'0')}</span><em class="badge ${s.type.includes('OFFICIAL')?'green':s.type.includes('STRUCTURAL')?'gold':'blue'}">${escapeHTML(s.type)}</em></header>
+    <h3>${escapeHTML(s.name)}</h3>
+    <p>${escapeHTML(s.status)}</p>
+    <div class="v26-source-domains">${s.domains.map(d=>`<span>${escapeHTML(d)}</span>`).join('')}</div>
+    <footer><i></i><b>${s.type==='OFFICIAL'?'FONTE CANÔNICA':s.type.includes('STRUCTURAL')?'ENGINE FROMBOS':'EVIDÊNCIA / CURADORIA'}</b></footer>
+  </article>`).join('');
+  shell(`${pageHead('DATA CENTER','Provenance & fontes','A arquitetura separa fonte oficial, evidência observada, curadoria e cálculo estrutural. Ausência de evidência continua sendo UNKNOWN.')}
+    <section class="v26-data-manifest"><div><span>DATA CONTRACT</span><h2>Evidência antes da conclusão.</h2><p>O FROMBOS não converte ausência de dado em tendência, ranking ou probabilidade.</p></div><div><b>OFFICIAL</b><b>OBSERVED</b><b>CURATED</b><b>FROMBOS_STRUCTURAL</b><b>UNKNOWN</b></div></section>
+    <div class="v26-source-grid">${cards}</div>`);
+}
+function renderSettings(){
+  shell(`${pageHead('SYSTEM','Configurações & backup','Controle o workspace local sem perder a identidade competitiva do produto.')}
+    <section class="v26-settings-grid">
+      <article class="v26-settings-card featured"><div class="v26-settings-icon">${v26Icon('backup')}</div><span>BACKUP</span><h3>Exportar workspace</h3><p>Salva time, pools, drafts, série, Tactical, VOD, treinos e preferências locais em JSON.</p><button class="btn primary" id="exportAll">Exportar workspace ${v26Icon('arrow')}</button></article>
+      <article class="v26-settings-card"><div class="v26-settings-icon">${v26Icon('data')}</div><span>RESTORE</span><h3>Restaurar workspace</h3><p>Carregue um backup compatível. A restauração acontece somente após você selecionar o arquivo.</p><label class="v26-file-drop"><input type="file" id="importFile" accept="application/json"><b>Selecionar arquivo JSON</b><small>Dados permanecem locais</small></label></article>
+      <article class="v26-settings-card"><div class="v26-settings-icon">${v26Icon('settings')}</div><span>AMBIENTE</span><h3>Contrato do produto</h3><div class="v26-settings-facts"><div><small>GAME</small><b>Wild Rift only</b></div><div><small>WORKSPACE</small><b>Local</b></div><div><small>VERSÃO</small><b>V2 state</b></div><div><small>DRAFT</small><b>Coach controlled</b></div></div></article>
+      <article class="v26-settings-card danger"><div class="v26-settings-icon">${v26Icon('close')}</div><span>ZONA DE RISCO</span><h3>Reset local</h3><p>Apaga o workspace salvo neste navegador e recria o estado inicial.</p><button class="btn danger-outline" id="resetAll">Resetar workspace</button></article>
+    </section>`);
+  document.querySelector('#exportAll').onclick=()=>download('FROMBOS-WORKSPACE.json',store.exportJSON());
+  document.querySelector('#importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{store.importJSON(await f.text());renderSettings();}catch(err){alert('Arquivo inválido: '+err.message);}};
+  document.querySelector('#resetAll').onclick=()=>{if(confirm('Resetar o workspace V2 local?')){store.reset();renderSettings();}};
+}
 function renderPlaceholder(id){const m=MODULES.find(x=>x.id===id);shell(`${pageHead(m?.group||'FROMBOS',m?.label||id,'Módulo conectado à arquitetura V2. A engine específica continuará entrando por etapas.')}<div class="empty">Estrutura preparada.</div>`);}
 function route(){currentRoute=location.hash.replace('#/','').split('?')[0]||'home';const routes={home:renderHome,team:renderTeam,comps:renderComps,draft:renderDraft,series:renderSeries,tactical:renderTactical,vod:renderVod,champions:renderChampions,matchups:renderMatchups,builds:renderBuilds,training:renderTraining,data:renderData,settings:renderSettings};(routes[currentRoute]||(()=>renderPlaceholder(currentRoute)))();}
 window.addEventListener('hashchange',route);route();
