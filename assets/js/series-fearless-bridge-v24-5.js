@@ -1,6 +1,6 @@
 // FROMBOS V24.5 — Series & Fearless State Bridge
 // Shared Draft/Series state with explicit coach-controlled activation only.
-// No automatic pick/ban, no competitive prediction and no Tactical map mutation.
+// No automatic pick/ban, no inferred competitive outcome and no Tactical map mutation.
 import { store } from './store.js';
 import { CHAMPIONS } from './data.js';
 import { portraitHTML } from './champion-intelligence.js';
