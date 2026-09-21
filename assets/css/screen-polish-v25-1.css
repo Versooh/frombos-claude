@@ -686,6 +686,11 @@ body.v25-prestige .v22-scout-queue article{
 /* =========================================================
    06 — TREINOS
    ========================================================= */
+body.v25-prestige .performance-center{
+  display:grid!important;
+  gap:7px!important;
+  min-width:0!important;
+}
 body.v25-prestige .performance-hero{
   display:grid!important;
   grid-template-columns:minmax(0,1.3fr) auto!important;
@@ -776,6 +781,11 @@ body.v25-prestige .coach-rule-list>div{
 /* =========================================================
    07 — RELATÓRIOS
    ========================================================= */
+body.v25-prestige .reports-center{
+  display:grid!important;
+  gap:7px!important;
+  min-width:0!important;
+}
 body.v25-prestige .report-hero{
   display:grid!important;
   grid-template-columns:minmax(0,1fr) auto!important;
