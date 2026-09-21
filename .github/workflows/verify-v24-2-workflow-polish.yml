@@ -44,7 +44,7 @@ jobs:
           grep -Fq 'data-v241-screen-polish="1"' index.html
           grep -Fq 'workflow-polish-v24-2.css?v=24.2' index.html
           grep -Fq 'workflow-polish-v24-2.js?v=24.2' index.html
-          grep -Eq "serviceWorker\.register\('\./sw\.js\?v=24\.[0-9]+'\)" index.html
+          grep -Eq "serviceWorker\.register\('\./sw\.js\?v=(24\.[0-9]+|25\.[0-9]+)'\)" index.html
 
       - name: Validate presentation-only safety
         shell: bash

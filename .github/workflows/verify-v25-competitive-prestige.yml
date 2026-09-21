@@ -1,0 +1,157 @@
+name: Verify FROMBOS V25 Competitive Prestige
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/competitive-prestige-v25.js'
+      - 'assets/css/competitive-prestige-v25.css'
+      - 'assets/css/competitive-modules-v25.css'
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - '.github/workflows/verify-v23-light-arena.yml'
+      - '.github/workflows/verify-v24-3-competitive-workflow.yml'
+      - '.github/workflows/verify-v24-5-series-fearless-bridge.yml'
+      - '.github/workflows/verify-v24-6-command-center.yml'
+      - '.github/workflows/verify-v25-competitive-prestige.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/js/app.js'
+      - 'assets/js/competitive-prestige-v25.js'
+      - 'assets/css/competitive-prestige-v25.css'
+      - 'assets/css/competitive-modules-v25.css'
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - '.github/workflows/verify-v25-competitive-prestige.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v25:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate syntax and native shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check assets/js/app.js
+          node --check assets/js/competitive-prestige-v25.js
+          for token in \
+            'v25-shell' 'v25-topbar' 'v25-primary-nav' 'v25-drawer' \
+            'V25_PRIMARY' 'v25HeroAsset' 'v25-page-hero' 'v25-subbar'; do
+            grep -Fq "$token" assets/js/app.js || { echo "Missing V25 shell token: $token"; exit 1; }
+          done
+          grep -Fq "const V25_PRIMARY=['home','draft','comps','champions','scouting','training','reports'];" assets/js/app.js
+
+      - name: Validate prestige design ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            '--v25-bg:#050b14' '--v25-gold:#d4aa52' '--v25-cyan:#55d8ff' \
+            '.v25-topbar' '.v25-primary-nav' '.v25-page-hero' '.v25-drawer' \
+            '.v246-hero' '.btn.primary' '@keyframes v25-rise' '@keyframes v25-pulse' \
+            '@media(max-width:1180px)' '@media(max-width:860px)' '@media(max-width:640px)' \
+            'prefers-reduced-motion:reduce'; do
+            grep -Fq -- "$token" assets/css/competitive-prestige-v25.css || { echo "Missing V25 prestige token: $token"; exit 1; }
+          done
+
+      - name: Validate reference screen coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          for token in \
+            '.draft-arena' '.dr-slot.pick' '.dr-slot.ban' '.draft-champ-grid' \
+            '.v22-comp-workspace' '.v22-comp-lineup' \
+            '.fb-pool-grid' '.fb-pool-art' \
+            '.v22-scout-workspace' '.performance-center' '.reports-center' \
+            '.tactical-shell' '.vod-pro' '.ci-card'; do
+            grep -Fq "$token" assets/css/competitive-modules-v25.css || { echo "Missing V25 module coverage: $token"; exit 1; }
+          done
+          grep -Fq 'aspect-ratio:3/4!important' assets/css/competitive-modules-v25.css
+          grep -Fq 'aspect-ratio:1/1!important' assets/css/competitive-modules-v25.css
+          grep -Fq 'object-position:center 14%!important' assets/css/competitive-modules-v25.css
+
+      - name: Validate final cascade and PWA dark chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'competitive-modules-v25.css?v=25.0' index.html
+          grep -Fq 'competitive-prestige-v25.css?v=25.0' index.html
+          grep -Fq 'competitive-prestige-v25.js?v=25.0' index.html
+          grep -Fq '<body class="v25-prestige v23-light v24-editorial">' index.html
+          grep -Fq '<meta name="theme-color" content="#050B14">' index.html
+          grep -Fq '"background_color": "#050B14"' manifest.webmanifest
+          grep -Fq '"theme_color": "#050B14"' manifest.webmanifest
+          grep -Fq "serviceWorker.register('./sw.js?v=25.0')" index.html
+          grep -Fq 'v25-competitive-prestige' sw.js
+          grep -Fq "'./assets/css/competitive-prestige-v25.css'" sw.js
+          grep -Fq "'./assets/css/competitive-modules-v25.css'" sw.js
+          grep -Fq "'./assets/js/competitive-prestige-v25.js'" sw.js
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('index.html').read_text()
+          old=html.index('command-center-v24-6.css?v=24.6')
+          modules=html.index('competitive-modules-v25.css?v=25.0')
+          prestige=html.index('competitive-prestige-v25.css?v=25.0')
+          if not old < modules < prestige:
+              raise SystemExit('V25 CSS must own the final cascade after V24.6')
+          PY
+
+      - name: Validate V25 is presentation-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const js=fs.readFileSync('assets/js/competitive-prestige-v25.js','utf8');
+          const forbidden=[
+            /store\.update/,/store\.save/,/localStorage/,/sessionStorage/,
+            /fetch\s*\(/,/XMLHttpRequest/,/WebSocket/,/axios/,
+            /draft\.actions\.push/,/\.click\s*\(/,
+            /ddragon\.leagueoflegends\.com/i,/lol-game-data/i,/CommunityDragon/i
+          ];
+          for(const pattern of forbidden) if(pattern.test(js)) throw new Error('Forbidden V25 runtime token: '+pattern);
+          for(const token of ['v25-prestige','keepStyleLast','enhancePageHero','v25-reveal','FROMBOS_V25_PRESTIGE']) {
+            if(!js.includes(token)) throw new Error('Missing V25 runtime contract: '+token);
+          }
+          NODE
+
+      - name: Preserve exact Tactical Board
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const MAP_URL = './assets/img/wild-rift-map.jpg';" assets/js/tactical.js
+          if grep -Eq 'MAP_URL\s*=|tbMapImage\.setAttribute|marker\.|coordinate|stroke' assets/js/competitive-prestige-v25.js; then
+            echo 'V25 presentation layer may not mutate Tactical map or geometry'
+            exit 1
+          fi
+
+      - name: Validate CSS structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          for name in ['assets/css/competitive-prestige-v25.css','assets/css/competitive-modules-v25.css']:
+              css=Path(name).read_text()
+              depth=0
+              for ch in css:
+                  if ch=='{': depth+=1
+                  elif ch=='}':
+                      depth-=1
+                      if depth<0: raise SystemExit(f'{name}: closing brace underflow')
+              if depth: raise SystemExit(f'{name}: CSS brace imbalance {depth}')
+              print(name,'OK')
+          PY

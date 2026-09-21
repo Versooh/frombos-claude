@@ -41,7 +41,7 @@ jobs:
           node --check assets/js/competitive-workflow-v24-3.js
           grep -Fq 'competitive-workflow-v24-3.css?v=24.3' index.html
           grep -Fq 'competitive-workflow-v24-3.js?v=24.3' index.html
-          grep -Eq "serviceWorker\.register\('./sw\.js\?v=24\.(3|4|5|6)'\)" index.html
+          grep -Eq "serviceWorker\.register\('./sw\.js\?v=(24\.(3|4|5|6)|25\.0)'\)" index.html
 
       - name: Preserve read-only handoff contract
         shell: bash
