@@ -92,11 +92,11 @@ jobs:
           grep -Fq 'competitive-modules-v25.css?v=25.0' index.html
           grep -Fq 'competitive-prestige-v25.css?v=25.0' index.html
           grep -Fq 'competitive-prestige-v25.js?v=25.0' index.html
-          grep -Fq '<body class="v25-prestige v23-light v24-editorial">' index.html
+          grep -Eq '<body class="(v26-product )?v25-prestige v23-light v24-editorial">' index.html
           grep -Fq '<meta name="theme-color" content="#050B14">' index.html
           grep -Fq '"background_color": "#050B14"' manifest.webmanifest
           grep -Fq '"theme_color": "#050B14"' manifest.webmanifest
-          grep -Eq "serviceWorker\.register\('./sw\.js\?v=25\.(0|1)'\)" index.html
+          grep -Eq "serviceWorker\.register\('./sw\.js\?v=(25\.(0|1)|26\.0)'\)" index.html
           grep -Fq 'v25-competitive-prestige' sw.js
           grep -Fq "'./assets/css/competitive-prestige-v25.css'" sw.js
           grep -Fq "'./assets/css/competitive-modules-v25.css'" sw.js
@@ -108,7 +108,11 @@ jobs:
           modules=html.index('competitive-modules-v25.css?v=25.0')
           prestige=html.index('competitive-prestige-v25.css?v=25.0')
           polish=html.find('screen-polish-v25-1.css?v=25.1')
-          if polish >= 0:
+          v26=html.find('product-experience-v26.css?v=26.0')
+          if v26 >= 0:
+              if not old < modules < prestige < polish < v26:
+                  raise SystemExit('V26 must own the final cascade after V25.1')
+          elif polish >= 0:
               if not old < modules < prestige < polish:
                   raise SystemExit('V25.1 polish must own the final cascade after V25')
           elif not old < modules < prestige:
