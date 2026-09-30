@@ -61,23 +61,11 @@ async function req(url,opt){opt=opt||{};var r=await fetch(url,Object.assign({cre
 async function boot(){
   var b=await (await fetch('/api/bootstrap',{credentials:'include'})).json();
   if(b.user)return route(b.user.role);
-  if(!b.initialized)return setup();
   login();
 }
 function route(role){location.href=role==='admin'?'/admin':'/painel'}
-function setup(){
-  box.innerHTML='<div class="boxmark"></div><h2>Primeiro acesso</h2><div class="sub">Configure os dados iniciais do ambiente.</div><div class="stack"><label>Empresa<input id="company" value="EMPAT"></label><label>Nome do responsável<input id="name" value="WEVERSON"></label><button id="go">Criar ambiente</button></div><div class="note">A senha temporária inicial será <b>123456</b>. Ela poderá ser alterada após o acesso.</div>';
-  document.getElementById('go').onclick=doSetup;
-  ['company','name'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doSetup()}})})
-}
-async function doSetup(){
-  var payload={company:document.getElementById('company').value.trim(),name:document.getElementById('name').value.trim()};
-  if(!payload.company||!payload.name)return toast('Preencha empresa e nome');
-  try{var r=await req('/api/setup',{method:'POST',body:JSON.stringify(payload)});var j=await r.json();route(j.role)}
-  catch(e){toast(e.message)}
-}
 function login(){
-  box.innerHTML='<div class="boxmark"></div><h2>Entrar no PedidoFlow</h2><div class="sub">Informe seu usuário e sua senha para continuar.</div><div class="stack"><label>Usuário<input id="username" autocomplete="username" placeholder="Seu usuário"></label><label>Senha<input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></label><button id="go">Entrar</button></div><div class="note">No primeiro acesso, utilize a senha temporária fornecida e altere-a depois dentro do sistema.</div>';
+  box.innerHTML='<div class="boxmark"></div><h2>Entrar no PedidoFlow</h2><div class="sub">Informe seu usuário e sua senha para acessar o sistema.</div><div class="stack"><label>Usuário<input id="username" autocomplete="username" placeholder="Seu usuário"></label><label>Senha<input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></label><button id="go">Entrar</button></div><div class="note">Acesso interno ao PedidoFlow.</div>';
   document.getElementById('go').onclick=doLogin;
   ['username','password'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doLogin()}})})
 }
