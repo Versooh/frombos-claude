@@ -138,7 +138,7 @@ tr.data:hover td:first-child{box-shadow:inset 3px 0 0 var(--flow-cyan)}
 .top{height:70px}.topEyebrow{font-size:9px;letter-spacing:.14em;color:#8190a4;font-weight:900}.top h1{font-size:18px;margin-top:2px}
 .heroAdmin{position:relative;overflow:hidden;background:linear-gradient(115deg,#0d1728,#142542 65%,#10384a);color:#fff;border-radius:16px;padding:18px 20px;margin-bottom:13px;box-shadow:0 18px 44px rgba(30,64,175,.13);display:flex;align-items:center;justify-content:space-between;gap:20px}.heroAdmin:after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;border:1px solid #22d3ee22;right:-120px;top:-155px;box-shadow:0 0 0 30px #2563eb0b,0 0 0 60px #22d3ee07}.heroAdmin span{font-size:9px;letter-spacing:.16em;font-weight:900;color:#67e8f9}.heroAdmin h2{font-size:20px;margin:5px 0 4px;letter-spacing:-.025em}.heroAdmin p{margin:0;color:#afbdd0}.flowPulse{display:flex;gap:6px;position:relative;z-index:1}.flowPulse i{display:block;width:9px;height:9px;border-radius:4px;background:#3b82f6;transform:rotate(45deg);animation:fp 1.6s infinite}.flowPulse i:nth-child(2){animation-delay:.18s;background:#38bdf8}.flowPulse i:nth-child(3){animation-delay:.36s;background:#22d3ee}@keyframes fp{50%{transform:rotate(45deg) translateY(-6px);filter:drop-shadow(0 0 6px #22d3ee)}}
 .modalHead h2{margin:2px 0 3px}.modalHead p{margin:0;color:#718096}.micro{font-size:9px;letter-spacing:.15em;font-weight:900;color:#2563eb}.teamList{display:grid;gap:7px;max-height:220px;overflow:auto;margin:14px 0}.teamRow{display:grid;grid-template-columns:36px 1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid #e5ebf3;border-radius:10px;background:#fbfdff}.teamAvatar{width:32px;height:32px;border-radius:9px;background:#eaf2ff;color:#2563eb;display:grid;place-items:center;font-weight:900}.teamRow b,.teamRow small{display:block}.teamRow small{color:#7a879a;font-size:11px}.teamRow>span{font-size:10px;font-weight:800;color:#15803d;background:#dcfce7;padding:3px 7px;border-radius:999px}.teamEmpty{padding:18px;text-align:center;color:#7a879a;border:1px dashed #d7e0eb;border-radius:10px}.divider{height:1px;background:#e7edf4;margin:14px 0}
-.tempPassInfo{padding:9px 10px;border-radius:9px;background:#fff7ed;border:1px solid #fed7aa;color:#9a4d0d;font-size:12px}.tempPassInfo b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.05em}
+.teamHelp{padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px solid #e7edf4;color:#64748b;font-size:12px}.teamHelp b{color:#172033}
 </style></head>
 <body>
 <div id="root"></div>
@@ -204,26 +204,10 @@ async function upload(kind,el){if(!el.files[0])return toast('Selecione o arquivo
 function openUsers(){
   var buyers=state.users.filter(function(u){return u.role==='buyer'});
   var list=buyers.length?buyers.map(function(u){
-    return '<div class="teamRow"><div class="teamAvatar">'+esc((u.name||u.username||'?').charAt(0).toUpperCase())+'</div><div><b>'+esc(u.name)+'</b><small>@'+esc(u.username||'')+'</small></div><span>'+(u.must_change_password?'Senha temporária':'Comprador')+'</span></div>'
-  }).join(''):'<div class="teamEmpty">Nenhum comprador criado ainda.</div>';
-  openModal('<div class="modalHead"><div><span class="micro">EQUIPE</span><h2>Compradores</h2><p>Crie os acessos que usarão o PedidoFlow.</p></div></div><div class="teamList">'+list+'</div><div class="divider"></div><div class="stack"><input id="uname" placeholder="Nome do comprador"><input id="uusername" autocomplete="username" placeholder="Usuário do comprador"><div class="tempPassInfo">Senha temporária padrão: <b>123456</b></div><button class="btn" id="createU">Criar comprador</button><button class="btn ghost" id="cancelU">Fechar</button></div>');
-  document.getElementById('createU').onclick=createUser;
+    return '<div class="teamRow"><div class="teamAvatar">'+esc((u.name||u.username||'?').charAt(0).toUpperCase())+'</div><div><b>'+esc(u.name)+'</b><small>@'+esc(u.username||'')+'</small></div><span>Comprador</span></div>'
+  }).join(''):'<div class="teamEmpty">Nenhum comprador acessou o sistema ainda.</div>';
+  openModal('<div class="modalHead"><div><span class="micro">EQUIPE</span><h2>Usuários compradores</h2><p>Os compradores aparecem aqui automaticamente depois do primeiro acesso.</p></div></div><div class="teamList">'+list+'</div><div class="divider"></div><div class="teamHelp">Total de compradores cadastrados: <b>'+buyers.length+'</b></div><button class="btn ghost" id="cancelU">Fechar</button>');
   document.getElementById('cancelU').onclick=closeModal;
-  ['uname','uusername'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();createUser()}})})
-}
-async function createUser(){
-  var payload={
-    name:document.getElementById('uname').value.trim(),
-    username:document.getElementById('uusername').value.trim(),
-    role:'buyer'
-  };
-  if(!payload.name||!payload.username){return toast('Preencha nome e usuário')}
-  try{
-    await req('/api/users',{method:'POST',body:JSON.stringify(payload)});
-    toast('Comprador criado · senha temporária 123456');
-    closeModal();
-    await refreshAll();
-  }catch(e){toast('Não foi possível criar o comprador: '+e.message)}
 }
 function openPassword(){
   openModal('<div class="modalHead"><div><span class="micro">SEGURANÇA</span><h2>Alterar senha</h2><p>Use sua senha atual para definir uma nova.</p></div></div><div class="stack"><input id="currentPass" type="password" autocomplete="current-password" placeholder="Senha atual"><input id="newPass" type="password" autocomplete="new-password" placeholder="Nova senha"><input id="confirmPass" type="password" autocomplete="new-password" placeholder="Confirmar nova senha"><button class="btn" id="savePass">Alterar senha</button><button class="btn ghost" id="cancelPass">Cancelar</button></div>');
