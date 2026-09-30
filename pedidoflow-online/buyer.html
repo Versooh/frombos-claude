@@ -122,6 +122,8 @@ header{
 @media(max-width:600px){.heroActions{width:100%}.heroActions .btn{flex:1}}
 </style><style>
 .buyerDash{display:grid;grid-template-columns:1.05fr 1fr;gap:10px;margin-bottom:12px}.buyerChart{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 8px 26px rgba(15,23,42,.045);min-height:174px}.chartHead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}.chartHead span{font-size:9px;letter-spacing:.15em;color:#7b889b;font-weight:900}.chartHead h3{font-size:14px;margin:2px 0}.chartHead small{color:#7b889b}.donutRow{display:flex;align-items:center;gap:18px}.donut{width:108px;height:108px;border-radius:50%;display:grid;place-items:center;position:relative}.donut:after{content:"";position:absolute;width:68px;height:68px;border-radius:50%;background:#fff;box-shadow:0 4px 16px #0f172a0c}.donut>div{position:relative;z-index:1;text-align:center}.donut b{font-size:20px;display:block}.donut small{font-size:9px;color:#7b889b}.legend{display:grid;gap:9px;flex:1}.legend div{display:grid;grid-template-columns:9px 1fr auto;gap:7px;align-items:center;color:#64748b;font-size:11px}.legend i{width:8px;height:8px;border-radius:50%}.cBlue{background:#3b82f6}.cAmber{background:#f59e0b}.cGreen{background:#22c55e}.bars{display:grid;gap:9px}.barLine label{display:flex;justify-content:space-between;font-size:10px;color:#64748b;margin-bottom:3px}.barLine>div{height:7px;border-radius:999px;background:#eef2f7;overflow:hidden}.barLine i{display:block;height:100%;min-width:2px;border-radius:999px;background:linear-gradient(90deg,#2563eb,#22d3ee);transition:width .35s}.barLine i[data-p="Urgente"]{background:linear-gradient(90deg,#dc2626,#fb7185)}.barLine i[data-p="Alta"]{background:linear-gradient(90deg,#ea580c,#f59e0b)}.barLine i[data-p="Normal"]{background:linear-gradient(90deg,#2563eb,#60a5fa)}.barLine i[data-p="Baixa"]{background:linear-gradient(90deg,#64748b,#94a3b8)}.optional{font-weight:500;color:#94a3b8;font-size:10px}@media(max-width:780px){.buyerDash{grid-template-columns:1fr}}
+</style><style>
+.buyerDash{display:grid;grid-template-columns:1.05fr .95fr;gap:10px;margin:0 0 12px}.buyerChart{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px;box-shadow:0 8px 24px rgba(15,23,42,.04);min-height:142px}.chartTitle span{font-size:9px;letter-spacing:.14em;color:#8190a4;font-weight:900}.chartTitle h3{margin:2px 0 10px;font-size:13px}.donutSmall{float:left;width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin-right:14px;position:relative}.donutSmall:after{content:"";position:absolute;width:54px;height:54px;border-radius:50%;background:#fff}.donutSmall>div{position:relative;z-index:1;text-align:center}.donutSmall b{display:block;font-size:17px}.donutSmall small{font-size:8px;color:#7b889b}.miniLegend{display:grid;gap:6px;padding-top:3px}.miniLegend span{font-size:10px;color:#64748b;display:flex;align-items:center;gap:6px}.miniLegend i{width:7px;height:7px;border-radius:50%}.b1{background:#3b82f6}.b2{background:#f59e0b}.b3{background:#22c55e}.bars{display:grid;gap:7px}.barLine label{display:flex;justify-content:space-between;color:#64748b;font-size:10px;margin-bottom:3px}.barLine>div{height:6px;border-radius:999px;background:#eef2f7;overflow:hidden}.barLine i{display:block;height:100%;min-width:2px;border-radius:999px;background:linear-gradient(90deg,#2563eb,#22d3ee)}.barLine i[data-p="Urgente"]{background:linear-gradient(90deg,#dc2626,#fb7185)}.barLine i[data-p="Alta"]{background:linear-gradient(90deg,#ea580c,#f59e0b)}.barLine i[data-p="Normal"]{background:linear-gradient(90deg,#2563eb,#60a5fa)}.barLine i[data-p="Baixa"]{background:linear-gradient(90deg,#64748b,#94a3b8)}.optional{font-weight:600;color:#94a3b8;font-size:10px}@media(max-width:760px){.buyerDash{grid-template-columns:1fr}}
 </style></head>
 <body>
 <div id="root"></div>
@@ -175,14 +177,44 @@ function buyerCardsHtml(){
 function bindBuyerCards(){document.querySelectorAll('.card[data-n]').forEach(function(card){card.onclick=function(){openOrder(card.dataset.n)}})}
 function updateBuyerCards(){var g=document.getElementById('buyerGrid');if(!g)return;g.innerHTML=buyerCardsHtml();bindBuyerCards();syncBuyerTabs()}
 function syncBuyerTabs(){document.querySelectorAll('[data-t]').forEach(function(b){b.classList.toggle('on',b.dataset.t===st.tab)})}
+function buyerDashboardHtml(){
+  var total=st.orders.length||1;
+  var novo=count('Novo'),pend=count('Pendente'),fill=count('Preenchido');
+  var priorities=['Urgente','Alta','Normal','Baixa'];
+  var p1=Math.round(novo/total*100),p2=Math.round(pend/total*100);
+  var donut='conic-gradient(#3b82f6 0 '+p1+'%,#f59e0b '+p1+'% '+(p1+p2)+'%,#22c55e '+(p1+p2)+'% 100%)';
+  var pmax=Math.max.apply(null,priorities.map(function(s){return st.orders.filter(function(o){return o.priority===s}).length}).concat([1]));
+  return '<section class="buyerDash"><div class="buyerChart"><div class="chartTitle"><span>MINHA CARTEIRA</span><h3>Progresso</h3></div><div class="donutSmall" style="background:'+donut+'"><div><b>'+fill+'</b><small>preenchidos</small></div></div><div class="miniLegend"><span><i class="b1"></i>Novo '+novo+'</span><span><i class="b2"></i>Pendente '+pend+'</span><span><i class="b3"></i>Preenchido '+fill+'</span></div></div><div class="buyerChart"><div class="chartTitle"><span>PRIORIDADE</span><h3>Distribuição</h3></div><div class="bars">'+priorities.map(function(s){var n=st.orders.filter(function(o){return o.priority===s}).length;return '<div class="barLine"><label><span>'+esc(s)+'</span><b>'+n+'</b></label><div><i data-p="'+s+'" style="width:'+Math.round(n/pmax*100)+'%"></i></div></div>'}).join('')+'</div></div></section>'
+}
+function buyerCardsHtml(){
+  var f=st.orders.filter(function(o){
+    var text=(o.number+' '+o.supplier.name+' '+o.items.map(function(i){return i.description+' '+i.code}).join(' ')).toLowerCase();
+    return (!st.tab||o.workflow_status===st.tab)&&(!st.search||text.indexOf(st.search)>=0)
+  });
+  if(!f.length)return '<div class="empty" style="grid-column:1/-1">Nenhum pedido nesta lista.</div>';
+  return f.map(function(o){
+    var shown=o.items.slice(0,2),more=o.items.length-shown.length;
+    return '<article class="card '+(o.workflow_status==='Novo'?'new':'')+'" data-n="'+o.number+'"><div class="topline"><div class="ord">Pedido '+esc(o.number)+'</div>'+badge(o.workflow_status)+'</div><div class="supplier">'+esc(o.supplier.name||'Fornecedor não informado')+'</div><div class="items">'+shown.map(function(i){return '<div class="itemline"><b>'+esc(i.description)+'</b><div class="muted">'+i.quantity+' '+esc(i.unit||'')+(i.code?' · cód. '+esc(i.code):'')+'</div></div>'}).join('')+(more>0?'<div class="muted">+'+more+' item(ns) no pedido</div>':'')+'</div><div class="meta">'+(o.delivery_type?'<span class="badge tag">'+esc(o.delivery_type)+'</span>':'')+(o.proposal_due_date?'<span class="badge tag">Proposta '+fmtDT(o.proposal_due_date+'T00:00:00')+'</span>':'')+'<span class="muted">Alteração: '+fmtDT(o.last_modified_at)+'</span></div></article>'
+  }).join('')
+}
+function bindBuyerCards(){
+  document.querySelectorAll('.card[data-n]').forEach(function(c){c.onclick=function(){openOrder(c.dataset.n)}})
+}
+function updateBuyerCards(){
+  var grid=document.getElementById('ordersGrid');
+  if(!grid)return;
+  grid.innerHTML=buyerCardsHtml();
+  bindBuyerCards()
+}
 function render(){
   var html='<div class="stats"><div class="stat" data-tab="Novo"><small>Novos pedidos</small><strong>'+count('Novo')+'</strong></div><div class="stat" data-tab="Pendente"><small>Pendentes</small><strong>'+count('Pendente')+'</strong></div><div class="stat" data-tab="Preenchido"><small>Preenchidos</small><strong>'+count('Preenchido')+'</strong></div></div>';
   html+=buyerDashboardHtml();
-  html+='<div class="bar"><input class="search" id="search" placeholder="Buscar pedido, fornecedor ou descrição do item…" value="'+esc(st.search)+'"><div class="tabs"><button data-t="Novo" class="'+(st.tab==='Novo'?'on':'')+'">Novos</button><button data-t="Pendente" class="'+(st.tab==='Pendente'?'on':'')+'">Pendentes</button><button data-t="Preenchido" class="'+(st.tab==='Preenchido'?'on':'')+'">Preenchidos</button><button data-t="" class="'+(st.tab===''?'on':'')+'">Todos</button></div></div><div class="grid" id="buyerGrid">'+buyerCardsHtml()+'</div>';
+  html+='<div class="bar"><input class="search" id="search" placeholder="Buscar pedido, fornecedor ou descrição do item…" value="'+esc(st.search)+'"><div class="tabs"><button data-t="Novo" class="'+(st.tab==='Novo'?'on':'')+'">Novos</button><button data-t="Pendente" class="'+(st.tab==='Pendente'?'on':'')+'">Pendentes</button><button data-t="Preenchido" class="'+(st.tab==='Preenchido'?'on':'')+'">Preenchidos</button><button data-t="" class="'+(st.tab===''?'on':'')+'">Todos</button></div></div><div class="grid" id="ordersGrid">'+buyerCardsHtml()+'</div>';
   document.getElementById('view').innerHTML=html;
-  document.getElementById('search').oninput=function(){st.search=this.value.toLowerCase();updateBuyerCards()};
-  document.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){st.tab=b.dataset.t;updateBuyerCards()}});
-  document.querySelectorAll('.stat').forEach(function(card){card.onclick=function(){st.tab=card.dataset.tab;updateBuyerCards()}});
+  var searchEl=document.getElementById('search');
+  searchEl.oninput=function(){st.search=this.value.toLowerCase();updateBuyerCards()};
+  document.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){st.tab=b.dataset.t;document.querySelectorAll('[data-t]').forEach(function(x){x.classList.toggle('on',x.dataset.t===st.tab)});updateBuyerCards()}});
+  document.querySelectorAll('.stat').forEach(function(c){c.onclick=function(){st.tab=c.dataset.tab;document.querySelectorAll('[data-t]').forEach(function(x){x.classList.toggle('on',x.dataset.t===st.tab)});updateBuyerCards()}});
   bindBuyerCards()
 }
 async function openOrder(n){var o=await (await req('/api/orders/'+n)).json();st.current=o;st.priority=o.priority||'Normal';st.delivery=o.delivery_type||'';var d=document.getElementById('drawer'),items=o.items.map(function(i){return '<div class="ibox"><b>'+esc(i.description)+'</b><div class="muted">Código: '+esc(i.code||'—')+' · Quantidade: '+i.quantity+' '+esc(i.unit||'')+' · Entregue: '+i.delivered+'</div></div>'}).join('');
