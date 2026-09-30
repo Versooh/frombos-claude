@@ -61,6 +61,7 @@ class PurchaseOrder(Base):
     priority=Column(String(20),default="Normal")
     entry_notes=Column(Text)
     delivery_type=Column(String(20))
+    proposal_due_date=Column(Date)
     supplier_due_date=Column(Date)
     supplier_status=Column(String(100))
     next_follow_up=Column(Date)
@@ -89,6 +90,7 @@ Base.metadata.create_all(engine)
 def ensure_columns():
     additions={
         "delivery_type":"VARCHAR(20)",
+        "proposal_due_date":"DATE",
         "created_at":"TIMESTAMP",
         "last_modified_at":"TIMESTAMP",
         "last_modified_by":"VARCHAR(120)",
@@ -226,6 +228,7 @@ def order_json(o):
       "sent_at":o.sent_at.isoformat() if o.sent_at else None,"priority":o.priority or "Normal",
       "entry_notes":o.entry_notes or "","delivery_type":o.delivery_type or "",
       "system_due_date":o.system_due_date.isoformat() if o.system_due_date else None,
+      "proposal_due_date":o.proposal_due_date.isoformat() if o.proposal_due_date else None,
       "supplier_due_date":o.supplier_due_date.isoformat() if o.supplier_due_date else None,
       "supplier_status":o.supplier_status or "","next_follow_up":o.next_follow_up.isoformat() if o.next_follow_up else None,
       "tracking_notes":o.tracking_notes or "","created_at":iso_dt(o.created_at),
@@ -421,7 +424,9 @@ async def buyer_submit(number:str,data:dict,u=Depends(current),db:Session=Depend
     if delivery not in ("COLETA","ENTREGA"):raise HTTPException(400,"Selecione Coleta ou Entrega")
     o.buyer_id=u.id;o.buyer_name=u.name;o.sent_at=sent;o.delivery_type=delivery
     o.priority=data.get("priority") if data.get("priority") in ("Baixa","Normal","Alta","Urgente") else "Normal"
-    o.entry_notes=norm(data.get("entry_notes"));o.last_modified_at=datetime.utcnow();o.last_modified_by=u.name
+    o.entry_notes=norm(data.get("entry_notes"))
+    o.proposal_due_date=dt(data.get("proposal_due_date")) if data.get("proposal_due_date") else None
+    o.last_modified_at=datetime.utcnow();o.last_modified_by=u.name
     db.commit();db.refresh(o)
     publish(u.organization_id,"buyer.submitted",{"number":o.number,"buyer":u.name,"workflow_status":workflow(o)})
     return order_json(o)
@@ -432,7 +437,7 @@ async def admin_update(number:str,data:dict,u=Depends(admin),db:Session=Depends(
     if not o:raise HTTPException(404)
     for k in ("supplier_status","tracking_notes"):
         if k in data:setattr(o,k,norm(data[k]))
-    for k in ("supplier_due_date","next_follow_up"):
+    for k in ("proposal_due_date","supplier_due_date","next_follow_up"):
         if k in data:setattr(o,k,dt(data[k]))
     if "delivery_type" in data:
         dv=(data.get("delivery_type") or "").upper()
@@ -503,10 +508,10 @@ async def import_suppliers(file:UploadFile=File(...),u=Depends(admin),db:Session
 @app.get("/api/export.xlsx")
 def export_xlsx(u=Depends(admin),db:Session=Depends(dbdep)):
     wb=Workbook();ws=wb.active;ws.title="ENTRADA_COMPRADORES"
-    ws.append(["Nº Pedido","Comprador responsável","Data envio","Prioridade","Tipo entrega","Observação","Fornecedor","Descrição dos itens","Prazo confirmado","Status fornecedor","Próxima cobrança","Data alteração","Alterado por","Situação preenchimento"])
+    ws.append(["Nº Pedido","Comprador responsável","Data envio","Prioridade","Tipo entrega","Previsão entrega proposta","Observação","Fornecedor","Descrição dos itens","Prazo confirmado","Status fornecedor","Próxima cobrança","Data alteração","Alterado por","Situação preenchimento"])
     for o in db.query(PurchaseOrder).filter(PurchaseOrder.organization_id==u.organization_id).order_by(PurchaseOrder.number).all():
         desc=" | ".join(i.description for i in o.items)
-        ws.append([o.number,o.buyer_name,o.sent_at,o.priority,o.delivery_type,o.entry_notes,(o.supplier.trade_name or o.supplier.legal_name) if o.supplier else "",desc,o.supplier_due_date,o.supplier_status,o.next_follow_up,o.last_modified_at or o.updated_at,o.last_modified_by,workflow(o)])
+        ws.append([o.number,o.buyer_name,o.sent_at,o.priority,o.delivery_type,o.proposal_due_date,o.entry_notes,(o.supplier.trade_name or o.supplier.legal_name) if o.supplier else "",desc,o.supplier_due_date,o.supplier_status,o.next_follow_up,o.last_modified_at or o.updated_at,o.last_modified_by,workflow(o)])
     out=io.BytesIO();wb.save(out);out.seek(0)
     return StreamingResponse(out,media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",headers={"Content-Disposition":"attachment; filename=PedidoFlow_Export.xlsx"})
 
