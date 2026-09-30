@@ -9,7 +9,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from openpyxl import load_workbook, Workbook
 
 BASE_DIR=Path(__file__).resolve().parent
-APP_VERSION="2026.09.30.4"
+APP_VERSION=(os.getenv("RENDER_GIT_COMMIT") or "dev")[:12]
 APP_SECRET=os.getenv("APP_SECRET") or secrets.token_urlsafe(48)
 DATABASE_URL=os.getenv("DATABASE_URL","sqlite:///./pedidoflow.db")
 if DATABASE_URL.startswith("postgres://"):
