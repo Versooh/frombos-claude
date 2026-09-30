@@ -30,6 +30,7 @@ class User(Base):
     id=Column(Integer,primary_key=True)
     organization_id=Column(Integer,ForeignKey("organizations.id"),nullable=False)
     name=Column(String(120),nullable=False)
+    username=Column(String(80))
     email=Column(String(180),nullable=False)
     password_hash=Column(String(300),nullable=False)
     role=Column(String(20),default="buyer")
@@ -92,11 +93,18 @@ def ensure_columns():
         "last_modified_by":"VARCHAR(120)",
     }
     existing={c["name"] for c in inspect(engine).get_columns("purchase_orders")}
+    user_existing={c["name"] for c in inspect(engine).get_columns("users")}
     with engine.begin() as conn:
         for name,ddl in additions.items():
             if name not in existing:
                 conn.execute(text(f"ALTER TABLE purchase_orders ADD COLUMN {name} {ddl}"))
+        if "username" not in user_existing:
+            conn.execute(text("ALTER TABLE users ADD COLUMN username VARCHAR(80)"))
         conn.execute(text("UPDATE purchase_orders SET created_at = COALESCE(created_at, updated_at, CURRENT_TIMESTAMP)"))
+        if engine.dialect.name=="sqlite":
+            conn.execute(text("UPDATE users SET username = LOWER(SUBSTR(email,1,INSTR(email,'@')-1)) WHERE (username IS NULL OR username='') AND email LIKE '%@%'"))
+        else:
+            conn.execute(text("UPDATE users SET username = LOWER(SPLIT_PART(email,'@',1)) WHERE (username IS NULL OR username='') AND email LIKE '%@%'"))
 ensure_columns()
 
 app=FastAPI(title="PedidoFlow Online")
@@ -241,26 +249,48 @@ def bootstrap(req:Request,db:Session=Depends(dbdep)):
     user=None
     if p:
         u=db.query(User).filter(User.id==p["uid"]).first()
-        if u:user={"id":u.id,"name":u.name,"email":u.email,"role":u.role}
+        if u:user={"id":u.id,"name":u.name,"username":u.username or u.name,"role":u.role}
     return {"initialized":initialized,"user":user}
 
 @app.post("/api/setup")
 async def setup(data:dict,res:Response,db:Session=Depends(dbdep)):
     if db.query(User).count(): raise HTTPException(400,"Sistema já configurado")
-    company=norm(data.get("company")); name=norm(data.get("name")); email=norm(data.get("email")).lower(); password=data.get("password") or ""
-    if not company or not name or "@" not in email or len(password)<6: raise HTTPException(400,"Preencha empresa, nome, e-mail e senha")
+    company=norm(data.get("company"))
+    name=norm(data.get("name"))
+    username=norm(data.get("username")).lower()
+    password=data.get("password") or ""
+    if not company or not name or len(username)<3 or len(password)<6:
+        raise HTTPException(400,"Preencha empresa, nome, usuário e senha")
+    if not re.fullmatch(r"[a-z0-9._-]+",username):
+        raise HTTPException(400,"Usuário deve conter apenas letras, números, ponto, hífen ou underline")
     org=Organization(name=company);db.add(org);db.flush()
-    u=User(organization_id=org.id,name=name,email=email,password_hash=hpw(password),role="admin");db.add(u);db.commit();db.refresh(u)
+    compat_email=f"{username}@pedidoflow.local"
+    u=User(organization_id=org.id,name=name,username=username,email=compat_email,password_hash=hpw(password),role="admin")
+    db.add(u);db.commit();db.refresh(u)
     res.set_cookie("session",token(u.id,org.id),httponly=True,samesite="lax",secure=True,max_age=604800)
-    return {"ok":True}
+    return {"ok":True,"role":"admin","name":u.name,"username":u.username}
 
-@app.post("/api/login")
-async def login(data:dict,res:Response,db:Session=Depends(dbdep)):
-    email=norm(data.get("email")).lower(); password=data.get("password") or ""
-    u=db.query(User).filter(func.lower(User.email)==email,User.active==True).first()
-    if not u or not vpw(password,u.password_hash): raise HTTPException(401,"E-mail ou senha inválidos")
+def authenticate_role(data,role,db):
+    username=norm(data.get("username")).lower()
+    password=data.get("password") or ""
+    if not username or not password:
+        raise HTTPException(400,"Informe usuário e senha")
+    u=db.query(User).filter(func.lower(User.username)==username,User.role==role,User.active==True).first()
+    if not u or not vpw(password,u.password_hash):
+        raise HTTPException(401,"Usuário ou senha inválidos")
+    return u
+
+@app.post("/api/login/admin")
+async def login_admin(data:dict,res:Response,db:Session=Depends(dbdep)):
+    u=authenticate_role(data,"admin",db)
     res.set_cookie("session",token(u.id,u.organization_id),httponly=True,samesite="lax",secure=True,max_age=604800)
-    return {"ok":True,"role":u.role}
+    return {"ok":True,"role":"admin","name":u.name}
+
+@app.post("/api/login/buyer")
+async def login_buyer(data:dict,res:Response,db:Session=Depends(dbdep)):
+    u=authenticate_role(data,"buyer",db)
+    res.set_cookie("session",token(u.id,u.organization_id),httponly=True,samesite="lax",secure=True,max_age=604800)
+    return {"ok":True,"role":"buyer","name":u.name}
 
 @app.post("/api/logout")
 def logout(res:Response):
@@ -268,16 +298,24 @@ def logout(res:Response):
 
 @app.get("/api/users")
 def users(u=Depends(admin),db:Session=Depends(dbdep)):
-    return [{"id":x.id,"name":x.name,"email":x.email,"role":x.role} for x in db.query(User).filter(User.organization_id==u.organization_id).all()]
+    return [{"id":x.id,"name":x.name,"username":x.username,"role":x.role} for x in db.query(User).filter(User.organization_id==u.organization_id).all()]
 
 @app.post("/api/users")
 async def create_user(data:dict,u=Depends(admin),db:Session=Depends(dbdep)):
-    name=norm(data.get("name"));email=norm(data.get("email")).lower();password=data.get("password") or "";role=data.get("role","buyer")
-    if not name or "@" not in email or len(password)<6:raise HTTPException(400,"Dados inválidos")
-    if db.query(User).filter(User.organization_id==u.organization_id,func.lower(User.email)==email).first():raise HTTPException(400,"E-mail já cadastrado")
-    x=User(organization_id=u.organization_id,name=name,email=email,password_hash=hpw(password),role=role);db.add(x);db.commit()
-    publish(u.organization_id,"user.created",{"name":name})
-    return {"ok":True}
+    name=norm(data.get("name"))
+    username=norm(data.get("username")).lower()
+    password=data.get("password") or ""
+    if not name or len(username)<3 or len(password)<6:
+        raise HTTPException(400,"Informe nome, usuário e senha com pelo menos 6 caracteres")
+    if not re.fullmatch(r"[a-z0-9._-]+",username):
+        raise HTTPException(400,"Usuário deve conter apenas letras, números, ponto, hífen ou underline")
+    if db.query(User).filter(User.organization_id==u.organization_id,func.lower(User.username)==username).first():
+        raise HTTPException(400,"Este usuário já existe")
+    compat_email=f"{username}@pedidoflow.local"
+    x=User(organization_id=u.organization_id,name=name,username=username,email=compat_email,password_hash=hpw(password),role="buyer")
+    db.add(x);db.commit()
+    publish(u.organization_id,"user.created",{"name":name,"username":username})
+    return {"ok":True,"id":x.id,"name":x.name,"username":x.username}
 
 @app.get("/api/orders")
 def orders(search:str="",u=Depends(current),db:Session=Depends(dbdep)):
