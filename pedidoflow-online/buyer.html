@@ -18,7 +18,102 @@ input,select,textarea{border:1px solid var(--line);background:#fff;color:var(--t
 .auth{min-height:100vh;display:grid;place-items:center;padding:20px}.authbox{width:min(470px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);animation:rise .35s}.authbox h1{margin:0}.authbox p{color:var(--muted)}.authbox .stack{display:grid;gap:9px;margin-top:17px}.authbox input{width:100%}
 @media(max-width:760px){main{padding:12px}.stats{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.hello{align-items:flex-start;flex-direction:column}.bar{align-items:stretch}.tabs{overflow:auto}.prior{grid-template-columns:repeat(2,1fr)}}
 </style>
-</head>
+<style>
+:root{--flow-cyan:#22d3ee;--flow-blue:#2563eb;--flow-indigo:#4f46e5;--flow-ink:#0b1220}
+body{
+  background:
+    radial-gradient(circle at 5% 0%,rgba(37,99,235,.08),transparent 28%),
+    radial-gradient(circle at 95% 4%,rgba(34,211,238,.07),transparent 24%),
+    linear-gradient(180deg,#f6f9fd,#edf3f9);
+}
+header{
+  background:rgba(255,255,255,.93);backdrop-filter:blur(12px);
+  box-shadow:0 8px 30px rgba(15,23,42,.035)
+}
+.brand{letter-spacing:-.035em}
+.brand:before{
+  content:"";display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:9px;
+  background:linear-gradient(135deg,var(--flow-cyan),var(--flow-blue));
+  box-shadow:0 0 18px rgba(34,211,238,.5);transform:rotate(45deg)
+}
+.brand b{background:linear-gradient(90deg,var(--flow-blue),var(--flow-cyan));-webkit-background-clip:text;color:transparent}
+.live{background:#f1f5f9;border:1px solid #e2e8f0;padding:5px 9px;border-radius:999px}
+.hello{
+  background:linear-gradient(110deg,#0f1b2e,#172554 62%,#12344b);
+  color:#fff;padding:18px 20px;border-radius:16px;position:relative;overflow:hidden;
+  box-shadow:0 18px 45px rgba(30,64,175,.15)
+}
+.hello:after{
+  content:"";position:absolute;width:260px;height:260px;border-radius:50%;
+  border:1px solid rgba(34,211,238,.14);right:-120px;top:-160px;
+  box-shadow:0 0 0 32px rgba(37,99,235,.06),0 0 0 64px rgba(34,211,238,.025)
+}
+.hello p{color:#c6d4e7!important}.hello .btn{position:relative;z-index:1}
+.stats{margin-top:13px}
+.stat{
+  position:relative;overflow:hidden;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.stat:after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:linear-gradient(90deg,var(--flow-blue),var(--flow-cyan));opacity:.55
+}
+.stat:hover{box-shadow:0 14px 30px rgba(37,99,235,.08)}
+.bar{box-shadow:0 8px 24px rgba(15,23,42,.04)}
+.tabs button{transition:.18s ease}.tabs button:hover{color:#1d4ed8}
+.card{
+  position:relative;overflow:hidden;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease
+}
+.card:hover{box-shadow:0 20px 44px rgba(37,99,235,.09)}
+.card.new:before{
+  content:"NOVO";position:absolute;right:-29px;top:11px;width:98px;text-align:center;
+  transform:rotate(36deg);font-size:9px;font-weight:900;letter-spacing:.11em;color:#1d4ed8;
+  background:#dbeafe;padding:3px 0
+}
+.card.new{animation:newPulse 2.7s ease-in-out infinite}
+@keyframes newPulse{0%,100%{box-shadow:inset 3px 0 0 #2563eb,0 12px 32px rgba(15,34,58,.07)}50%{box-shadow:inset 3px 0 0 #22d3ee,0 16px 36px rgba(37,99,235,.11)}}
+.drawer{
+  background:
+    radial-gradient(circle at 100% 0%,rgba(34,211,238,.06),transparent 28%),#fff;
+  border-left:1px solid #dce7f3
+}
+.head:before{
+  content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,var(--flow-blue),var(--flow-cyan))
+}
+.choice,.prior button{transition:transform .15s ease,border-color .15s ease,background .15s ease}
+.choice:hover,.prior button:hover{transform:translateY(-1px);border-color:#93b8f7}
+.choice.on{
+  background:linear-gradient(135deg,#eff6ff,#ecfeff);
+  border-color:#67a4f9;box-shadow:0 0 0 3px #2563eb0d
+}
+.btn{
+  background:linear-gradient(135deg,var(--flow-blue),var(--flow-indigo));
+  box-shadow:0 8px 18px rgba(37,99,235,.16);transition:.18s ease
+}
+.btn:hover{box-shadow:0 12px 24px rgba(37,99,235,.24);transform:translateY(-1px)}
+.auth{
+  background:
+    radial-gradient(circle at 13% 18%,rgba(37,99,235,.14),transparent 28%),
+    radial-gradient(circle at 87% 18%,rgba(34,211,238,.10),transparent 25%),
+    linear-gradient(135deg,#eef4fb,#f9fbfe 60%,#eef7fb);
+  position:relative;overflow:hidden
+}
+.auth:before{
+  content:"";position:absolute;width:430px;height:430px;border-radius:50%;
+  border:1px solid rgba(37,99,235,.08);right:-220px;top:-180px;
+  box-shadow:0 0 0 45px rgba(37,99,235,.025),0 0 0 90px rgba(34,211,238,.018)
+}
+.authbox{
+  position:relative;z-index:1;background:rgba(255,255,255,.94);backdrop-filter:blur(15px);
+  box-shadow:0 30px 90px rgba(27,48,83,.12);padding:28px
+}
+.authbox:before{
+  content:"";display:block;width:44px;height:5px;border-radius:999px;margin-bottom:18px;
+  background:linear-gradient(90deg,var(--flow-blue),var(--flow-cyan));
+  box-shadow:0 0 18px rgba(34,211,238,.28)
+}
+#toast{background:linear-gradient(135deg,#0f172a,#172554);border:1px solid rgba(96,165,250,.2)}
+</style></head>
 <body>
 <div id="root"></div>
 <div class="overlay" id="ov"></div>
@@ -33,7 +128,15 @@ function toast(m){var e=document.getElementById('toast');e.textContent=m;e.class
 async function req(url,opt){opt=opt||{};var r=await fetch(url,Object.assign({credentials:'include',headers:{'Content-Type':'application/json'}},opt));if(!r.ok)throw new Error(await r.text());return r}
 async function boot(){var b=await (await fetch('/api/bootstrap',{credentials:'include'})).json();if(!b.initialized)return document.getElementById('root').innerHTML='<div class="auth"><div class="authbox"><h1>PedidoFlow</h1><p>O administrador ainda precisa configurar o sistema.</p></div></div>';if(!b.user)return renderLogin();st.user=b.user;if(b.user.role==='admin'){location='/';return}renderShell();await refresh();connectEvents()}
 function renderLogin(){document.getElementById('root').innerHTML='<div class="auth"><div class="authbox"><h1>PedidoFlow</h1><p>Acesso exclusivo dos compradores</p><div class="stack"><input id="username" autocomplete="username" placeholder="Usuário comprador"><input id="password" type="password" autocomplete="current-password" placeholder="Senha"><button class="btn" id="loginBtn">Entrar como comprador</button></div></div></div>';loginBtn.onclick=login}
-async function login(){try{await req('/api/login/buyer',{method:'POST',body:JSON.stringify({username:username.value,password:password.value})});location.reload()}catch(e){toast('Usuário ou senha inválidos')}}
+async function login(){
+  var payload={
+    username:document.getElementById('username').value.trim(),
+    password:document.getElementById('password').value
+  };
+  if(!payload.username||!payload.password){return toast('Informe usuário e senha')}
+  try{await req('/api/login/buyer',{method:'POST',body:JSON.stringify(payload)});location.reload()}
+  catch(e){toast('Usuário ou senha inválidos')}
+}
 function renderShell(){document.getElementById('root').innerHTML='<header><div class="brand">Pedido<b>Flow</b></div><div class="live"><span class="dot" id="dot"></span><span id="liveText">tempo real</span></div><div class="user">'+esc(st.user.name)+'</div></header><main><div class="hello"><div><h1>Olá, '+esc(st.user.name)+'</h1><p>Confira os pedidos novos e preencha somente o que falta.</p></div><button class="btn ghost" id="logout">Sair</button></div><div id="view"></div></main>';logout.onclick=async function(){await req('/api/logout',{method:'POST'});location.reload()}}
 async function refresh(){st.orders=await (await req('/api/orders')).json();render()}
 function count(s){return st.orders.filter(function(o){return o.workflow_status===s}).length}
