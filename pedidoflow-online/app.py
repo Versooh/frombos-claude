@@ -9,6 +9,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from openpyxl import load_workbook, Workbook
 
 BASE_DIR=Path(__file__).resolve().parent
+APP_VERSION="2026.09.30.4"
 APP_SECRET=os.getenv("APP_SECRET") or secrets.token_urlsafe(48)
 DATABASE_URL=os.getenv("DATABASE_URL","sqlite:///./pedidoflow.db")
 if DATABASE_URL.startswith("postgres://"):
@@ -66,6 +67,8 @@ class PurchaseOrder(Base):
     supplier_status=Column(String(100))
     next_follow_up=Column(Date)
     tracking_notes=Column(Text)
+    source_file=Column(String(260))
+    source_imported_at=Column(DateTime)
     created_at=Column(DateTime,default=datetime.utcnow)
     last_modified_at=Column(DateTime)
     last_modified_by=Column(String(120))
@@ -85,12 +88,26 @@ class OrderItem(Base):
     total_value=Column(Float,default=0)
     order=relationship("PurchaseOrder",back_populates="items")
 
+class ImportBatch(Base):
+    __tablename__="import_batches"
+    id=Column(Integer,primary_key=True)
+    organization_id=Column(Integer,ForeignKey("organizations.id"),nullable=False)
+    filename=Column(String(260),nullable=False)
+    imported_at=Column(DateTime,default=datetime.utcnow)
+    imported_by=Column(String(120))
+    orders_in_file=Column(Integer,default=0)
+    new_orders=Column(Integer,default=0)
+    skipped_orders=Column(Integer,default=0)
+    item_rows=Column(Integer,default=0)
+
 Base.metadata.create_all(engine)
 
 def ensure_columns():
     additions={
         "delivery_type":"VARCHAR(20)",
         "proposal_due_date":"DATE",
+        "source_file":"VARCHAR(260)",
+        "source_imported_at":"TIMESTAMP",
         "created_at":"TIMESTAMP",
         "last_modified_at":"TIMESTAMP",
         "last_modified_by":"VARCHAR(120)",
@@ -140,6 +157,35 @@ def vpw(p,s):
         return hmac.compare_digest(got,expected)
     except: return False
 
+def ensure_default_admin():
+    db=SessionLocal()
+    try:
+        admin_user=db.query(User).filter(func.lower(User.username)=="weverson").first()
+        if admin_user:
+            if admin_user.role!="admin":
+                admin_user.role="admin"
+                db.commit()
+            return
+        org=db.query(Organization).order_by(Organization.id).first()
+        if not org:
+            org=Organization(name="EMPAT")
+            db.add(org);db.flush()
+        admin_user=User(
+            organization_id=org.id,
+            name="WEVERSON",
+            username="weverson",
+            email="weverson@pedidoflow.local",
+            password_hash=hpw("123456"),
+            role="admin",
+            active=True,
+            must_change_password=False
+        )
+        db.add(admin_user);db.commit()
+    finally:
+        db.close()
+
+ensure_default_admin()
+
 def initialize_temp_passwords():
     db=SessionLocal()
     try:
@@ -155,7 +201,7 @@ def initialize_temp_passwords():
 initialize_temp_passwords()
 
 def token(uid,oid):
-    body=base64.urlsafe_b64encode(json.dumps({"uid":uid,"oid":oid,"exp":int((datetime.utcnow()+timedelta(days=7)).timestamp())},separators=(",",":")).encode()).decode().rstrip("=")
+    body=base64.urlsafe_b64encode(json.dumps({"uid":uid,"oid":oid,"ver":APP_VERSION,"exp":int((datetime.utcnow()+timedelta(days=7)).timestamp())},separators=(",",":")).encode()).decode().rstrip("=")
     sig=hmac.new(APP_SECRET.encode(),body.encode(),hashlib.sha256).hexdigest()
     return body+"."+sig
 
@@ -165,6 +211,7 @@ def untoken(t):
         if not hmac.compare_digest(sig,hmac.new(APP_SECRET.encode(),body.encode(),hashlib.sha256).hexdigest()): return None
         p=json.loads(base64.urlsafe_b64decode(body+"="*(-len(body)%4)))
         if p["exp"]<int(datetime.utcnow().timestamp()): return None
+        if p.get("ver")!=APP_VERSION: return None
         return p
     except: return None
 
@@ -231,7 +278,7 @@ def order_json(o):
       "proposal_due_date":o.proposal_due_date.isoformat() if o.proposal_due_date else None,
       "supplier_due_date":o.supplier_due_date.isoformat() if o.supplier_due_date else None,
       "supplier_status":o.supplier_status or "","next_follow_up":o.next_follow_up.isoformat() if o.next_follow_up else None,
-      "tracking_notes":o.tracking_notes or "","created_at":iso_dt(o.created_at),
+      "tracking_notes":o.tracking_notes or "","source_file":o.source_file or "","source_imported_at":iso_dt(o.source_imported_at),"created_at":iso_dt(o.created_at),
       "last_modified_at":iso_dt(o.last_modified_at or o.updated_at or o.created_at),
       "last_modified_by":o.last_modified_by or "",
       "quantity":q,"delivered":d,"percent":pct,
@@ -270,15 +317,20 @@ async def events(u=Depends(current)):
     return StreamingResponse(event_stream(u.organization_id),media_type="text/event-stream",headers={"Cache-Control":"no-cache","X-Accel-Buffering":"no"})
 
 @app.get("/api/bootstrap")
-def bootstrap(req:Request,db:Session=Depends(dbdep)):
+def bootstrap(req:Request,res:Response,db:Session=Depends(dbdep)):
+    cookie=req.cookies.get("session","")
     initialized=db.query(User).count()>0
-    p=untoken(req.cookies.get("session",""))
+    p=untoken(cookie) if cookie else None
     user=None
+    update_required=False
     if p:
         u=db.query(User).filter(User.id==p["uid"],User.active==True).first()
         if u:
             user={"id":u.id,"name":u.name,"username":u.username or u.name,"role":u.role,"must_change_password":bool(u.must_change_password)}
-    return {"initialized":initialized,"user":user}
+    elif cookie:
+        update_required=True
+        res.delete_cookie("session")
+    return {"initialized":initialized,"user":user,"update_required":update_required,"version":APP_VERSION}
 
 def clean_username(value):
     username=norm(value).lower()
@@ -329,7 +381,11 @@ async def login(data:dict,res:Response,db:Session=Depends(dbdep)):
         else:
             admin_user=db.query(User).filter(func.lower(User.username)=="weverson",User.active==True).first()
             if not admin_user:
-                raise HTTPException(403,"O ambiente ainda não foi iniciado")
+                org=db.query(Organization).order_by(Organization.id).first()
+                if not org:
+                    org=Organization(name="EMPAT");db.add(org);db.flush()
+                admin_user=User(organization_id=org.id,name="WEVERSON",username="weverson",email="weverson@pedidoflow.local",password_hash=hpw("123456"),role="admin",active=True,must_change_password=False)
+                db.add(admin_user);db.flush()
             u=User(
                 organization_id=admin_user.organization_id,
                 name=default_display_name(username),
@@ -449,35 +505,102 @@ async def admin_update(number:str,data:dict,u=Depends(admin),db:Session=Depends(
 
 @app.post("/api/import/orders")
 async def import_orders(file:UploadFile=File(...),u=Depends(admin),db:Session=Depends(dbdep)):
-    if not (file.filename or "").lower().endswith(".xlsx"):raise HTTPException(400,"Envie um arquivo .xlsx")
-    raw=await file.read();wb=load_workbook(io.BytesIO(raw),data_only=True);ws=wb.active
+    filename=norm(file.filename) or "relatorio_pedidos.xlsx"
+    if not filename.lower().endswith(".xlsx"):
+        raise HTTPException(400,"Envie um arquivo .xlsx")
+    raw=await file.read()
+    wb=load_workbook(io.BytesIO(raw),data_only=True)
+    ws=wb.active
     grouped={}
     for r in ws.iter_rows(min_row=4,values_only=True):
         pc=norm(r[0])
-        if not pc or not re.fullmatch(r"\d{1,6}",pc):continue
+        if not pc or not re.fullmatch(r"\d{1,6}",pc):
+            continue
         pc=pc.zfill(6)
         g=grouped.setdefault(pc,{"issued_at":dt(r[1]),"supplier":norm(r[9]) or "Fornecedor não informado","system_due_date":dt(r[10]),"items":[]})
         if not g["issued_at"]:g["issued_at"]=dt(r[1])
         if not g["system_due_date"]:g["system_due_date"]=dt(r[10])
-        g["items"].append({"code":norm(r[2]),"description":norm(r[3]) or "Item","unit":norm(r[4]),"quantity":num(r[5]),"total_value":num(r[7]),"delivered":num(r[11])})
-    created=updated=items=0
+        g["items"].append({
+            "code":norm(r[2]),
+            "description":norm(r[3]) or "Item",
+            "unit":norm(r[4]),
+            "quantity":num(r[5]),
+            "total_value":num(r[7]),
+            "delivered":num(r[11])
+        })
+
+    created=skipped=items=0
     now=datetime.utcnow()
     for pc,g in grouped.items():
-        sup=db.query(Supplier).filter(Supplier.organization_id==u.organization_id,func.lower(Supplier.legal_name)==g["supplier"].lower()).first()
-        if not sup:sup=Supplier(organization_id=u.organization_id,legal_name=g["supplier"]);db.add(sup);db.flush()
-        o=db.query(PurchaseOrder).filter(PurchaseOrder.organization_id==u.organization_id,PurchaseOrder.number==pc).first()
-        if not o:
-            o=PurchaseOrder(organization_id=u.organization_id,number=pc,supplier_id=sup.id,created_at=now,priority="Normal")
-            db.add(o);db.flush();created+=1
-        else:
-            updated+=1;o.supplier_id=sup.id
-        o.issued_at=g["issued_at"];o.system_due_date=g["system_due_date"]
-        o.items.clear();db.flush()
+        existing=db.query(PurchaseOrder).filter(
+            PurchaseOrder.organization_id==u.organization_id,
+            PurchaseOrder.number==pc
+        ).first()
+        if existing:
+            skipped+=1
+            continue
+
+        sup=db.query(Supplier).filter(
+            Supplier.organization_id==u.organization_id,
+            func.lower(Supplier.legal_name)==g["supplier"].lower()
+        ).first()
+        if not sup:
+            sup=Supplier(organization_id=u.organization_id,legal_name=g["supplier"])
+            db.add(sup);db.flush()
+
+        o=PurchaseOrder(
+            organization_id=u.organization_id,
+            number=pc,
+            supplier_id=sup.id,
+            issued_at=g["issued_at"],
+            system_due_date=g["system_due_date"],
+            created_at=now,
+            source_file=filename,
+            source_imported_at=now,
+            priority="Normal"
+        )
+        db.add(o);db.flush()
+        created+=1
         for it in g["items"]:
-            db.add(OrderItem(order_id=o.id,erp_code=it["code"],description=it["description"],unit=it["unit"],quantity=it["quantity"],total_value=it["total_value"],quantity_delivered=it["delivered"]));items+=1
+            db.add(OrderItem(
+                order_id=o.id,
+                erp_code=it["code"],
+                description=it["description"],
+                unit=it["unit"],
+                quantity=it["quantity"],
+                total_value=it["total_value"],
+                quantity_delivered=it["delivered"]
+            ))
+            items+=1
+
+    batch=ImportBatch(
+        organization_id=u.organization_id,
+        filename=filename,
+        imported_at=now,
+        imported_by=u.name,
+        orders_in_file=len(grouped),
+        new_orders=created,
+        skipped_orders=skipped,
+        item_rows=items
+    )
+    db.add(batch)
     db.commit()
-    publish(u.organization_id,"import.completed",{"orders":len(grouped),"created":created,"updated":updated,"items":items})
-    return {"ok":True,"orders":len(grouped),"created":created,"updated":updated,"items":items}
+    publish(u.organization_id,"import.completed",{"filename":filename,"orders":len(grouped),"created":created,"skipped":skipped,"items":items})
+    return {"ok":True,"filename":filename,"orders":len(grouped),"created":created,"skipped":skipped,"items":items}
+
+@app.get("/api/import/history")
+def import_history(u=Depends(admin),db:Session=Depends(dbdep)):
+    rows=db.query(ImportBatch).filter(ImportBatch.organization_id==u.organization_id).order_by(ImportBatch.imported_at.desc()).limit(50).all()
+    return [{
+        "id":x.id,
+        "filename":x.filename,
+        "imported_at":iso_dt(x.imported_at),
+        "imported_by":x.imported_by or "",
+        "orders_in_file":x.orders_in_file or 0,
+        "new_orders":x.new_orders or 0,
+        "skipped_orders":x.skipped_orders or 0,
+        "item_rows":x.item_rows or 0
+    } for x in rows]
 
 @app.post("/api/import/suppliers")
 async def import_suppliers(file:UploadFile=File(...),u=Depends(admin),db:Session=Depends(dbdep)):
