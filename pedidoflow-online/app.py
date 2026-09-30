@@ -259,8 +259,14 @@ async def setup(data:dict,res:Response,db:Session=Depends(dbdep)):
     name=norm(data.get("name"))
     username=norm(data.get("username")).lower()
     password=data.get("password") or ""
-    if not company or not name or len(username)<3 or len(password)<6:
-        raise HTTPException(400,"Preencha empresa, nome, usuário e senha")
+    if not company:
+        raise HTTPException(400,"Informe o nome da empresa")
+    if not name:
+        raise HTTPException(400,"Informe o nome do administrador")
+    if len(username)<3:
+        raise HTTPException(400,"O usuário deve ter pelo menos 3 caracteres")
+    if len(password)<6:
+        raise HTTPException(400,"A senha deve ter pelo menos 6 caracteres")
     if not re.fullmatch(r"[a-z0-9._-]+",username):
         raise HTTPException(400,"Usuário deve conter apenas letras, números, ponto, hífen ou underline")
     org=Organization(name=company);db.add(org);db.flush()
