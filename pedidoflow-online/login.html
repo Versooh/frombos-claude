@@ -62,6 +62,11 @@ async function boot(){
   var b=await (await fetch('/api/bootstrap',{credentials:'include'})).json();
   if(b.user)return route(b.user.role);
   login();
+  var forced=new URLSearchParams(location.search).get('updated')==='1';
+  if(b.update_required||forced){
+    setTimeout(function(){toast('PedidoFlow atualizado. Entre novamente para carregar a versão mais recente.')},80);
+    if(history.replaceState)history.replaceState({},document.title,'/');
+  }
 }
 function route(role){location.href=role==='admin'?'/admin':'/painel'}
 function login(){
