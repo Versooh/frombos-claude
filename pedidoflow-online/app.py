@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Date, DateTime, F
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from openpyxl import load_workbook, Workbook
 
-APP_SECRET=os.getenv("APP_SECRET","pedidoflow-homologacao-alterar")
+APP_SECRET=os.getenv("APP_SECRET") or secrets.token_urlsafe(48)
 DATABASE_URL=os.getenv("DATABASE_URL","sqlite:///./pedidoflow.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL="postgresql+psycopg://"+DATABASE_URL[len("postgres://"):]
