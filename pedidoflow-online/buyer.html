@@ -118,6 +118,8 @@ header{
 .stats .stat:nth-child(1):before,.stats .stat:nth-child(2):before,.stats .stat:nth-child(3):before{content:"";position:absolute;left:13px;top:11px;width:6px;height:6px;border-radius:50%}.stats .stat:nth-child(1):before{background:#3b82f6;box-shadow:0 0 0 4px #3b82f612}.stats .stat:nth-child(2):before{background:#f59e0b;box-shadow:0 0 0 4px #f59e0b12}.stats .stat:nth-child(3):before{background:#22c55e;box-shadow:0 0 0 4px #22c55e12}.stats .stat small{padding-left:13px}
 .card .supplier:before{content:"Fornecedor";display:block;font-size:9px;text-transform:uppercase;letter-spacing:.11em;color:#8794a7;font-weight:850;margin-bottom:1px}.itemline b{font-size:13px}.meta{padding-top:8px;border-top:1px dashed #e6edf5}
 @media(max-width:760px){.buyerMode{display:none}.userChip small{display:none}.userChip{margin-left:8px}.live{margin-left:auto}}
+.heroActions{display:flex;gap:8px;position:relative;z-index:1}.passwordBox{display:grid;gap:10px}.passwordBox label{display:grid;gap:5px;font-size:12px;font-weight:800;color:#44536a}.passwordBox input{width:100%}
+@media(max-width:600px){.heroActions{width:100%}.heroActions .btn{flex:1}}
 </style></head>
 <body>
 <div id="root"></div>
@@ -142,7 +144,7 @@ async function login(){
   try{await req('/api/login/buyer',{method:'POST',body:JSON.stringify(payload)});location.reload()}
   catch(e){toast('Usuário ou senha inválidos')}
 }
-function renderShell(){document.getElementById('root').innerHTML='<header><div class="brand">Pedido<b>Flow</b></div><div class="buyerMode"><span>ÁREA DO COMPRADOR</span></div><div class="live"><span class="dot" id="dot"></span><span id="liveText">sincronizado</span></div><div class="userChip"><div class="miniAvatar">'+esc((st.user.name||'?').charAt(0).toUpperCase())+'</div><div><b>'+esc(st.user.name)+'</b><small>Comprador</small></div></div></header><main><div class="hello"><div><div class="heroMicro">MINHA CARTEIRA</div><h1>Olá, '+esc(st.user.name)+'</h1><p>Priorize os novos pedidos e complete apenas as informações que dependem de você.</p></div><button class="btn ghost" id="logout">Sair</button></div><div id="view"></div></main>';logout.onclick=async function(){await req('/api/logout',{method:'POST'});location='/'}}
+function renderShell(){document.getElementById('root').innerHTML='<header><div class="brand">Pedido<b>Flow</b></div><div class="buyerMode"><span>ÁREA DO COMPRADOR</span></div><div class="live"><span class="dot" id="dot"></span><span id="liveText">sincronizado</span></div><div class="userChip"><div class="miniAvatar">'+esc((st.user.name||'?').charAt(0).toUpperCase())+'</div><div><b>'+esc(st.user.name)+'</b><small>Comprador</small></div></div></header><main><div class="hello"><div><div class="heroMicro">MINHA CARTEIRA</div><h1>Olá, '+esc(st.user.name)+'</h1><p>Priorize os novos pedidos e complete apenas as informações que dependem de você.</p></div><div class="heroActions"><button class="btn ghost" id="changePassBuyer">Alterar senha</button><button class="btn ghost" id="logout">Sair</button></div></div><div id="view"></div></main>';document.getElementById('changePassBuyer').onclick=openPassword;document.getElementById('logout').onclick=async function(){await req('/api/logout',{method:'POST'});location='/'}}
 async function refresh(){st.orders=await (await req('/api/orders')).json();render()}
 function count(s){return st.orders.filter(function(o){return o.workflow_status===s}).length}
 function render(){var f=st.orders.filter(function(o){var text=(o.number+' '+o.supplier.name+' '+o.items.map(function(i){return i.description+' '+i.code}).join(' ')).toLowerCase();return (!st.tab||o.workflow_status===st.tab)&&(!st.search||text.indexOf(st.search)>=0)});var html='<div class="stats"><div class="stat" data-tab="Novo"><small>Novos pedidos</small><strong>'+count('Novo')+'</strong></div><div class="stat" data-tab="Pendente"><small>Pendentes</small><strong>'+count('Pendente')+'</strong></div><div class="stat" data-tab="Preenchido"><small>Preenchidos</small><strong>'+count('Preenchido')+'</strong></div></div>';
@@ -150,12 +152,48 @@ html+='<div class="bar"><input class="search" id="search" placeholder="Buscar pe
 if(!f.length)html+='<div class="empty" style="grid-column:1/-1">Nenhum pedido nesta lista.</div>';
 f.forEach(function(o){var shown=o.items.slice(0,2),more=o.items.length-shown.length;html+='<article class="card '+(o.workflow_status==='Novo'?'new':'')+'" data-n="'+o.number+'"><div class="topline"><div class="ord">Pedido '+esc(o.number)+'</div>'+badge(o.workflow_status)+'</div><div class="supplier">'+esc(o.supplier.name||'Fornecedor não informado')+'</div><div class="items">'+shown.map(function(i){return '<div class="itemline"><b>'+esc(i.description)+'</b><div class="muted">'+i.quantity+' '+esc(i.unit||'')+(i.code?' · cód. '+esc(i.code):'')+'</div></div>'}).join('')+(more>0?'<div class="muted">+'+more+' item(ns) no pedido</div>':'')+'</div><div class="meta">'+(o.delivery_type?'<span class="badge tag">'+esc(o.delivery_type)+'</span>':'')+'<span class="muted">Alteração: '+fmtDT(o.last_modified_at)+'</span></div></article>'});
 html+='</div>';view.innerHTML=html;search.oninput=function(){st.search=this.value.toLowerCase();render()};document.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){st.tab=b.dataset.t;render()}});document.querySelectorAll('.stat').forEach(function(c){c.onclick=function(){st.tab=c.dataset.tab;render()}});document.querySelectorAll('.card[data-n]').forEach(function(c){c.onclick=function(){openOrder(c.dataset.n)}})}
-async function openOrder(n){var o=await (await req('/api/orders/'+n)).json();st.current=o;st.priority=o.priority||'Normal';st.delivery=o.delivery_type||'';var d=drawer,items=o.items.map(function(i){return '<div class="ibox"><b>'+esc(i.description)+'</b><div class="muted">Código: '+esc(i.code||'—')+' · Quantidade: '+i.quantity+' '+esc(i.unit||'')+' · Entregue: '+i.delivered+'</div></div>'}).join('');
+async function openOrder(n){var o=await (await req('/api/orders/'+n)).json();st.current=o;st.priority=o.priority||'Normal';st.delivery=o.delivery_type||'';var d=document.getElementById('drawer'),items=o.items.map(function(i){return '<div class="ibox"><b>'+esc(i.description)+'</b><div class="muted">Código: '+esc(i.code||'—')+' · Quantidade: '+i.quantity+' '+esc(i.unit||'')+' · Entregue: '+i.delivered+'</div></div>'}).join('');
 d.innerHTML='<div class="head"><button class="x" id="closeD">×</button>'+badge(o.workflow_status)+'<h2>Pedido '+esc(o.number)+'</h2><div class="muted">'+esc(o.supplier.name)+'</div></div><div class="body"><div class="section">Itens do pedido</div>'+items+'<div class="section">Preenchimento</div><div class="form"><label>Data em que enviou ao fornecedor<input id="sent" type="date" value="'+esc(o.sent_at||'')+'"></label><label>Tipo de entrega<div class="delivery"><button class="choice" data-d="COLETA">Coleta</button><button class="choice" data-d="ENTREGA">Entrega</button></div></label><label>Prioridade<div class="prior"><button data-p="Baixa">Baixa</button><button data-p="Normal">Normal</button><button data-p="Alta">Alta</button><button data-p="Urgente">Urgente</button></div></label><label>Observação<textarea id="obs" rows="4" placeholder="Informação útil para o acompanhamento">'+esc(o.entry_notes||'')+'</textarea></label><button class="btn" id="save">Salvar preenchimento</button></div><div class="section">Registro</div><div class="muted">Comprador: '+esc(o.buyer_name||st.user.name)+'<br>Última alteração: '+fmtDT(o.last_modified_at)+'</div></div>';
-d.classList.add('on');ov.classList.add('on');closeD.onclick=closeDrawer;ov.onclick=closeDrawer;paintChoices();document.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){st.delivery=b.dataset.d;paintChoices()}});document.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){st.priority=b.dataset.p;paintChoices()}});save.onclick=saveOrder}
+d.classList.add('on');document.getElementById('ov').classList.add('on');document.getElementById('closeD').onclick=closeDrawer;document.getElementById('ov').onclick=closeDrawer;paintChoices();document.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){st.delivery=b.dataset.d;paintChoices()}});document.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){st.priority=b.dataset.p;paintChoices()}});document.getElementById('save').onclick=saveOrder;document.getElementById('sent').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();saveOrder()}})}
 function paintChoices(){document.querySelectorAll('[data-d]').forEach(function(b){b.classList.toggle('on',b.dataset.d===st.delivery)});document.querySelectorAll('[data-p]').forEach(function(b){b.classList.toggle('on',b.dataset.p===st.priority)})}
-async function saveOrder(){if(!sent.value)return toast('Informe a data de envio ao fornecedor');if(!st.delivery)return toast('Selecione Coleta ou Entrega');try{await req('/api/orders/'+st.current.number+'/buyer-submit',{method:'POST',body:JSON.stringify({sent_at:sent.value,delivery_type:st.delivery,priority:st.priority,entry_notes:obs.value})});toast('Pedido preenchido com sucesso');closeDrawer();await refresh();st.tab='Preenchido';render()}catch(e){toast('Não foi possível salvar')}}
-function closeDrawer(){drawer.classList.remove('on');ov.classList.remove('on')}
+async function saveOrder(){
+  var sentEl=document.getElementById('sent');
+  var obsEl=document.getElementById('obs');
+  if(!sentEl||!sentEl.value)return toast('Informe a data de envio ao fornecedor');
+  if(!st.delivery)return toast('Selecione Coleta ou Entrega');
+  try{
+    await req('/api/orders/'+st.current.number+'/buyer-submit',{method:'POST',body:JSON.stringify({sent_at:sentEl.value,delivery_type:st.delivery,priority:st.priority,entry_notes:obsEl?obsEl.value:''})});
+    toast('Pedido preenchido com sucesso');
+    closeDrawer();
+    await refresh();
+    st.tab='Preenchido';
+    render()
+  }catch(e){toast(e.message||'Não foi possível salvar')}
+}
+function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('ov').classList.remove('on')}
+function openPassword(){
+  var d=document.getElementById('drawer');
+  d.innerHTML='<div class="head"><button class="x" id="closeD">×</button><span class="badge tag">Segurança</span><h2>Alterar senha</h2><div class="muted">Defina uma senha pessoal diferente da temporária.</div></div><div class="body"><div class="passwordBox"><label>Senha atual<input id="currentPass" type="password" autocomplete="current-password" placeholder="Senha atual"></label><label>Nova senha<input id="newPass" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></label><label>Confirmar nova senha<input id="confirmPass" type="password" autocomplete="new-password" placeholder="Repita a nova senha"></label><button class="btn" id="savePass">Alterar senha</button></div></div>';
+  d.classList.add('on');
+  document.getElementById('ov').classList.add('on');
+  document.getElementById('closeD').onclick=closeDrawer;
+  document.getElementById('ov').onclick=closeDrawer;
+  document.getElementById('savePass').onclick=changePassword;
+  ['currentPass','newPass','confirmPass'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();changePassword()}})})
+}
+async function changePassword(){
+  var current=document.getElementById('currentPass').value;
+  var next=document.getElementById('newPass').value;
+  var confirm=document.getElementById('confirmPass').value;
+  if(!current||!next||!confirm)return toast('Preencha as três senhas');
+  if(next!==confirm)return toast('A confirmação não confere');
+  try{
+    await req('/api/change-password',{method:'POST',body:JSON.stringify({current_password:current,new_password:next})});
+    st.user.must_change_password=false;
+    toast('Senha alterada com sucesso');
+    closeDrawer()
+  }catch(e){toast(e.message)}
+}
 function connectEvents(){if(st.event)st.event.close();var es=new EventSource('/api/events');st.event=es;es.onopen=function(){liveText.textContent='tempo real';dot.style.background='#22c55e'};es.onmessage=async function(ev){try{var m=JSON.parse(ev.data);if(m.type==='import.completed'){toast((m.payload.created||0)+' novo(s) pedido(s) importado(s)');st.tab='Novo'}else if(m.type==='order.updated')toast('Um pedido foi atualizado');await refresh()}catch(e){}};es.onerror=function(){liveText.textContent='reconectando…';dot.style.background='#f59e0b'}}
 setInterval(function(){if(st.user)refresh().catch(function(){})},20000);boot();
 </script>
