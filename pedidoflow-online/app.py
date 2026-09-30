@@ -35,6 +35,7 @@ class User(Base):
     password_hash=Column(String(300),nullable=False)
     role=Column(String(20),default="buyer")
     active=Column(Boolean,default=True)
+    must_change_password=Column(Boolean)
 
 class Supplier(Base):
     __tablename__="suppliers"
@@ -100,6 +101,8 @@ def ensure_columns():
                 conn.execute(text(f"ALTER TABLE purchase_orders ADD COLUMN {name} {ddl}"))
         if "username" not in user_existing:
             conn.execute(text("ALTER TABLE users ADD COLUMN username VARCHAR(80)"))
+        if "must_change_password" not in user_existing:
+            conn.execute(text("ALTER TABLE users ADD COLUMN must_change_password BOOLEAN"))
         conn.execute(text("UPDATE purchase_orders SET created_at = COALESCE(created_at, updated_at, CURRENT_TIMESTAMP)"))
         if engine.dialect.name=="sqlite":
             conn.execute(text("UPDATE users SET username = LOWER(SUBSTR(email,1,INSTR(email,'@')-1)) WHERE (username IS NULL OR username='') AND email LIKE '%@%'"))
@@ -134,6 +137,20 @@ def vpw(p,s):
         got=hashlib.pbkdf2_hmac("sha256",p.encode(),salt,180000)
         return hmac.compare_digest(got,expected)
     except: return False
+
+def initialize_temp_passwords():
+    db=SessionLocal()
+    try:
+        pending=db.query(User).filter(User.must_change_password==None).all()
+        for u in pending:
+            u.password_hash=hpw("123456")
+            u.must_change_password=True
+        if pending:
+            db.commit()
+    finally:
+        db.close()
+
+initialize_temp_passwords()
 
 def token(uid,oid):
     body=base64.urlsafe_b64encode(json.dumps({"uid":uid,"oid":oid,"exp":int((datetime.utcnow()+timedelta(days=7)).timestamp())},separators=(",",":")).encode()).decode().rstrip("=")
@@ -256,7 +273,7 @@ def bootstrap(req:Request,db:Session=Depends(dbdep)):
     user=None
     if p:
         u=db.query(User).filter(User.id==p["uid"]).first()
-        if u:user={"id":u.id,"name":u.name,"username":u.username or u.name,"role":u.role}
+        if u:user={"id":u.id,"name":u.name,"username":u.username or u.name,"role":u.role,"must_change_password":bool(u.must_change_password)}
     return {"initialized":initialized,"user":user}
 
 @app.post("/api/setup")
@@ -265,14 +282,11 @@ async def setup(data:dict,res:Response,db:Session=Depends(dbdep)):
     company=norm(data.get("company"))
     name=norm(data.get("name")) or "WEVERSON"
     username="weverson"
-    password=data.get("password") or ""
     if not company:
         raise HTTPException(400,"Informe o nome da empresa")
-    if len(password)<6:
-        raise HTTPException(400,"A senha deve ter pelo menos 6 caracteres")
     org=Organization(name=company);db.add(org);db.flush()
     compat_email="weverson@pedidoflow.local"
-    u=User(organization_id=org.id,name=name,username=username,email=compat_email,password_hash=hpw(password),role="admin")
+    u=User(organization_id=org.id,name=name,username=username,email=compat_email,password_hash=hpw("123456"),role="admin",must_change_password=True)
     db.add(u);db.commit();db.refresh(u)
     res.set_cookie("session",token(u.id,org.id),httponly=True,samesite="lax",secure=True,max_age=604800)
     return {"ok":True,"role":"admin","name":u.name,"username":u.username}
@@ -297,21 +311,37 @@ async def login(data:dict,res:Response,db:Session=Depends(dbdep)):
     res.set_cookie("session",token(u.id,u.organization_id),httponly=True,samesite="lax",secure=True,max_age=604800)
     return {"ok":True,"role":u.role,"name":u.name,"username":u.username}
 
+@app.post("/api/change-password")
+async def change_password(data:dict,u=Depends(current),db:Session=Depends(dbdep)):
+    current_password=data.get("current_password") or ""
+    new_password=data.get("new_password") or ""
+    if not vpw(current_password,u.password_hash):
+        raise HTTPException(400,"Senha atual incorreta")
+    if len(new_password)<6:
+        raise HTTPException(400,"A nova senha deve ter pelo menos 6 caracteres")
+    if new_password=="123456":
+        raise HTTPException(400,"Escolha uma senha diferente da senha temporária")
+    if current_password==new_password:
+        raise HTTPException(400,"A nova senha deve ser diferente da senha atual")
+    u.password_hash=hpw(new_password)
+    u.must_change_password=False
+    db.commit()
+    return {"ok":True}
+
 @app.post("/api/logout")
 def logout(res:Response):
     res.delete_cookie("session");return {"ok":True}
 
 @app.get("/api/users")
 def users(u=Depends(admin),db:Session=Depends(dbdep)):
-    return [{"id":x.id,"name":x.name,"username":x.username,"role":x.role} for x in db.query(User).filter(User.organization_id==u.organization_id).all()]
+    return [{"id":x.id,"name":x.name,"username":x.username,"role":x.role,"must_change_password":bool(x.must_change_password)} for x in db.query(User).filter(User.organization_id==u.organization_id).all()]
 
 @app.post("/api/users")
 async def create_user(data:dict,u=Depends(admin),db:Session=Depends(dbdep)):
     name=norm(data.get("name"))
     username=norm(data.get("username")).lower()
-    password=data.get("password") or ""
-    if not name or len(username)<3 or len(password)<6:
-        raise HTTPException(400,"Informe nome, usuário e senha com pelo menos 6 caracteres")
+    if not name or len(username)<3:
+        raise HTTPException(400,"Informe nome e usuário com pelo menos 3 caracteres")
     if not re.fullmatch(r"[a-z0-9._-]+",username):
         raise HTTPException(400,"Usuário deve conter apenas letras, números, ponto, hífen ou underline")
     if username=="weverson":
@@ -319,7 +349,7 @@ async def create_user(data:dict,u=Depends(admin),db:Session=Depends(dbdep)):
     if db.query(User).filter(User.organization_id==u.organization_id,func.lower(User.username)==username).first():
         raise HTTPException(400,"Este usuário já existe")
     compat_email=f"{username}@pedidoflow.local"
-    x=User(organization_id=u.organization_id,name=name,username=username,email=compat_email,password_hash=hpw(password),role="buyer")
+    x=User(organization_id=u.organization_id,name=name,username=username,email=compat_email,password_hash=hpw("123456"),role="buyer",must_change_password=True)
     db.add(x);db.commit()
     publish(u.organization_id,"user.created",{"name":name,"username":username})
     return {"ok":True,"id":x.id,"name":x.name,"username":x.username}
